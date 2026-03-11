@@ -3,369 +3,1257 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>EHR Scheduler</title>
+<title>EHR Scheduler · MCP App</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800&display=swap');
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+*{box-sizing:border-box;margin:0;padding:0;}
 html,body{height:100%;overflow:hidden;}
-:root{
-  --bg:#07090f;--surf:#0e1118;--surf2:#111827;--faint:#1e2535;
-  --brd:rgba(255,255,255,.07);--txt:#e2e8f0;--mut:#64748b;--mut2:#4b5a72;
-  --acc:#6366f1;--acc2:#818cf8;--accbg:rgba(99,102,241,.12);--accbr:rgba(99,102,241,.3);
-  --grn:#10b981;--fn:'Geist','Segoe UI',system-ui,sans-serif;
-}
-body{font-family:var(--fn);background:var(--bg);color:var(--txt);font-size:13px;}
+body{font-family:'Geist','Söhne','Segoe UI',system-ui,sans-serif;background:#07090f;color:#e2e8f0;}
 ::-webkit-scrollbar{width:4px;height:4px;}
-::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:2px;}
+::-webkit-scrollbar-thumb{background:rgba(255,255,255,.07);border-radius:2px;}
 ::-webkit-scrollbar-track{background:transparent;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:translateY(0)}}
-@keyframes rptRow{from{opacity:0;transform:translateX(10px)}to{opacity:1;transform:translateX(0)}}
-@keyframes slideInRight {from{transform:translateX(100%)}to{transform:translateX(0)}}
-@keyframes slideInLeft  {from{transform:translateX(-100%)}to{transform:translateX(0)}}
-@keyframes slideOutLeft {from{transform:translateX(0)}to{transform:translateX(-100%)}}
-@keyframes slideOutRight{from{transform:translateX(0)}to{transform:translateX(100%)}}
-@keyframes blink{0%,80%,100%{opacity:.2;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-#app{display:flex;flex-direction:column;height:100vh;}
-#topbar{height:48px;display:flex;align-items:center;gap:10px;padding:0 16px;background:var(--surf);border-bottom:1px solid var(--brd);flex-shrink:0;z-index:30;}
-.logo-icon{width:26px;height:26px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;}
-.logo-name{font-weight:700;font-size:14px;letter-spacing:-.4px;color:var(--txt);}
-.logo-badge{font-size:10px;font-weight:700;background:var(--accbg);color:var(--acc);padding:2px 7px;border-radius:4px;letter-spacing:.5px;border:1px solid var(--accbr);}
-.topbar-sp{flex:1;}
-.status-pill{display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);border-radius:20px;padding:3px 10px;}
-.status-dot{width:6px;height:6px;border-radius:50%;background:var(--grn);animation:pulse 2s infinite;}
-.status-lbl{font-size:11px;color:var(--grn);font-weight:600;}
-#body{flex:1;display:flex;overflow:hidden;}
-#lp{width:44%;display:flex;flex-direction:column;border-right:1px solid var(--brd);overflow:hidden;transition:width .25s cubic-bezier(.4,0,.2,1);}
-#lp.exp{width:100%;border-right:none;}
-#lp.col{width:0;overflow:hidden;border-right:none;}
-#rp{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-#rp.col{display:none;}
-.ph{height:36px;display:flex;align-items:center;justify-content:space-between;padding:0 10px;border-bottom:1px solid var(--brd);background:var(--surf);flex-shrink:0;}
-.ph-title{font-size:10px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.8px;}
-.xbtn{width:32px;height:32px;border-radius:8px;background:var(--accbg);border:1px solid var(--accbr);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--acc);transition:all .15s;flex-shrink:0;}
-.xbtn:hover{background:rgba(99,102,241,.22);box-shadow:0 0 0 2px var(--accbr);}
-.xbtn svg{display:block;}
-#thread{flex:1;overflow-y:auto;padding:16px 16px 0;}
-#es{display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:32px;text-align:center;}
-.es-icon{width:52px;height:52px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 8px 32px rgba(99,102,241,.25);}
-.es-title{font-size:17px;font-weight:800;color:var(--txt);letter-spacing:-.4px;margin-bottom:6px;}
-.es-sub{font-size:12px;color:var(--mut);line-height:1.7;max-width:320px;}
-.cg{display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:360px;}
-.chip,.qchip{font-family:var(--fn);font-size:11px;color:var(--mut);background:rgba(255,255,255,.03);border:1px solid var(--brd);border-radius:20px;padding:6px 13px;cursor:pointer;transition:all .15s;white-space:nowrap;}
-.chip:hover,.qchip:hover{background:var(--accbg);color:var(--acc2);border-color:var(--accbr);transform:translateY(-1px);}
-.qchip{font-size:10px;padding:4px 10px;border-radius:14px;}
-#qbar{padding:7px 12px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;scrollbar-width:none;}
-#qbar::-webkit-scrollbar{display:none;}
-.msg{margin-bottom:16px;animation:fadeUp .2s ease;}
-.mu{display:flex;justify-content:flex-end;}
-.mub{background:linear-gradient(135deg,#4f46e5,#6d28d9);border-radius:14px 14px 3px 14px;padding:9px 14px;max-width:80%;font-size:13px;color:#fff;line-height:1.6;box-shadow:0 4px 14px rgba(99,102,241,.22);}
-.mb{display:flex;gap:9px;align-items:flex-start;}
-.bav{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:2px;}
-.bbd{flex:1;min-width:0;}
-.ir{display:flex;align-items:center;gap:5px;margin-bottom:8px;}
-.idot{width:4px;height:4px;border-radius:50%;background:var(--acc);flex-shrink:0;}
-.it{font-size:9px;font-weight:700;color:var(--acc2);text-transform:uppercase;letter-spacing:.8px;}
-.fu{font-size:10.5px;color:var(--mut);margin-top:7px;padding-top:6px;border-top:1px solid rgba(255,255,255,.05);}
-.tybub{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:3px 14px 14px 14px;padding:10px 14px;width:fit-content;}
-.tyd{width:6px;height:6px;border-radius:50%;background:var(--acc);animation:blink 1.3s infinite;}
-.tyd:nth-child(2){animation-delay:.22s;}.tyd:nth-child(3){animation-delay:.44s;}
-.tyl{font-size:10px;color:var(--mut);margin-left:3px;}
-#ibar{display:flex;gap:8px;padding:10px 14px;border-top:1px solid var(--brd);background:var(--surf);flex-shrink:0;align-items:flex-end;}
-.iw{flex:1;display:flex;gap:8px;align-items:flex-end;background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:12px;padding:8px 8px 8px 12px;transition:border-color .15s;}
-.iw:focus-within{border-color:var(--accbr);}
-#ci{flex:1;background:none;border:none;color:var(--txt);font-family:var(--fn);font-size:13px;line-height:1.6;resize:none;outline:none;min-height:22px;max-height:100px;overflow-y:auto;}
-#ci::placeholder{color:var(--mut2);}
-#sb{width:32px;height:32px;border-radius:8px;background:var(--acc);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#fff;transition:all .15s;flex-shrink:0;}
-#sb:hover{background:#4f46e5;transform:translateY(-1px);box-shadow:0 4px 12px rgba(99,102,241,.35);}
-#sb:disabled{background:var(--faint);color:var(--mut);cursor:not-allowed;transform:none;box-shadow:none;}
-.itw{border:1px solid var(--brd);border-radius:10px;overflow:hidden;}
-.ttb{display:flex;align-items:center;background:rgba(255,255,255,.025);border-bottom:1px solid var(--brd);overflow-x:auto;scrollbar-width:none;padding:0 6px 0 2px;gap:2px;flex-shrink:0;}
-.ttb::-webkit-scrollbar{display:none;}
-.sc{display:flex;gap:5px;align-items:center;padding:7px 11px;border:none;background:none;border-bottom:2px solid transparent;color:var(--mut);font-size:10.5px;cursor:pointer;font-family:var(--fn);transition:all .15s;white-space:nowrap;flex-shrink:0;}
-.sc:hover{color:var(--acc2);border-bottom-color:var(--acc2);}
-.sc.active{color:var(--acc2);border-bottom-color:var(--acc);background:var(--accbg);}
-.sc .num{font-family:monospace;font-weight:800;font-size:11px;}
-.tsp{flex:1;}.rct{font-size:10px;color:var(--mut);padding:0 8px;white-space:nowrap;}
-.tscr{overflow-x:auto;max-height:280px;overflow-y:auto;}
-table{width:100%;border-collapse:collapse;}
-thead th{padding:7px 10px;text-align:left;font-size:9.5px;font-family:monospace;color:var(--mut);text-transform:uppercase;letter-spacing:.7px;font-weight:600;border-bottom:1px solid var(--brd);background:rgba(255,255,255,.025);white-space:nowrap;cursor:pointer;user-select:none;transition:color .12s;position:sticky;top:0;z-index:1;}
-thead th:hover{color:var(--txt);}
-thead th.srt{color:var(--acc2);}
-.sorticon{display:inline-flex;flex-direction:column;gap:1px;margin-left:4px;vertical-align:middle;}
-tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .1s;}
+input,select,button,textarea{outline:none;font-family:inherit;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideInLeft{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid;}
+.badge-dot{width:4px;height:4px;border-radius:50%;display:inline-block;flex-shrink:0;}
+.chip{font-size:11px;color:#64748b;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:6px 12px;cursor:pointer;transition:all .15s;}
+.chip:hover{background:rgba(99,102,241,.12);color:#6366f1;border-color:rgba(99,102,241,.3);}
+.chip-sm{font-size:11px;color:#64748b;background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:4px 10px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;}
+.chip-sm:hover{background:rgba(99,102,241,.12);color:#6366f1;}
+.btn-icon{width:32px;height:32px;border-radius:8px;background:rgba(99,102,241,.12);border:1px solid rgba(99,102,241,.3);cursor:pointer;display:flex;align-items:center;justify-content:center;color:#6366f1;transition:all .15s;}
+.btn-icon:hover{background:rgba(99,102,241,.22);box-shadow:0 0 0 2px rgba(99,102,241,.3);}
+.sort-th{cursor:pointer;user-select:none;transition:color .15s;}
+.sort-th:hover{color:#e2e8f0!important;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+thead{position:sticky;top:0;background:#0e1118;z-index:2;}
+th{padding:8px 10px;text-align:left;font-size:10px;color:#64748b;text-transform:uppercase;letter-spacing:.8px;font-weight:700;white-space:nowrap;border-bottom:1px solid rgba(255,255,255,.07);}
+td{padding:8px 10px;vertical-align:middle;}
+tbody tr{border-bottom:1px solid rgba(255,255,255,.03);transition:background .1s;cursor:pointer;}
 tbody tr:hover{background:rgba(255,255,255,.025);}
-tbody td{padding:7px 10px;vertical-align:middle;color:var(--txt);font-size:11.5px;white-space:nowrap;}
-.nor td{text-align:center;color:var(--mut);padding:22px;font-size:11px;}
-.badge{display:inline-block;font-size:9.5px;font-weight:600;padding:2px 8px;border-radius:10px;white-space:nowrap;}
-.badge-Pending   {background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25);}
-.badge-High      {background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);}
-.badge-Medium    {background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25);}
-.badge-Low       {background:rgba(99,102,241,.1);color:#a5b4fc;border:1px solid rgba(99,102,241,.25);}
-.badge-Late      {background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);}
-.badge-Incomplete{background:rgba(249,115,22,.1);color:#fb923c;border:1px solid rgba(249,115,22,.25);}
-.badge-Completed {background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.25);}
-.badge-Unassigned{background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);}
-.badge-Assigned  {background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.25);}
-.badge-Missed    {background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);}
-.badge-Declined  {background:rgba(239,68,68,.1);color:#f87171;border:1px solid rgba(239,68,68,.25);}
-.badge-Rescheduled{background:rgba(251,191,36,.1);color:#fbbf24;border:1px solid rgba(251,191,36,.25);}
-.badge-Reassigned{background:rgba(99,102,241,.1);color:#a5b4fc;border:1px solid rgba(99,102,241,.25);}
-.badge-Yes{background:rgba(16,185,129,.1);color:#34d399;border:1px solid rgba(16,185,129,.25);}
-.badge-No{background:rgba(100,116,139,.1);color:#94a3b8;border:1px solid rgba(100,116,139,.25);}
-.idl{font-family:monospace;font-size:10px;color:var(--mut);}
-#rc{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;}
-#dash{flex:1;overflow-y:auto;background:var(--bg);}
-.dh{padding:28px 24px 24px;border-bottom:1px solid var(--brd);background:linear-gradient(135deg,var(--surf) 0%,rgba(99,102,241,.05) 100%);}
-.dd{font-size:11px;color:var(--mut);letter-spacing:.6px;margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-.dg{font-size:26px;font-weight:800;color:var(--txt);letter-spacing:-.6px;line-height:1.15;margin-bottom:6px;}
-.dg .nm{background:linear-gradient(90deg,#818cf8,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
-.dsub{font-size:13px;color:var(--mut);line-height:1.6;}
-.rs{padding:20px 24px;}
-.sl{font-size:10px;color:var(--mut);text-transform:uppercase;letter-spacing:.9px;font-weight:700;margin-bottom:12px;}
-.rch{display:grid;grid-template-columns:3px 44px 1fr 88px 88px 88px 40px;align-items:center;padding:0 0 8px;border-bottom:1px solid var(--brd);margin-bottom:8px;}
-.rch .ch{font-size:9px;color:var(--mut);text-transform:uppercase;letter-spacing:.7px;font-weight:700;}
-.rr{display:grid;grid-template-columns:3px 44px 1fr 88px 88px 88px 40px;align-items:stretch;background:var(--surf);border:1px solid var(--brd);border-radius:10px;overflow:hidden;cursor:pointer;text-align:left;margin-bottom:8px;transition:border-color .18s,background .18s,box-shadow .18s;font-family:var(--fn);width:100%;animation:rptRow .25s ease both;}
-.rr:hover{border-color:var(--accbr);background:rgba(99,102,241,.04);box-shadow:0 2px 16px rgba(99,102,241,.1);}
-.ra{opacity:.75;}.ri{display:flex;align-items:center;justify-content:center;font-size:20px;min-width:44px;padding:0;}
-.rn{padding:14px 12px 14px 4px;min-width:0;display:flex;flex-direction:column;justify-content:center;}
-.rn .lb{font-size:13px;font-weight:700;color:var(--txt);letter-spacing:-.2px;line-height:1;display:flex;align-items:center;gap:7px;margin-bottom:4px;}
-.rn .dc{font-size:11px;color:var(--mut);line-height:1.45;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rst{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:12px 6px;border-left:1px solid var(--brd);}
-.rst .v{font-size:19px;font-weight:800;font-family:monospace;line-height:1;margin-bottom:4px;}
-.rst .l{font-size:9px;opacity:.7;text-transform:uppercase;letter-spacing:.55px;font-weight:700;text-align:center;line-height:1.3;}
-.raro{display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:18px;border-left:1px solid var(--brd);padding:0 4px;}
-#rv{flex:1;display:flex;flex-direction:column;overflow:hidden;}
-/* Tabs live outside the slide container — they never move */
-#rtabs-fixed{display:flex;gap:2px;padding:0 14px;border-bottom:1px solid var(--brd);background:var(--surf);flex-shrink:0;overflow-x:auto;scrollbar-width:none;}
-#rtabs-fixed::-webkit-scrollbar{display:none;}
-/* Keep old #rtabs style for any legacy ref but point to fixed */
-#rtabs{display:none;}
-.rt{font-family:var(--fn);font-size:11px;font-weight:500;padding:0 12px;height:36px;border:none;background:none;color:var(--mut);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;display:flex;align-items:center;gap:5px;}
-.rt:hover{color:var(--txt);}.rt.active{color:var(--acc2);border-bottom-color:var(--acc);}
-.rtb{font-family:monospace;font-size:9px;background:var(--accbg);color:var(--acc2);border:1px solid var(--accbr);border-radius:8px;padding:1px 5px;}
-#stiles{display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid var(--brd);overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
-#stiles::-webkit-scrollbar{display:none;}
-.st{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:68px;padding:7px 12px;border-radius:8px;border:1px solid var(--brd);background:rgba(255,255,255,.025);cursor:pointer;flex-shrink:0;transition:all .15s;font-family:var(--fn);}
-.st:hover{border-color:rgba(99,102,241,.35);background:rgba(99,102,241,.06);}
-.st.active{border-color:rgba(99,102,241,.45);background:var(--accbg);}
-.st .tv{font-family:monospace;font-size:18px;font-weight:800;color:var(--txt);line-height:1;margin-bottom:3px;}
-.st.active .tv{color:var(--acc2);}.st .tl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--mut);text-align:center;line-height:1.2;}
-.st.active .tl{color:var(--acc2);}.stb{width:14px;height:2px;background:var(--acc);border-radius:1px;margin-top:4px;}
-/* Filter bar — single row, no wrap, compact */
-#fb{display:flex;gap:6px;padding:6px 12px;border-bottom:1px solid var(--brd);background:var(--surf);flex-shrink:0;align-items:center;flex-wrap:nowrap;}
-.sw{position:relative;width:160px;flex-shrink:0;}
-.sico{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none;}
-#sinput{width:100%;background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:6px;padding:5px 8px 5px 26px;color:var(--txt);font-family:var(--fn);font-size:11px;outline:none;transition:border-color .15s;height:28px;}
-#sinput:focus{border-color:var(--accbr);}#sinput::placeholder{color:var(--mut2);}
-#fsel{display:flex;gap:6px;align-items:center;}
-.fs{background:rgba(255,255,255,.04);border:1px solid var(--brd);border-radius:6px;padding:4px 7px;color:var(--mut);font-family:var(--fn);font-size:11px;cursor:pointer;outline:none;transition:border-color .15s;height:28px;}
-.fs:focus{border-color:var(--accbr);}
-.fcount{font-size:10px;color:var(--mut);margin-left:auto;white-space:nowrap;flex-shrink:0;}
-#rtw{flex:1;overflow-y:auto;}
-#rtw thead th{font-size:9.5px;}
+.modal-backdrop{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);}
+.modal-box{background:#0e1118;border:1px solid rgba(255,255,255,.07);border-radius:16px;width:440px;max-width:92vw;box-shadow:0 24px 80px rgba(0,0,0,.6);overflow:hidden;}
+.summary-modal-box{background:#0e1118;border:1px solid rgba(255,255,255,.07);border-radius:16px;width:680px;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;box-shadow:0 32px 80px rgba(0,0,0,.6);overflow:hidden;}
+.filter-select{background:#1e2535;border:1px solid rgba(255,255,255,.07);border-radius:6px;padding:4px 8px;color:#e2e8f0;font-size:11px;cursor:pointer;}
+.report-card{display:flex;flex-direction:column;background:#0e1118;border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;cursor:pointer;text-align:left;padding:0;transition:border-color .18s,box-shadow .18s,transform .18s;}
+.report-card:hover{border-color:rgba(99,102,241,.4);box-shadow:0 8px 24px rgba(0,0,0,.35);transform:translateY(-1px);}
+.att-box{margin:16px 28px 0;border-radius:10px;border:1px solid rgba(248,113,113,.18);background:rgba(248,113,113,.03);padding:14px 18px;}
+.urgency-banner{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(248,113,113,.08);border-bottom:1px solid rgba(248,113,113,.18);flex-shrink:0;}
+.section-header{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.025);border:none;cursor:pointer;text-align:left;}
+.action-form-field{margin-bottom:12px;}
+.action-form-field label{font-size:11px;color:#64748b;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px;}
+.action-form-field input,.action-form-field select,.action-form-field textarea{width:100%;background:#1e2535;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:8px 10px;color:#e2e8f0;font-size:13px;font-family:inherit;}
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="topbar">
-    <div class="logo-icon">🏥</div>
-    <span class="logo-name">EHR Scheduler</span>
-    <span class="logo-badge">MCP APP</span>
-    <div class="topbar-sp"></div>
-  </div>
-  <div id="body">
-    <div id="lp">
-      <div class="ph">
-        <span class="ph-title">Chat</span>
-        <button class="xbtn" id="lbtn" title="Expand chat"></button>
-      </div>
-      <div id="thread">
-        <div id="es">
-          <div class="es-icon">🏥</div>
-          <div><div class="es-title">EHR Scheduling Assistant</div><div class="es-sub">Ask a question or pick an option below. Results render as live tables directly in the chat.</div></div>
-          <div class="cg" id="cg"></div>
-        </div>
-      </div>
-      <div id="qbar" style="display:none"></div>
-      <div id="ibar">
-        <div class="iw">
-          <textarea id="ci" rows="1" placeholder="Ask about visits or take actions…"></textarea>
-          <button id="sb" disabled><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button>
-        </div>
-      </div>
-    </div>
-    <div id="rp">
-      <div class="ph">
-        <button class="xbtn" id="rbtn" title="Expand reports"></button>
-        <span class="ph-title" id="rp-title">Reports</span>
-      </div>
-      <div id="rtabs-fixed"></div>
-      <div id="rc"></div>
-    </div>
-  </div>
-</div>
+
+<div id="app" style="height:100vh;display:flex;flex-direction:column;overflow:hidden;"></div>
+
 <script>
-const _store={agentSummary:[{id:"V001",patient:"Margaret Collins",clinician:"Dr. Sarah Okonkwo",visitType:"Home Health",scheduledDate:"2026-03-04",scheduledTime:"09:00",status:"Pending",priority:"High",attempts:2,lastAttempt:"2026-03-05 14:32",phone:"(555) 234-8901",notes:"Post-surgery follow-up"},{id:"V002",patient:"Harold Nguyen",clinician:"Dr. James Patel",visitType:"PT Assessment",scheduledDate:"2026-03-04",scheduledTime:"11:30",status:"Pending",priority:"Medium",attempts:0,lastAttempt:null,phone:"(555) 876-3421",notes:"Initial evaluation"},{id:"V003",patient:"Dorothy Reyes",clinician:"NP Kim Yardley",visitType:"Wound Care",scheduledDate:"2026-03-05",scheduledTime:"14:00",status:"Pending",priority:"High",attempts:1,lastAttempt:"2026-03-05 10:15",phone:"(555) 543-9087",notes:"Wound dressing change"},{id:"V004",patient:"Bernard Shaw",clinician:"Dr. Sarah Okonkwo",visitType:"Med Review",scheduledDate:"2026-03-05",scheduledTime:"10:00",status:"Pending",priority:"Low",attempts:0,lastAttempt:null,phone:"(555) 321-7654",notes:"Quarterly medication review"},{id:"V005",patient:"Constance Li",clinician:"RN Marco DiSalvo",visitType:"Infusion",scheduledDate:"2026-03-06",scheduledTime:"08:00",status:"Pending",priority:"High",attempts:3,lastAttempt:"2026-03-06 07:45",phone:"(555) 789-0123",notes:"IV antibiotic therapy"},{id:"V006",patient:"Franklin Torres",clinician:"Dr. James Patel",visitType:"Home Health",scheduledDate:"2026-03-06",scheduledTime:"13:30",status:"Pending",priority:"Medium",attempts:1,lastAttempt:"2026-03-05 16:00",phone:"(555) 654-3210",notes:"Vital signs monitoring"},{id:"V007",patient:"Gertrude Walsh",clinician:"PT Rebecca Moss",visitType:"PT Assessment",scheduledDate:"2026-03-07",scheduledTime:"09:30",status:"Pending",priority:"High",attempts:0,lastAttempt:null,phone:"(555) 112-3344",notes:"Post-hip replacement mobility eval"},{id:"V008",patient:"Howard Kim",clinician:"NP Kim Yardley",visitType:"Home Health",scheduledDate:"2026-03-07",scheduledTime:"11:00",status:"Pending",priority:"Medium",attempts:2,lastAttempt:"2026-03-07 09:00",phone:"(555) 223-4455",notes:"Diabetic foot care follow-up"},{id:"V009",patient:"Iris Patel",clinician:"RN Marco DiSalvo",visitType:"Wound Care",scheduledDate:"2026-03-07",scheduledTime:"15:30",status:"Pending",priority:"High",attempts:1,lastAttempt:"2026-03-06 17:00",phone:"(555) 334-5566",notes:"Stage 3 pressure ulcer management"},{id:"V010",patient:"Jerome Banks",clinician:"Dr. Sarah Okonkwo",visitType:"Med Review",scheduledDate:"2026-03-08",scheduledTime:"10:00",status:"Pending",priority:"Low",attempts:0,lastAttempt:null,phone:"(555) 445-6677",notes:"Blood pressure monitoring"},{id:"V011",patient:"Karen Olsen",clinician:"Dr. James Patel",visitType:"Infusion",scheduledDate:"2026-03-08",scheduledTime:"08:30",status:"Pending",priority:"High",attempts:0,lastAttempt:null,phone:"(555) 556-7788",notes:"Vancomycin IV day 5 of 10"},{id:"V012",patient:"Leonard Cruz",clinician:"PT Rebecca Moss",visitType:"PT Session",scheduledDate:"2026-03-08",scheduledTime:"13:00",status:"Pending",priority:"Medium",attempts:1,lastAttempt:"2026-03-07 14:00",phone:"(555) 667-8899",notes:"Stroke rehab gait training"},{id:"V013",patient:"Miriam Santos",clinician:"NP Kim Yardley",visitType:"Home Health",scheduledDate:"2026-03-09",scheduledTime:"09:00",status:"Pending",priority:"High",attempts:3,lastAttempt:"2026-03-08 16:30",phone:"(555) 778-9900",notes:"CHF exacerbation monitoring"},{id:"V014",patient:"Nelson Adeyemi",clinician:"RN Marco DiSalvo",visitType:"Wound Care",scheduledDate:"2026-03-09",scheduledTime:"14:00",status:"Pending",priority:"Medium",attempts:0,lastAttempt:null,phone:"(555) 889-0011",notes:"Post-op abdominal wound check"},{id:"V015",patient:"Olivia Fernandez",clinician:"Dr. Sarah Okonkwo",visitType:"Assessment",scheduledDate:"2026-03-09",scheduledTime:"11:30",status:"Pending",priority:"Low",attempts:0,lastAttempt:null,phone:"(555) 990-1122",notes:"Fall risk re-assessment"},{id:"V016",patient:"Percy Goldstein",clinician:"Dr. James Patel",visitType:"Med Review",scheduledDate:"2026-03-10",scheduledTime:"10:30",status:"Pending",priority:"High",attempts:2,lastAttempt:"2026-03-09 11:00",phone:"(555) 101-2233",notes:"Warfarin dose adjustment needed"},{id:"V017",patient:"Queenie Abara",clinician:"PT Rebecca Moss",visitType:"PT Assessment",scheduledDate:"2026-03-10",scheduledTime:"08:00",status:"Pending",priority:"Medium",attempts:0,lastAttempt:null,phone:"(555) 202-3344",notes:"Knee replacement week 2 eval"}],weeklyVisits:[{id:"W001",patient:"Alice Brennan",clinician:"NP Kim Yardley",visitType:"Home Health",scheduledDate:"2026-03-03",completedDate:null,status:"Late",duration:60,region:"North",agency:"CareFirst"},{id:"W002",patient:"Robert Chu",clinician:"Dr. Sarah Okonkwo",visitType:"PT Session",scheduledDate:"2026-03-03",completedDate:"2026-03-03",status:"Completed",duration:45,region:"South",agency:"HomeCare Plus"},{id:"W003",patient:"Susan Park",clinician:"RN Marco DiSalvo",visitType:"Wound Care",scheduledDate:"2026-03-04",completedDate:null,status:"Incomplete",duration:30,region:"East",agency:"CareFirst"},{id:"W004",patient:"Thomas Green",clinician:"Dr. James Patel",visitType:"Med Review",scheduledDate:"2026-03-04",completedDate:"2026-03-04",status:"Completed",duration:20,region:"West",agency:"Wellness Home"},{id:"W005",patient:"Nancy Wright",clinician:"NP Kim Yardley",visitType:"Assessment",scheduledDate:"2026-03-04",completedDate:null,status:"Late",duration:90,region:"North",agency:"HomeCare Plus"},{id:"W006",patient:"Charles Moore",clinician:"Dr. Sarah Okonkwo",visitType:"Infusion",scheduledDate:"2026-03-04",completedDate:"2026-03-04",status:"Completed",duration:120,region:"South",agency:"CareFirst"},{id:"W007",patient:"Linda Harris",clinician:"RN Marco DiSalvo",visitType:"Home Health",scheduledDate:"2026-03-05",completedDate:null,status:"Incomplete",duration:60,region:"East",agency:"Wellness Home"},{id:"W008",patient:"Mark Davis",clinician:"Dr. James Patel",visitType:"PT Session",scheduledDate:"2026-03-05",completedDate:"2026-03-05",status:"Completed",duration:45,region:"West",agency:"CareFirst"},{id:"W009",patient:"Patricia Wilson",clinician:"NP Kim Yardley",visitType:"Wound Care",scheduledDate:"2026-03-05",completedDate:null,status:"Late",duration:30,region:"North",agency:"HomeCare Plus"},{id:"W010",patient:"James Martin",clinician:"RN Marco DiSalvo",visitType:"Home Health",scheduledDate:"2026-03-06",completedDate:"2026-03-06",status:"Completed",duration:60,region:"East",agency:"CareFirst"}],schedulingRequests:[{id:"SR001",patient:"Frank Miller",requestDate:"2026-03-04",requestType:"New Visit",visitType:"Home Health",priority:"High",status:"Unassigned",assignedClinician:null,insurance:"Medicare",preferredDate:"2026-03-07",preferredTime:"Morning",diagnosis:"COPD"},{id:"SR002",patient:"George Anderson",requestDate:"2026-03-04",requestType:"Reschedule",visitType:"PT Assessment",priority:"Medium",status:"Unassigned",assignedClinician:null,insurance:"Medicaid",preferredDate:"2026-03-09",preferredTime:"Afternoon",diagnosis:"Hip Fracture"},{id:"SR003",patient:"Helen Thompson",requestDate:"2026-03-05",requestType:"New Visit",visitType:"Wound Care",priority:"High",status:"Unassigned",assignedClinician:null,insurance:"Blue Cross",preferredDate:"2026-03-07",preferredTime:"Any",diagnosis:"Diabetic Ulcer"},{id:"SR004",patient:"Ivan Jackson",requestDate:"2026-03-05",requestType:"New Visit",visitType:"Infusion",priority:"High",status:"Unassigned",assignedClinician:null,insurance:"Medicare",preferredDate:"2026-03-10",preferredTime:"Morning",diagnosis:"Osteomyelitis"},{id:"SR005",patient:"Julia White",requestDate:"2026-03-06",requestType:"Reschedule",visitType:"Med Review",priority:"Low",status:"Unassigned",assignedClinician:null,insurance:"Aetna",preferredDate:"2026-03-11",preferredTime:"Evening",diagnosis:"Hypertension"},{id:"SR006",patient:"Raymond Okafor",requestDate:"2026-03-06",requestType:"New Visit",visitType:"Home Health",priority:"High",status:"Unassigned",assignedClinician:null,insurance:"Medicare",preferredDate:"2026-03-09",preferredTime:"Morning",diagnosis:"COPD exacerbation"},{id:"SR007",patient:"Sylvia Nakamura",requestDate:"2026-03-06",requestType:"New Visit",visitType:"PT Session",priority:"Medium",status:"Assigned",assignedClinician:"PT Rebecca Moss",insurance:"Blue Cross",preferredDate:"2026-03-10",preferredTime:"Any",diagnosis:"Lumbar Surgery"},{id:"SR008",patient:"Timothy Brooks",requestDate:"2026-03-07",requestType:"Reschedule",visitType:"Wound Care",priority:"High",status:"Unassigned",assignedClinician:null,insurance:"Medicaid",preferredDate:"2026-03-11",preferredTime:"Afternoon",diagnosis:"Venous Ulcer"},{id:"SR009",patient:"Uma Krishnamurthy",requestDate:"2026-03-07",requestType:"New Visit",visitType:"Assessment",priority:"Medium",status:"Assigned",assignedClinician:"NP Kim Yardley",insurance:"Medicare",preferredDate:"2026-03-12",preferredTime:"Morning",diagnosis:"Dementia"},{id:"SR010",patient:"Victor Mensah",requestDate:"2026-03-08",requestType:"New Visit",visitType:"Infusion",priority:"High",status:"Unassigned",assignedClinician:null,insurance:"Aetna",preferredDate:"2026-03-12",preferredTime:"Any",diagnosis:"Cellulitis"},{id:"SR011",patient:"Wanda Johansson",requestDate:"2026-03-08",requestType:"Reschedule",visitType:"Med Review",priority:"Low",status:"Assigned",assignedClinician:"Dr. James Patel",insurance:"Medicaid",preferredDate:"2026-03-13",preferredTime:"Morning",diagnosis:"Diabetes T2"},{id:"SR012",patient:"Xavier Osei",requestDate:"2026-03-09",requestType:"New Visit",visitType:"Home Health",priority:"Medium",status:"Unassigned",assignedClinician:null,insurance:"Medicare",preferredDate:"2026-03-13",preferredTime:"Afternoon",diagnosis:"Post-op Knee"}],clientSchedule:[{id:"CS001",patient:"Kenneth Brown",clinician:"Dr. Sarah Okonkwo",visitType:"Home Health",scheduledDate:"2026-03-02",status:"Missed",reason:"Patient not home",followUpRequired:true,rebookedDate:null},{id:"CS002",patient:"Laura Garcia",clinician:"RN Marco DiSalvo",visitType:"Wound Care",scheduledDate:"2026-03-03",status:"Declined",reason:"Patient refused service",followUpRequired:true,rebookedDate:null},{id:"CS003",patient:"Michael Lee",clinician:"NP Kim Yardley",visitType:"PT Session",scheduledDate:"2026-03-03",status:"Rescheduled",reason:"Clinician availability",followUpRequired:false,rebookedDate:"2026-03-07"},{id:"CS004",patient:"Nancy Hill",clinician:"Dr. James Patel",visitType:"Assessment",scheduledDate:"2026-03-04",status:"Reassigned",reason:"Clinician OOO",followUpRequired:false,rebookedDate:"2026-03-05"},{id:"CS005",patient:"Oscar King",clinician:"Dr. Sarah Okonkwo",visitType:"Infusion",scheduledDate:"2026-03-05",status:"Missed",reason:"Emergency hospitalization",followUpRequired:true,rebookedDate:null},{id:"CS006",patient:"Paula Scott",clinician:"RN Marco DiSalvo",visitType:"Med Review",scheduledDate:"2026-03-05",status:"Rescheduled",reason:"Patient request",followUpRequired:false,rebookedDate:"2026-03-08"},{id:"CS007",patient:"Quincy Davis",clinician:"PT Rebecca Moss",visitType:"PT Session",scheduledDate:"2026-03-05",status:"Declined",reason:"Patient feeling unwell",followUpRequired:true,rebookedDate:null},{id:"CS008",patient:"Rachel Thompson",clinician:"NP Kim Yardley",visitType:"Home Health",scheduledDate:"2026-03-06",status:"Missed",reason:"Family emergency",followUpRequired:true,rebookedDate:null},{id:"CS009",patient:"Samuel Wright",clinician:"Dr. James Patel",visitType:"Med Review",scheduledDate:"2026-03-06",status:"Rescheduled",reason:"Provider schedule change",followUpRequired:false,rebookedDate:"2026-03-10"},{id:"CS010",patient:"Teresa Nguyen",clinician:"RN Marco DiSalvo",visitType:"Wound Care",scheduledDate:"2026-03-06",status:"Missed",reason:"Patient not reachable",followUpRequired:true,rebookedDate:null},{id:"CS011",patient:"Ulrich Baumann",clinician:"Dr. Sarah Okonkwo",visitType:"Infusion",scheduledDate:"2026-03-07",status:"Declined",reason:"Patient at ER",followUpRequired:true,rebookedDate:null},{id:"CS012",patient:"Vivian Morales",clinician:"PT Rebecca Moss",visitType:"PT Session",scheduledDate:"2026-03-07",status:"Rescheduled",reason:"Equipment not available",followUpRequired:false,rebookedDate:"2026-03-11"},{id:"CS013",patient:"Walter Obi",clinician:"NP Kim Yardley",visitType:"Assessment",scheduledDate:"2026-03-07",status:"Missed",reason:"Wrong address on file",followUpRequired:true,rebookedDate:null},{id:"CS014",patient:"Xena Petrova",clinician:"Dr. James Patel",visitType:"Home Health",scheduledDate:"2026-03-08",status:"Declined",reason:"Caregiver refused entry",followUpRequired:true,rebookedDate:null},{id:"CS015",patient:"Yusuf Al-Rashid",clinician:"Dr. Sarah Okonkwo",visitType:"Wound Care",scheduledDate:"2026-03-08",status:"Rescheduled",reason:"Patient hospitalized briefly",followUpRequired:false,rebookedDate:"2026-03-12"}]};
-const CM={red:{t:"#f87171"},amber:{t:"#fbbf24"},green:{t:"#34d399"},blue:{t:"#60a5fa"},purple:{t:"#c084fc"},cyan:{t:"#22d3ee"},slate:{t:"#94a3b8"}};
-const UC={high:"#f87171",medium:"#fbbf24",clear:"#34d399"};
-const RPTS=[{id:"agentSummary",icon:"📋",label:"Agent Summary",desc:"Pending visits requiring follow-up, escalation, or scheduling action.",stats:()=>{const r=_store.agentSummary;return[{l:"Pending",v:r.length,c:"amber"},{l:"High priority",v:r.filter(x=>x.priority==="High").length,c:"red"},{l:"No contact",v:r.filter(x=>x.attempts===0).length,c:"cyan"}];},urgency:()=>_store.agentSummary.filter(r=>r.priority==="High").length>0?"high":"medium"},{id:"weeklyVisits",icon:"📅",label:"Weekly Summary",desc:"All visits from the current week — completed, late, and incomplete.",stats:()=>{const r=_store.weeklyVisits;return[{l:"Late",v:r.filter(x=>x.status==="Late").length,c:"red"},{l:"Incomplete",v:r.filter(x=>x.status==="Incomplete").length,c:"amber"},{l:"Completed",v:r.filter(x=>x.status==="Completed").length,c:"green"}];},urgency:()=>_store.weeklyVisits.filter(r=>r.status==="Late").length>0?"high":"medium"},{id:"schedulingRequests",icon:"📨",label:"Scheduling Requests",desc:"New visit requests and reschedules awaiting clinician assignment.",stats:()=>{const r=_store.schedulingRequests;return[{l:"Unassigned",v:r.filter(x=>x.status==="Unassigned").length,c:"amber"},{l:"High priority",v:r.filter(x=>x.priority==="High").length,c:"red"},{l:"Reschedules",v:r.filter(x=>x.requestType==="Reschedule").length,c:"blue"}];},urgency:()=>_store.schedulingRequests.filter(r=>r.priority==="High").length>0?"high":"medium"},{id:"clientSchedule",icon:"🔁",label:"Client Schedule",desc:"Missed, declined, and rescheduled visits needing outreach or rebooking.",stats:()=>{const r=_store.clientSchedule;return[{l:"Follow-up req.",v:r.filter(x=>x.followUpRequired).length,c:"purple"},{l:"Missed",v:r.filter(x=>x.status==="Missed").length,c:"red"},{l:"Declined",v:r.filter(x=>x.status==="Declined").length,c:"amber"}];},urgency:()=>_store.clientSchedule.filter(r=>r.followUpRequired).length>0?"high":"clear"}];
-const DSC={agentSummary:{label:"Agent Summary",cols:["id","patient","clinician","visitType","scheduledDate","priority","status","attempts"],sumFn:rows=>({total:{l:"Total",v:rows.length,f:false},high:{l:"High",v:rows.filter(r=>r.priority==="High").length,f:true,p:r=>r.priority==="High"},pending:{l:"Pending",v:rows.filter(r=>r.status==="Pending").length,f:true,p:r=>r.status==="Pending"},noContact:{l:"No Contact",v:rows.filter(r=>r.attempts===0).length,f:true,p:r=>r.attempts===0}}),filters:[{k:"priority",l:"Priority",o:["High","Medium","Low"],p:(r,v)=>r.priority===v},{k:"visitType",l:"Visit Type",o:["Home Health","PT Assessment","Wound Care","Med Review","Infusion","Assessment","PT Session"],p:(r,v)=>r.visitType===v}]},weeklyVisits:{label:"Weekly Summary",cols:["id","patient","clinician","visitType","scheduledDate","completedDate","status","region","agency"],sumFn:rows=>({total:{l:"Total",v:rows.length,f:false},late:{l:"Late",v:rows.filter(r=>r.status==="Late").length,f:true,p:r=>r.status==="Late"},incomplete:{l:"Incomplete",v:rows.filter(r=>r.status==="Incomplete").length,f:true,p:r=>r.status==="Incomplete"},completed:{l:"Completed",v:rows.filter(r=>r.status==="Completed").length,f:true,p:r=>r.status==="Completed"}}),filters:[{k:"status",l:"Status",o:["Late","Incomplete","Completed"],p:(r,v)=>r.status===v},{k:"region",l:"Region",o:["North","South","East","West"],p:(r,v)=>r.region===v}]},schedulingRequests:{label:"Scheduling Requests",cols:["id","patient","requestDate","requestType","visitType","priority","status","assignedClinician","insurance"],sumFn:rows=>({total:{l:"Total",v:rows.length,f:false},unassigned:{l:"Unassigned",v:rows.filter(r=>r.status==="Unassigned").length,f:true,p:r=>r.status==="Unassigned"},reschedules:{l:"Reschedule",v:rows.filter(r=>r.requestType==="Reschedule").length,f:true,p:r=>r.requestType==="Reschedule"}}),filters:[{k:"priority",l:"Priority",o:["High","Medium","Low"],p:(r,v)=>r.priority===v},{k:"status",l:"Status",o:["Unassigned","Assigned"],p:(r,v)=>r.status===v}]},clientSchedule:{label:"Client Schedule",cols:["id","patient","clinician","visitType","scheduledDate","status","followUpRequired","rebookedDate"],sumFn:rows=>({total:{l:"Total",v:rows.length,f:false},missed:{l:"Missed",v:rows.filter(r=>r.status==="Missed").length,f:true,p:r=>r.status==="Missed"},declined:{l:"Declined",v:rows.filter(r=>r.status==="Declined").length,f:true,p:r=>r.status==="Declined"},rescheduled:{l:"Rescheduled",v:rows.filter(r=>r.status==="Rescheduled").length,f:true,p:r=>r.status==="Rescheduled"},followUp:{l:"Follow-Up",v:rows.filter(r=>r.followUpRequired).length,f:true,p:r=>r.followUpRequired===true}}),filters:[{k:"status",l:"Status",o:["Missed","Declined","Rescheduled","Reassigned"],p:(r,v)=>r.status===v}]}};
-const CHIPS=[{label:"Show all pending visits",ds:"agentSummary",f:null,intent:"Agent Summary Report"},{label:"High priority pending visits",ds:"agentSummary",f:r=>r.priority==="High",intent:"High Priority Visits"},{label:"Late visits this week",ds:"weeklyVisits",f:r=>r.status==="Late",intent:"Late Weekly Visits"},{label:"All unassigned requests",ds:"schedulingRequests",f:r=>r.status==="Unassigned",intent:"Unassigned Requests"},{label:"Missed visits needing follow-up",ds:"clientSchedule",f:r=>r.status==="Missed"&&r.followUpRequired,intent:"Missed + Follow-up"},{label:"Show incomplete visits",ds:"weeklyVisits",f:r=>r.status==="Incomplete",intent:"Incomplete Visits"},{label:"Show declined visits",ds:"clientSchedule",f:r=>r.status==="Declined",intent:"Declined Visits"},{label:"Show visits for Dr. James Patel",ds:"agentSummary",f:r=>r.clinician&&r.clinician.includes("Patel"),intent:"Dr. James Patel's Visits"},{label:"Agent summary",ds:"agentSummary",f:null,intent:"Agent Summary"},{label:"Weekly summary",ds:"weeklyVisits",f:null,intent:"Weekly Visit Summary"}];
-function fmtC(c){return c.replace(/([A-Z])/g,' $1').replace(/^./,s=>s.toUpperCase()).trim();}
-function bc(col,val){if(col==="id")return`<span class="idl">${val}</span>`;if(val===null||val===undefined)return`<span style="color:var(--mut)">—</span>`;const isB=["status","priority","followUpRequired"].some(k=>col.toLowerCase().includes(k.toLowerCase()));if(isB){const l=val===true?"Yes":val===false?"No":val;return`<span class="badge badge-${l}">${l}</span>`;}return String(val);}
-function srt(rows,col,dir){if(!col)return rows;return[...rows].sort((a,b)=>{const av=a[col],bv=b[col];if(av==null)return 1;if(bv==null)return-1;const c=(typeof av==="number"&&typeof bv==="number")?av-bv:String(av).localeCompare(String(bv),undefined,{numeric:true});return dir==="asc"?c:-c;});}
-function sico(col,cc,dir){const u=(col===cc&&dir==="asc")?"var(--acc2)":"rgba(255,255,255,.18)";const d=(col===cc&&dir==="desc")?"var(--acc2)":"rgba(255,255,255,.18)";return`<span class="sorticon"><svg width="7" height="5" viewBox="0 0 7 5"><polygon points="3.5,0 7,5 0,5" fill="${u}"/></svg><svg width="7" height="5" viewBox="0 0 7 5"><polygon points="3.5,5 0,0 7,0" fill="${d}"/></svg></span>`;}
-// Expand/Collapse
-const IL=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/><polyline points="4 18 10 12 4 6"/></svg>`;
-const CL=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/><polyline points="20 18 14 12 20 6"/></svg>`;
-const IR=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/><polyline points="20 18 14 12 20 6"/></svg>`;
-const CR=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/><polyline points="4 18 10 12 4 6"/></svg>`;
-let pane=null;
-const lpEl=document.getElementById("lp"),rpEl=document.getElementById("rp"),lbEl=document.getElementById("lbtn"),rbEl=document.getElementById("rbtn");
-function applyPane(){lpEl.classList.remove("exp","col");rpEl.classList.remove("col");if(pane==="left"){lpEl.classList.add("exp");rpEl.classList.add("col");lbEl.innerHTML=CL;lbEl.title="Restore split view";}else if(pane==="right"){lpEl.classList.add("col");rbEl.innerHTML=CR;rbEl.title="Restore split view";}else{lbEl.innerHTML=IL;lbEl.title="Expand chat";rbEl.innerHTML=IR;rbEl.title="Expand reports";}}
-lbEl.addEventListener("click",()=>{pane=pane==="left"?null:"left";applyPane();});
-rbEl.addEventListener("click",()=>{pane=pane==="right"?null:"right";applyPane();});
-applyPane();
-// Report View state — declared here so renderDash and navTo can both access it
-const DS_ORDER=["agentSummary","weeklyVisits","schedulingRequests","clientSchedule"];
-let lastNavDs=null;
-let ads="agentSummary",rf={},rs="",rsc=null,rsd="asc",rtp=null,rtk=null;
-const SLIDE_DUR=280;
+// ─── Store ────────────────────────────────────────────────────────────────────
+const _store = {
+  agentSummary: [
+    { id:"V001", patient:"Margaret Collins",   clinician:"Dr. Sarah Okonkwo",  visitType:"Home Health",    scheduledDate:"2026-03-04", scheduledTime:"09:00", status:"Pending", priority:"High",   phone:"(555) 234-8901", notes:"Post-surgery follow-up",           attempts:2, lastAttempt:"2026-03-05 14:32" },
+    { id:"V002", patient:"Harold Nguyen",      clinician:"Dr. James Patel",    visitType:"PT Assessment",  scheduledDate:"2026-03-04", scheduledTime:"11:30", status:"Pending", priority:"Medium", phone:"(555) 876-3421", notes:"Initial evaluation",                attempts:0, lastAttempt:null },
+    { id:"V003", patient:"Dorothy Reyes",      clinician:"NP Kim Yardley",     visitType:"Wound Care",     scheduledDate:"2026-03-05", scheduledTime:"14:00", status:"Pending", priority:"High",   phone:"(555) 543-9087", notes:"Wound dressing change",             attempts:1, lastAttempt:"2026-03-05 10:15" },
+    { id:"V004", patient:"Bernard Shaw",       clinician:"Dr. Sarah Okonkwo",  visitType:"Med Review",     scheduledDate:"2026-03-05", scheduledTime:"10:00", status:"Pending", priority:"Low",    phone:"(555) 321-7654", notes:"Quarterly medication review",       attempts:0, lastAttempt:null },
+    { id:"V005", patient:"Constance Li",       clinician:"RN Marco DiSalvo",   visitType:"Infusion",       scheduledDate:"2026-03-06", scheduledTime:"08:00", status:"Pending", priority:"High",   phone:"(555) 789-0123", notes:"IV antibiotic therapy",             attempts:3, lastAttempt:"2026-03-06 07:45" },
+    { id:"V006", patient:"Franklin Torres",    clinician:"Dr. James Patel",    visitType:"Home Health",    scheduledDate:"2026-03-06", scheduledTime:"13:30", status:"Pending", priority:"Medium", phone:"(555) 654-3210", notes:"Vital signs monitoring",            attempts:1, lastAttempt:"2026-03-05 16:00" },
+    { id:"V007", patient:"Gertrude Walsh",     clinician:"PT Rebecca Moss",    visitType:"PT Assessment",  scheduledDate:"2026-03-07", scheduledTime:"09:30", status:"Pending", priority:"High",   phone:"(555) 112-3344", notes:"Post-hip replacement mobility eval", attempts:0, lastAttempt:null },
+    { id:"V008", patient:"Howard Kim",         clinician:"NP Kim Yardley",     visitType:"Home Health",    scheduledDate:"2026-03-07", scheduledTime:"11:00", status:"Pending", priority:"Medium", phone:"(555) 223-4455", notes:"Diabetic foot care follow-up",      attempts:2, lastAttempt:"2026-03-07 09:00" },
+    { id:"V009", patient:"Iris Patel",         clinician:"RN Marco DiSalvo",   visitType:"Wound Care",     scheduledDate:"2026-03-07", scheduledTime:"15:30", status:"Pending", priority:"High",   phone:"(555) 334-5566", notes:"Stage 3 pressure ulcer management", attempts:1, lastAttempt:"2026-03-06 17:00" },
+    { id:"V010", patient:"Jerome Banks",       clinician:"Dr. Sarah Okonkwo",  visitType:"Med Review",     scheduledDate:"2026-03-08", scheduledTime:"10:00", status:"Pending", priority:"Low",    phone:"(555) 445-6677", notes:"Blood pressure monitoring",         attempts:0, lastAttempt:null },
+    { id:"V011", patient:"Karen Olsen",        clinician:"Dr. James Patel",    visitType:"Infusion",       scheduledDate:"2026-03-08", scheduledTime:"08:30", status:"Pending", priority:"High",   phone:"(555) 556-7788", notes:"Vancomycin IV — day 5 of 10",       attempts:0, lastAttempt:null },
+    { id:"V012", patient:"Leonard Cruz",       clinician:"PT Rebecca Moss",    visitType:"PT Session",     scheduledDate:"2026-03-08", scheduledTime:"13:00", status:"Pending", priority:"Medium", phone:"(555) 667-8899", notes:"Stroke rehab — gait training",      attempts:1, lastAttempt:"2026-03-07 14:00" },
+    { id:"V013", patient:"Miriam Santos",      clinician:"NP Kim Yardley",     visitType:"Home Health",    scheduledDate:"2026-03-09", scheduledTime:"09:00", status:"Pending", priority:"High",   phone:"(555) 778-9900", notes:"CHF exacerbation monitoring",       attempts:3, lastAttempt:"2026-03-08 16:30" },
+    { id:"V014", patient:"Nelson Adeyemi",     clinician:"RN Marco DiSalvo",   visitType:"Wound Care",     scheduledDate:"2026-03-09", scheduledTime:"14:00", status:"Pending", priority:"Medium", phone:"(555) 889-0011", notes:"Post-op abdominal wound check",     attempts:0, lastAttempt:null },
+    { id:"V015", patient:"Olivia Fernandez",   clinician:"Dr. Sarah Okonkwo",  visitType:"Assessment",     scheduledDate:"2026-03-09", scheduledTime:"11:30", status:"Pending", priority:"Low",    phone:"(555) 990-1122", notes:"Fall risk re-assessment",           attempts:0, lastAttempt:null },
+    { id:"V016", patient:"Percy Goldstein",    clinician:"Dr. James Patel",    visitType:"Med Review",     scheduledDate:"2026-03-10", scheduledTime:"10:30", status:"Pending", priority:"High",   phone:"(555) 101-2233", notes:"Warfarin dose adjustment needed",   attempts:2, lastAttempt:"2026-03-09 11:00" },
+    { id:"V017", patient:"Queenie Abara",      clinician:"PT Rebecca Moss",    visitType:"PT Assessment",  scheduledDate:"2026-03-10", scheduledTime:"08:00", status:"Pending", priority:"Medium", phone:"(555) 202-3344", notes:"Knee replacement — week 2 eval",    attempts:0, lastAttempt:null },
+  ],
+  weeklyVisits: [
+    { id:"W001", patient:"Alice Brennan",      clinician:"NP Kim Yardley",    visitType:"Home Health",  scheduledDate:"2026-03-03", completedDate:null,         status:"Late",       duration:60,  region:"North", agency:"CareFirst" },
+    { id:"W002", patient:"Robert Chu",         clinician:"Dr. Sarah Okonkwo", visitType:"PT Session",   scheduledDate:"2026-03-03", completedDate:"2026-03-03", status:"Completed",  duration:45,  region:"South", agency:"HomeCare Plus" },
+    { id:"W003", patient:"Susan Park",         clinician:"RN Marco DiSalvo",  visitType:"Wound Care",   scheduledDate:"2026-03-04", completedDate:null,         status:"Incomplete", duration:30,  region:"East",  agency:"CareFirst" },
+    { id:"W004", patient:"Thomas Green",       clinician:"Dr. James Patel",   visitType:"Med Review",   scheduledDate:"2026-03-04", completedDate:"2026-03-04", status:"Completed",  duration:20,  region:"West",  agency:"Wellness Home" },
+    { id:"W005", patient:"Nancy Wright",       clinician:"NP Kim Yardley",    visitType:"Assessment",   scheduledDate:"2026-03-04", completedDate:null,         status:"Late",       duration:90,  region:"North", agency:"HomeCare Plus" },
+    { id:"W006", patient:"Charles Moore",      clinician:"Dr. Sarah Okonkwo", visitType:"Infusion",     scheduledDate:"2026-03-04", completedDate:"2026-03-04", status:"Completed",  duration:120, region:"South", agency:"CareFirst" },
+    { id:"W007", patient:"Linda Harris",       clinician:"RN Marco DiSalvo",  visitType:"Home Health",  scheduledDate:"2026-03-05", completedDate:null,         status:"Incomplete", duration:60,  region:"East",  agency:"Wellness Home" },
+    { id:"W008", patient:"Mark Davis",         clinician:"Dr. James Patel",   visitType:"PT Session",   scheduledDate:"2026-03-05", completedDate:"2026-03-05", status:"Completed",  duration:45,  region:"West",  agency:"CareFirst" },
+    { id:"W009", patient:"Patricia Wilson",    clinician:"NP Kim Yardley",    visitType:"Wound Care",   scheduledDate:"2026-03-05", completedDate:null,         status:"Late",       duration:30,  region:"North", agency:"HomeCare Plus" },
+    { id:"W010", patient:"James Taylor",       clinician:"Dr. Sarah Okonkwo", visitType:"Med Review",   scheduledDate:"2026-03-05", completedDate:"2026-03-05", status:"Completed",  duration:25,  region:"South", agency:"Wellness Home" },
+    { id:"W011", patient:"Barbara Evans",      clinician:"PT Rebecca Moss",   visitType:"PT Session",   scheduledDate:"2026-03-06", completedDate:"2026-03-06", status:"Completed",  duration:50,  region:"East",  agency:"CareFirst" },
+    { id:"W012", patient:"Steven Adams",       clinician:"RN Marco DiSalvo",  visitType:"Infusion",     scheduledDate:"2026-03-06", completedDate:null,         status:"Incomplete", duration:90,  region:"West",  agency:"HomeCare Plus" },
+    { id:"W013", patient:"Donna Mitchell",     clinician:"Dr. James Patel",   visitType:"Home Health",  scheduledDate:"2026-03-06", completedDate:"2026-03-06", status:"Completed",  duration:55,  region:"North", agency:"Wellness Home" },
+    { id:"W014", patient:"Kevin Robinson",     clinician:"NP Kim Yardley",    visitType:"Assessment",   scheduledDate:"2026-03-07", completedDate:null,         status:"Late",       duration:40,  region:"South", agency:"CareFirst" },
+    { id:"W015", patient:"Michelle Carter",    clinician:"Dr. Sarah Okonkwo", visitType:"Wound Care",   scheduledDate:"2026-03-07", completedDate:"2026-03-07", status:"Completed",  duration:35,  region:"East",  agency:"HomeCare Plus" },
+    { id:"W016", patient:"Anthony Phillips",   clinician:"PT Rebecca Moss",   visitType:"PT Session",   scheduledDate:"2026-03-07", completedDate:null,         status:"Incomplete", duration:60,  region:"West",  agency:"Wellness Home" },
+    { id:"W017", patient:"Sharon Campbell",    clinician:"RN Marco DiSalvo",  visitType:"Med Review",   scheduledDate:"2026-03-08", completedDate:"2026-03-08", status:"Completed",  duration:20,  region:"North", agency:"CareFirst" },
+    { id:"W018", patient:"Donald Parker",      clinician:"Dr. James Patel",   visitType:"Home Health",  scheduledDate:"2026-03-08", completedDate:null,         status:"Late",       duration:70,  region:"South", agency:"HomeCare Plus" },
+    { id:"W019", patient:"Carol Edwards",      clinician:"NP Kim Yardley",    visitType:"Infusion",     scheduledDate:"2026-03-08", completedDate:"2026-03-08", status:"Completed",  duration:100, region:"East",  agency:"Wellness Home" },
+    { id:"W020", patient:"Jason Collins",      clinician:"Dr. Sarah Okonkwo", visitType:"Assessment",   scheduledDate:"2026-03-09", completedDate:"2026-03-09", status:"Completed",  duration:45,  region:"West",  agency:"CareFirst" },
+  ],
+  schedulingRequests: [
+    { id:"SR001", patient:"Evelyn Martinez",   requestDate:"2026-03-04", requestType:"New Visit",  preferredDate:"2026-03-08", preferredTime:"Morning",   visitType:"Home Health",    diagnosis:"CHF",               insurance:"Medicare",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Patient recently discharged",          phone:"(555) 111-2233" },
+    { id:"SR002", patient:"George Anderson",   requestDate:"2026-03-04", requestType:"Reschedule", preferredDate:"2026-03-09", preferredTime:"Afternoon", visitType:"PT Assessment",  diagnosis:"Hip Fracture",      insurance:"Medicaid",    priority:"Medium", assignedClinician:null,              status:"Unassigned", notes:"Transport issues",                      phone:"(555) 444-5566" },
+    { id:"SR003", patient:"Helen Thompson",    requestDate:"2026-03-05", requestType:"New Visit",  preferredDate:"2026-03-07", preferredTime:"Any",       visitType:"Wound Care",     diagnosis:"Diabetic Ulcer",    insurance:"Blue Cross",  priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Urgent wound assessment needed",        phone:"(555) 777-8899" },
+    { id:"SR004", patient:"Ivan Jackson",      requestDate:"2026-03-05", requestType:"New Visit",  preferredDate:"2026-03-10", preferredTime:"Morning",   visitType:"Infusion",       diagnosis:"Osteomyelitis",     insurance:"Medicare",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"PICC line placed, day 1",              phone:"(555) 000-1122" },
+    { id:"SR005", patient:"Julia White",       requestDate:"2026-03-06", requestType:"Reschedule", preferredDate:"2026-03-11", preferredTime:"Evening",   visitType:"Med Review",     diagnosis:"Hypertension",      insurance:"Aetna",       priority:"Low",    assignedClinician:null,              status:"Unassigned", notes:"Work schedule conflict",                phone:"(555) 333-4455" },
+    { id:"SR006", patient:"Raymond Okafor",    requestDate:"2026-03-06", requestType:"New Visit",  preferredDate:"2026-03-09", preferredTime:"Morning",   visitType:"Home Health",    diagnosis:"COPD exacerbation", insurance:"Medicare",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"O2 sats 88% at discharge",             phone:"(555) 123-6789" },
+    { id:"SR007", patient:"Sylvia Nakamura",   requestDate:"2026-03-06", requestType:"New Visit",  preferredDate:"2026-03-10", preferredTime:"Any",       visitType:"PT Session",     diagnosis:"Lumbar Surgery",    insurance:"Blue Cross",  priority:"Medium", assignedClinician:"PT Rebecca Moss", status:"Assigned",   notes:"Post-laminectomy rehab",               phone:"(555) 234-7890" },
+    { id:"SR008", patient:"Timothy Brooks",    requestDate:"2026-03-07", requestType:"Reschedule", preferredDate:"2026-03-11", preferredTime:"Afternoon", visitType:"Wound Care",     diagnosis:"Venous Ulcer",      insurance:"Medicaid",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Previous visit missed — urgent re-care", phone:"(555) 345-8901" },
+    { id:"SR009", patient:"Uma Krishnamurthy", requestDate:"2026-03-07", requestType:"New Visit",  preferredDate:"2026-03-12", preferredTime:"Morning",   visitType:"Assessment",     diagnosis:"Dementia",          insurance:"Medicare",    priority:"Medium", assignedClinician:"NP Kim Yardley",  status:"Assigned",   notes:"Family requesting cognitive assessment",phone:"(555) 456-9012" },
+    { id:"SR010", patient:"Victor Mensah",     requestDate:"2026-03-08", requestType:"New Visit",  preferredDate:"2026-03-12", preferredTime:"Any",       visitType:"Infusion",       diagnosis:"Cellulitis",        insurance:"Aetna",       priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Ceftriaxone 1g daily × 7 days",         phone:"(555) 567-0123" },
+    { id:"SR011", patient:"Wanda Johansson",   requestDate:"2026-03-08", requestType:"Reschedule", preferredDate:"2026-03-13", preferredTime:"Morning",   visitType:"Med Review",     diagnosis:"Diabetes T2",       insurance:"Medicaid",    priority:"Low",    assignedClinician:"Dr. James Patel", status:"Assigned",   notes:"Insulin regimen adjustment",            phone:"(555) 678-1234" },
+    { id:"SR012", patient:"Xavier Osei",       requestDate:"2026-03-09", requestType:"New Visit",  preferredDate:"2026-03-13", preferredTime:"Afternoon", visitType:"Home Health",    diagnosis:"Post-op Knee",      insurance:"Medicare",    priority:"Medium", assignedClinician:null,              status:"Unassigned", notes:"Day 3 post total knee replacement",     phone:"(555) 789-2345" },
+  ],
+  clientSchedule: [
+    { id:"CS001", patient:"Kenneth Brown",     clinician:"Dr. Sarah Okonkwo", visitType:"Home Health",   scheduledDate:"2026-03-02", status:"Missed",      reason:"Patient not home",             followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS002", patient:"Laura Garcia",      clinician:"RN Marco DiSalvo",  visitType:"Wound Care",    scheduledDate:"2026-03-03", status:"Declined",    reason:"Patient refused service",      followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS003", patient:"Michael Lee",       clinician:"NP Kim Yardley",    visitType:"PT Session",    scheduledDate:"2026-03-03", status:"Rescheduled", reason:"Clinician availability",       followUpRequired:false, rebookedDate:"2026-03-07", outreachLog:[] },
+    { id:"CS004", patient:"Nancy Hill",        clinician:"Dr. James Patel",   visitType:"Assessment",    scheduledDate:"2026-03-04", status:"Reassigned",  reason:"Clinician OOO",                followUpRequired:false, rebookedDate:"2026-03-05", newClinician:"Dr. Sarah Okonkwo", outreachLog:[] },
+    { id:"CS005", patient:"Oscar King",        clinician:"Dr. Sarah Okonkwo", visitType:"Infusion",      scheduledDate:"2026-03-05", status:"Missed",      reason:"Emergency hospitalization",    followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS006", patient:"Paula Scott",       clinician:"RN Marco DiSalvo",  visitType:"Med Review",    scheduledDate:"2026-03-05", status:"Rescheduled", reason:"Patient request",              followUpRequired:false, rebookedDate:"2026-03-08", outreachLog:[] },
+    { id:"CS007", patient:"Quincy Davis",      clinician:"PT Rebecca Moss",   visitType:"PT Session",    scheduledDate:"2026-03-05", status:"Declined",    reason:"Patient feeling unwell",       followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS008", patient:"Rachel Thompson",   clinician:"NP Kim Yardley",    visitType:"Home Health",   scheduledDate:"2026-03-06", status:"Missed",      reason:"Family emergency",             followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS009", patient:"Samuel Wright",     clinician:"Dr. James Patel",   visitType:"Med Review",    scheduledDate:"2026-03-06", status:"Rescheduled", reason:"Provider schedule change",     followUpRequired:false, rebookedDate:"2026-03-10", outreachLog:[] },
+    { id:"CS010", patient:"Teresa Nguyen",     clinician:"RN Marco DiSalvo",  visitType:"Wound Care",    scheduledDate:"2026-03-06", status:"Missed",      reason:"Patient not reachable",        followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS011", patient:"Ulrich Baumann",    clinician:"Dr. Sarah Okonkwo", visitType:"Infusion",      scheduledDate:"2026-03-07", status:"Declined",    reason:"Patient at ER",                followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS012", patient:"Vivian Morales",    clinician:"PT Rebecca Moss",   visitType:"PT Session",    scheduledDate:"2026-03-07", status:"Rescheduled", reason:"Equipment not available",      followUpRequired:false, rebookedDate:"2026-03-11", outreachLog:[] },
+    { id:"CS013", patient:"Walter Obi",        clinician:"NP Kim Yardley",    visitType:"Assessment",    scheduledDate:"2026-03-07", status:"Missed",      reason:"Wrong address on file",        followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS014", patient:"Xena Petrova",      clinician:"Dr. James Patel",   visitType:"Home Health",   scheduledDate:"2026-03-08", status:"Declined",    reason:"Caregiver refused entry",      followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
+    { id:"CS015", patient:"Yusuf Al-Rashid",   clinician:"Dr. Sarah Okonkwo", visitType:"Wound Care",    scheduledDate:"2026-03-08", status:"Rescheduled", reason:"Patient hospitalized briefly", followUpRequired:false, rebookedDate:"2026-03-12", outreachLog:[] },
+  ],
+};
 
-function renderDash(){
-  document.getElementById("rtabs-fixed").style.display="none";
-  const now=new Date();
-  const h=now.getHours(),gr=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":h<21?"Good evening":"Good night";
-  const tzLong=now.toLocaleTimeString("en",{timeZoneName:"long"}).split(" ").slice(1).join(" ");
-  const ds=now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});
-  const ts=now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit",hour12:true})+" · "+tzLong;
-  const rws=RPTS.map((r,i)=>{const st=r.stats(),ug=r.urgency(),uc=UC[ug];const sc=st.map(s=>`<div class="rst"><div class="v" style="color:${CM[s.c].t}">${s.v}</div><div class="l" style="color:${CM[s.c].t}">${s.l}</div></div>`).join("");return`<button class="rr" data-ds="${r.id}" style="animation-delay:${i*60}ms"><div class="ra" style="background:${uc}"></div><div class="ri">${r.icon}</div><div class="rn"><div class="lb">${r.label}<span style="width:5px;height:5px;border-radius:50%;background:${uc};display:inline-block;flex-shrink:0"></span></div><div class="dc">${r.desc}</div></div>${sc}<div class="raro">›</div></button>`;}).join("");
-  slideTransition(next=>{
-    next.innerHTML=`<div style="flex:1;overflow-y:auto;background:var(--bg)"><div class="dh"><div class="dd"><span style="font-weight:600">${ds}</span><span style="color:rgba(255,255,255,.12)">·</span><span>${ts}</span></div><div class="dg">${gr}, <span class="nm">Scheduler</span> 👋</div><p class="dsub">Select a report below to view and act on records.</p></div><div class="rs"><div class="sl">Available Reports</div><div class="rch"><div></div><div></div><div class="ch" style="padding-left:2px">Report</div><div class="ch" style="text-align:center;grid-column:span 3">Stats</div><div></div></div>${rws}</div></div>`;
-    next.querySelectorAll(".rr").forEach(b=>b.addEventListener("click",()=>navTo(b.dataset.ds)));
-  },"left");
-  lastNavDs=null;
-}
-// Report View
+const _ts = () => new Date().toISOString().slice(0,16).replace("T"," ");
+const CLINICIANS = ["Dr. Sarah Okonkwo","Dr. James Patel","NP Kim Yardley","RN Marco DiSalvo","PT Rebecca Moss"];
 
-function navTo(ds){
-  const prevIdx=DS_ORDER.indexOf(lastNavDs??ads);
-  const nextIdx=DS_ORDER.indexOf(ds);
-  const dir=(lastNavDs===null||nextIdx>=prevIdx)?"right":"left";
-  ads=ds;rf={};rs="";rsc=null;rsd="asc";rtp=null;rtk=null;lastNavDs=ds;
-  document.getElementById("rtabs-fixed").style.display="flex";
-  renderReport(dir);
-}
-
-let sliding=false;
-
-function slideTransition(buildFn, dir){
-  if(sliding) return;
-  sliding=true;
-  const rc=document.getElementById("rc");
-  const old=rc.firstElementChild;
-
-  // Create the incoming panel as a proper flex column container
-  const next=document.createElement("div");
-  next.style.cssText=`position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;transform:translateX(${dir==="right"?"100%":"-100%"});will-change:transform;`;
-
-  // Build content into next and wire it up BEFORE appending to DOM
-  buildFn(next);
-  rc.appendChild(next);
-
-  // Force reflow so transition starts from the correct position
-  next.getBoundingClientRect();
-
-  const ease="cubic-bezier(.4,0,.2,1)";
-  const tr=`transform ${SLIDE_DUR}ms ${ease}`;
-
-  if(old){
-    old.style.position="absolute";old.style.inset="0";
-    old.style.display="flex";old.style.flexDirection="column";old.style.overflow="hidden";
-    old.style.willChange="transform";old.style.transition=tr;
-    old.getBoundingClientRect();
-    old.style.transform=`translateX(${dir==="right"?"-100%":"100%"})`;
+// ─── serverCall ───────────────────────────────────────────────────────────────
+function serverCall(name, args) {
+  switch(name) {
+    case "get_agent_summary_report": {
+      let r = [..._store.agentSummary];
+      if (args.id)        r = r.filter(x => x.id === args.id);
+      if (args.priority)  r = r.filter(x => x.priority === args.priority);
+      if (args.clinician) r = r.filter(x => x.clinician.toLowerCase().includes(args.clinician.toLowerCase()));
+      if (args.visitType) r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      if (args.attempts !== undefined) r = r.filter(x => String(x.attempts) === String(args.attempts));
+      if (args.noContactOnly) r = r.filter(x => x.attempts === 0);
+      return { total:r.length, summary:{total:r.length,pending:r.filter(x=>x.status==="Pending").length,high:r.filter(x=>x.priority==="High").length,medium:r.filter(x=>x.priority==="Medium").length,low:r.filter(x=>x.priority==="Low").length,noContact:r.filter(x=>x.attempts===0).length,multiAttempt:r.filter(x=>x.attempts>=2).length}, records:r };
+    }
+    case "get_agent_summary_weekly": {
+      let r = [..._store.weeklyVisits];
+      if (args.id)        r = r.filter(x => x.id === args.id);
+      if (args.status)    r = r.filter(x => x.status === args.status);
+      if (args.region)    r = r.filter(x => x.region.toLowerCase().includes(args.region.toLowerCase()));
+      if (args.agency)    r = r.filter(x => x.agency.toLowerCase().includes(args.agency.toLowerCase()));
+      if (args.clinician) r = r.filter(x => x.clinician.toLowerCase().includes(args.clinician.toLowerCase()));
+      if (args.visitType) r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      return { summary:{total:r.length,late:r.filter(x=>x.status==="Late").length,incomplete:r.filter(x=>x.status==="Incomplete").length,completed:r.filter(x=>x.status==="Completed").length}, records:r };
+    }
+    case "get_scheduling_requests": {
+      let r = [..._store.schedulingRequests];
+      if (args.id)           r = r.filter(x => x.id === args.id);
+      if (args.priority)     r = r.filter(x => x.priority === args.priority);
+      if (args.visitType)    r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      if (args.insurance)    r = r.filter(x => x.insurance.toLowerCase().includes(args.insurance.toLowerCase()));
+      if (args.requestType)  r = r.filter(x => x.requestType === args.requestType);
+      if (args.status)       r = r.filter(x => x.status === args.status);
+      if (args.preferredTime)r = r.filter(x => x.preferredTime === args.preferredTime);
+      return { total:r.length, summary:{total:r.length,unassigned:r.filter(x=>x.status==="Unassigned").length,assigned:r.filter(x=>x.status==="Assigned").length,high:r.filter(x=>x.priority==="High").length,mediumReq:r.filter(x=>x.priority==="Medium").length,lowReq:r.filter(x=>x.priority==="Low").length,newVisit:r.filter(x=>x.requestType==="New Visit").length,reschedules:r.filter(x=>x.requestType==="Reschedule").length}, records:r };
+    }
+    case "get_client_schedule_report": {
+      let r = [..._store.clientSchedule];
+      if (args.id)        r = r.filter(x => x.id === args.id);
+      if (args.status)    r = r.filter(x => x.status === args.status);
+      if (args.clinician) r = r.filter(x => x.clinician.toLowerCase().includes(args.clinician.toLowerCase()));
+      if (args.visitType) r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      if (args.followUpRequired !== undefined) r = r.filter(x => x.followUpRequired === args.followUpRequired);
+      return { summary:{total:r.length,missed:r.filter(x=>x.status==="Missed").length,declined:r.filter(x=>x.status==="Declined").length,rescheduled:r.filter(x=>x.status==="Rescheduled").length,reassigned:r.filter(x=>x.status==="Reassigned").length,followUpPending:r.filter(x=>x.followUpRequired).length,noRebook:r.filter(x=>x.status==="Missed"&&x.followUpRequired&&!x.rebookedDate).length}, records:r };
+    }
+    case "log_contact_attempt": {
+      const v = _store.agentSummary.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Visit not found"};
+      v.attempts+=1; v.lastAttempt=_ts();
+      return {success:true,visitId:args.visitId,patient:v.patient,totalAttempts:v.attempts,record:v};
+    }
+    case "send_reminder": {
+      const v = _store.agentSummary.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Visit not found"};
+      return {success:true,visitId:args.visitId,clinician:v.clinician,channel:args.channel||"App Notification",sentAt:_ts(),record:v};
+    }
+    case "escalate_visit": {
+      const v = _store.agentSummary.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Visit not found"};
+      v.priority="High"; v.notes=(v.notes?v.notes+" | ":"")+"[ESCALATED "+_ts()+"]: "+(args.reason||"");
+      return {success:true,visitId:args.visitId,patient:v.patient,newPriority:"High",record:v};
+    }
+    case "resolve_visit": {
+      const v = _store.agentSummary.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Visit not found"};
+      v.status=args.resolution;
+      return {success:true,visitId:args.visitId,patient:v.patient,resolution:args.resolution,record:v};
+    }
+    case "mark_visit_complete": {
+      const v = _store.weeklyVisits.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Visit not found"};
+      v.status="Completed"; v.completedDate=args.completedDate||new Date().toISOString().slice(0,10);
+      return {success:true,visitId:args.visitId,patient:v.patient,completedDate:v.completedDate,record:v};
+    }
+    case "flag_visit_for_review": {
+      const v = _store.weeklyVisits.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Visit not found"};
+      v.flagged=true;
+      return {success:true,visitId:args.visitId,patient:v.patient,urgency:args.urgency||"Routine",record:v};
+    }
+    case "reassign_clinician": {
+      const ds=[..._store.agentSummary,..._store.weeklyVisits];
+      const v=ds.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Visit not found"};
+      v.clinician=args.newClinician;
+      return {success:true,visitId:args.visitId,patient:v.patient,newClinician:args.newClinician,record:v};
+    }
+    case "assign_clinician": {
+      const r=_store.schedulingRequests.find(r=>r.id===args.requestId);
+      if (!r) return {error:"Request not found"};
+      r.assignedClinician=args.clinician; r.status="Assigned";
+      if (args.confirmedDate) r.preferredDate=args.confirmedDate;
+      return {success:true,requestId:args.requestId,patient:r.patient,clinician:args.clinician,record:r};
+    }
+    case "reschedule_visit": {
+      const all=[..._store.agentSummary,..._store.weeklyVisits,..._store.schedulingRequests];
+      const v=all.find(r=>r.id===args.visitId);
+      if (!v) return {error:"Not found"};
+      v.scheduledDate=args.newDate; if (args.newTime) v.scheduledTime=args.newTime;
+      return {success:true,visitId:args.visitId,patient:v.patient,newDate:args.newDate,record:v};
+    }
+    case "rebook_visit": {
+      const r=_store.clientSchedule.find(r=>r.id===args.recordId);
+      if (!r) return {error:"Not found"};
+      r.rebookedDate=args.newDate; r.followUpRequired=false;
+      return {success:true,recordId:args.recordId,patient:r.patient,newDate:args.newDate,record:r};
+    }
+    case "log_outreach": {
+      const r=_store.clientSchedule.find(r=>r.id===args.recordId);
+      if (!r) return {error:"Not found"};
+      r.outreachLog.push({method:args.method,outcome:args.outcome,notes:args.notes,at:_ts()});
+      if (args.outcome==="Reached") r.followUpRequired=false;
+      return {success:true,recordId:args.recordId,patient:r.patient,outcome:args.outcome,record:r};
+    }
+    case "close_record": {
+      const r=_store.clientSchedule.find(r=>r.id===args.recordId);
+      if (!r) return {error:"Not found"};
+      r.status="Closed"; r.closeReason=args.reason; r.followUpRequired=false;
+      return {success:true,recordId:args.recordId,patient:r.patient,reason:args.reason,record:r};
+    }
+    default: return {error:"Unknown tool: "+name};
   }
+}
 
-  next.style.transition=tr;
-  next.getBoundingClientRect();
-  next.style.transform="translateX(0)";
+// ─── Design Tokens ────────────────────────────────────────────────────────────
+const BG="#07090f",SURF="#0e1118",BRD="rgba(255,255,255,.07)",TXT="#e2e8f0",MUT="#64748b",FAINT="#1e2535",ACC="#6366f1",ACCBG="rgba(99,102,241,.12)",ACCBR="rgba(99,102,241,.3)";
+const SP={Pending:{bg:"rgba(251,191,36,.1)",border:"rgba(251,191,36,.25)",text:"#fbbf24"},Late:{bg:"rgba(239,68,68,.1)",border:"rgba(239,68,68,.25)",text:"#f87171"},Incomplete:{bg:"rgba(249,115,22,.1)",border:"rgba(249,115,22,.25)",text:"#fb923c"},Completed:{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",text:"#34d399"},Missed:{bg:"rgba(239,68,68,.1)",border:"rgba(239,68,68,.25)",text:"#f87171"},Declined:{bg:"rgba(139,92,246,.1)",border:"rgba(139,92,246,.25)",text:"#a78bfa"},Rescheduled:{bg:"rgba(59,130,246,.1)",border:"rgba(59,130,246,.25)",text:"#60a5fa"},Reassigned:{bg:"rgba(6,182,212,.1)",border:"rgba(6,182,212,.25)",text:"#22d3ee"},High:{bg:"rgba(239,68,68,.1)",border:"rgba(239,68,68,.25)",text:"#f87171"},Medium:{bg:"rgba(251,191,36,.1)",border:"rgba(251,191,36,.25)",text:"#fbbf24"},Low:{bg:"rgba(100,116,139,.1)",border:"rgba(100,116,139,.25)",text:"#94a3b8"},Assigned:{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",text:"#34d399"},Unassigned:{bg:"rgba(251,191,36,.1)",border:"rgba(251,191,36,.25)",text:"#fbbf24"},Closed:{bg:"rgba(100,116,139,.1)",border:"rgba(100,116,139,.25)",text:"#94a3b8"}};
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+const clbl = c => ({id:"ID",visitType:"Type",scheduledDate:"Date",preferredDate:"Pref. Date",completedDate:"Completed",followUpRequired:"Follow-up",assignedClinician:"Assigned",requestDate:"Requested",scheduledTime:"Time",rebookedDate:"Rebooked",lastAttempt:"Last Contact"}[c]||(c.charAt(0).toUpperCase()+c.slice(1)));
+
+function badge(val) {
+  if (val===null||val===undefined||val==="") return `<span style="color:${MUT};font-size:11px">—</span>`;
+  const p=SP[String(val)]||{bg:"rgba(100,116,139,.1)",border:"rgba(100,116,139,.25)",text:"#94a3b8"};
+  return `<span class="badge" style="background:${p.bg};color:${p.text};border-color:${p.border}"><span class="badge-dot" style="background:${p.text}"></span>${val}</span>`;
+}
+
+function cell(col, val) {
+  if (val===null||val===undefined) return `<span style="color:${FAINT};font-size:11px">—</span>`;
+  const BADGE=new Set(["status","priority","requestType"]);
+  if (BADGE.has(col)) return badge(val);
+  if (col==="followUpRequired") return val?badge("Yes"):`<span style="color:${MUT};font-size:11px">No</span>`;
+  if (col==="attempts") return `<span style="font-family:monospace;font-weight:700;font-size:12px;color:${val===0?"#ef4444":"#94a3b8"}">${val}${val===0?" ⚠":""}</span>`;
+  if (col==="duration") return `<span style="color:${MUT};font-size:12px">${val}m</span>`;
+  const dim=new Set(["id","agency","insurance","phone","region","requestDate","scheduledTime","lastAttempt","completedDate","rebookedDate"]).has(col);
+  return `<span style="color:${dim?MUT:col==="patient"?TXT:"#cbd5e1"};font-size:12px;font-family:${col==="id"||col==="phone"?"monospace":"inherit"};white-space:nowrap">${String(val)}</span>`;
+}
+
+// ─── Report Configs ───────────────────────────────────────────────────────────
+const RC = {
+  agentSummary:{label:"Agent Summary",icon:"📋",tool:"get_agent_summary_report",cols:["id","patient","clinician","visitType","scheduledDate","scheduledTime","priority","status","attempts","lastAttempt","phone","notes"],filters:[{k:"priority",label:"Priority",opts:["High","Medium","Low"]},{k:"clinician",label:"Clinician",opts:CLINICIANS},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Assessment","Wound Care","Med Review","Infusion","Assessment","PT Session"]},{k:"attempts",label:"Attempts",opts:["0","1","2","3"]}]},
+  weeklyVisits:{label:"Weekly Summary",icon:"📅",tool:"get_agent_summary_weekly",cols:["id","patient","clinician","visitType","scheduledDate","completedDate","status","duration","region","agency"],filters:[{k:"status",label:"Status",opts:["Late","Incomplete","Completed"]},{k:"clinician",label:"Clinician",opts:CLINICIANS},{k:"region",label:"Region",opts:["North","South","East","West"]},{k:"agency",label:"Agency",opts:["CareFirst","HomeCare Plus","Wellness Home"]},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Session","Wound Care","Med Review","Assessment","Infusion"]}]},
+  schedulingRequests:{label:"Scheduling Requests",icon:"📨",tool:"get_scheduling_requests",cols:["id","patient","visitType","requestType","requestDate","preferredDate","preferredTime","diagnosis","insurance","priority","assignedClinician","status"],filters:[{k:"status",label:"Status",opts:["Unassigned","Assigned"]},{k:"priority",label:"Priority",opts:["High","Medium","Low"]},{k:"requestType",label:"Request Type",opts:["New Visit","Reschedule"]},{k:"insurance",label:"Insurance",opts:["Medicare","Medicaid","Blue Cross","Aetna"]},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Assessment","Wound Care","Infusion","Med Review","Assessment","PT Session"]},{k:"preferredTime",label:"Preferred Time",opts:["Morning","Afternoon","Evening","Any"]}]},
+  clientSchedule:{label:"Client Schedule",icon:"🔁",tool:"get_client_schedule_report",cols:["id","patient","clinician","visitType","scheduledDate","status","reason","followUpRequired","rebookedDate"],filters:[{k:"status",label:"Status",opts:["Missed","Declined","Rescheduled","Reassigned"]},{k:"followUpRequired",label:"Follow-Up",opts:["true","false"]},{k:"clinician",label:"Clinician",opts:CLINICIANS},{k:"visitType",label:"Visit Type",opts:["Home Health","Wound Care","PT Session","Assessment","Infusion","Med Review"]}]},
+};
+
+const DS_COLS={agentSummary:["id","patient","clinician","visitType","scheduledDate","priority","status","attempts"],weeklyVisits:["id","patient","clinician","visitType","scheduledDate","status","region"],schedulingRequests:["id","patient","requestDate","requestType","visitType","priority","status"],clientSchedule:["id","patient","clinician","visitType","scheduledDate","status","followUpRequired"]};
+
+// ─── buildAttGroups ───────────────────────────────────────────────────────────
+function buildAttGroups() {
+  const as=serverCall("get_agent_summary_report",{});
+  const wv=serverCall("get_agent_summary_weekly",{});
+  const sr=serverCall("get_scheduling_requests",{});
+  const cs=serverCall("get_client_schedule_report",{});
+  const criticalNoContact=as.records.filter(r=>r.priority==="High"&&r.attempts===0);
+  const unassignedHigh=sr.records.filter(r=>r.status==="Unassigned"&&r.priority==="High");
+  const escalationCandidates=as.records.filter(r=>r.priority==="High"&&r.attempts>=2);
+  const missedNoRebook=cs.records.filter(r=>r.status==="Missed"&&r.followUpRequired&&!r.rebookedDate);
+  const lateVisits=wv.records.filter(r=>r.status==="Late");
+  const declinedFollowUp=cs.records.filter(r=>r.status==="Declined"&&r.followUpRequired);
+  const incompleteVisits=wv.records.filter(r=>r.status==="Incomplete");
+  const rescheduleRequests=sr.records.filter(r=>r.requestType==="Reschedule"&&r.status==="Unassigned");
+  const mediumMultiAttempt=as.records.filter(r=>r.priority==="Medium"&&r.attempts>=2);
+  const unassignedMedium=sr.records.filter(r=>r.status==="Unassigned"&&r.priority==="Medium");
+  return [
+    criticalNoContact.length&&{label:`${criticalNoContact.length} high-priority visit${criticalNoContact.length>1?"s":""} with no contact yet`,color:"#f87171",nav:{dataset:"agentSummary",filterKey:"priority",filterVal:"High",tileFilter:"noContact"},rows:criticalNoContact},
+    unassignedHigh.length&&{label:`${unassignedHigh.length} unassigned high-priority request${unassignedHigh.length>1?"s":""}`,color:"#f87171",nav:{dataset:"schedulingRequests",filterKey:"status",filterVal:"Unassigned",tileFilter:"high"},rows:unassignedHigh},
+    escalationCandidates.length&&{label:`${escalationCandidates.length} visit${escalationCandidates.length>1?"s":""} ready to escalate`,color:"#fbbf24",nav:{dataset:"agentSummary",filterKey:"priority",filterVal:"High",tileFilter:"multiAttempt"},rows:escalationCandidates},
+    missedNoRebook.length&&{label:`${missedNoRebook.length} missed visit${missedNoRebook.length>1?"s":""} with no rebook scheduled`,color:"#c084fc",nav:{dataset:"clientSchedule",filterKey:"status",filterVal:"Missed",tileFilter:"noRebook"},rows:missedNoRebook},
+    lateVisits.length&&{label:`${lateVisits.length} late visit${lateVisits.length>1?"s":""} this week`,color:"#fb923c",nav:{dataset:"weeklyVisits",filterKey:"status",filterVal:"Late",tileFilter:"late"},rows:lateVisits},
+    declinedFollowUp.length&&{label:`${declinedFollowUp.length} declined visit${declinedFollowUp.length>1?"s":""} requiring re-engagement`,color:"#e879f9",nav:{dataset:"clientSchedule",filterKey:"status",filterVal:"Declined",tileFilter:"followUpPending"},rows:declinedFollowUp},
+    incompleteVisits.length&&{label:`${incompleteVisits.length} incomplete visit${incompleteVisits.length>1?"s":""} with no completion logged`,color:"#94a3b8",nav:{dataset:"weeklyVisits",filterKey:"status",filterVal:"Incomplete",tileFilter:"incomplete"},rows:incompleteVisits},
+    rescheduleRequests.length&&{label:`${rescheduleRequests.length} unassigned reschedule request${rescheduleRequests.length>1?"s":""}`,color:"#38bdf8",nav:{dataset:"schedulingRequests",filterKey:"requestType",filterVal:"Reschedule",tileFilter:"unassigned"},rows:rescheduleRequests},
+    mediumMultiAttempt.length&&{label:`${mediumMultiAttempt.length} medium-priority visit${mediumMultiAttempt.length>1?"s":""} stalled at 2+ attempts`,color:"#a3e635",nav:{dataset:"agentSummary",filterKey:"priority",filterVal:"Medium",tileFilter:"multiAttempt"},rows:mediumMultiAttempt},
+    unassignedMedium.length&&{label:`${unassignedMedium.length} medium-priority request${unassignedMedium.length>1?"s":""} awaiting assignment`,color:"#67e8f9",nav:{dataset:"schedulingRequests",filterKey:"status",filterVal:"Unassigned",tileFilter:"mediumReq"},rows:unassignedMedium},
+  ].filter(Boolean);
+}
+
+// ─── App State ────────────────────────────────────────────────────────────────
+const state = {
+  username: null,
+  thread: [],
+  busy: false,
+  activeDs: "dashboard",
+  filters: {},
+  search: "",
+  sortCol: null,
+  sortDir: "asc",
+  paneExpand: null,
+  modal: null,
+  summaryGroups: null,
+  sectionOpenState: {},  // key: section index, val: bool
+  colConfig: {},         // per-dataset: { cols:[...], hidden:Set }
+  colPanelOpen: false,
+  tileFilter: null,
+};
+
+function getColCfg(ds) {
+  if (!state.colConfig[ds]) state.colConfig[ds] = { cols:[...RC[ds].cols], hidden:new Set() };
+  return state.colConfig[ds];
+}
+function getActiveCols() {
+  const c = getColCfg(state.activeDs);
+  return c.cols.filter(col => !c.hidden.has(col));
+}
+
+// ─── Chat response processor (predefined only) ────────────────────────────────
+const CHIPS = [
+  "What needs attention today?",
+  "Show all pending visits",
+  "High priority pending visits",
+  "Late visits this week",
+  "All unassigned requests",
+  "Missed visits needing follow-up",
+  "Show incomplete visits",
+  "Show declined visits",
+  "Show visits for Dr. James Patel",
+  "Agent summary",
+  "Weekly summary",
+];
+
+const CHIP_ROUTING = {
+  "What needs attention today?": () => handleAttentionQuery(),
+  "Show all pending visits": () => handleReport("get_agent_summary_report", {}, "agentSummary", "Pending Visits"),
+  "High priority pending visits": () => handleReport("get_agent_summary_report", {priority:"High"}, "agentSummary", "High Priority Visits"),
+  "Late visits this week": () => handleReport("get_agent_summary_weekly", {status:"Late"}, "weeklyVisits", "Late Visits"),
+  "All unassigned requests": () => handleReport("get_scheduling_requests", {status:"Unassigned"}, "schedulingRequests", "Unassigned Requests"),
+  "Missed visits needing follow-up": () => handleReport("get_client_schedule_report", {status:"Missed",followUpRequired:true}, "clientSchedule", "Missed Visits — Follow-Up Required"),
+  "Show incomplete visits": () => handleReport("get_agent_summary_weekly", {status:"Incomplete"}, "weeklyVisits", "Incomplete Visits"),
+  "Show declined visits": () => handleReport("get_client_schedule_report", {status:"Declined"}, "clientSchedule", "Declined Visits"),
+  "Show visits for Dr. James Patel": () => handleReport("get_agent_summary_report", {clinician:"Patel"}, "agentSummary", "Visits — Dr. James Patel"),
+  "Agent summary": () => handleReport("get_agent_summary_report", {}, "agentSummary", "Agent Summary"),
+  "Weekly summary": () => handleReport("get_agent_summary_weekly", {}, "weeklyVisits", "Weekly Summary"),
+};
+
+function handleAttentionQuery() {
+  const as=_store.agentSummary, sr=_store.schedulingRequests, cs=_store.clientSchedule, wv=_store.weeklyVisits;
+  const criticalNoContact=as.filter(r=>r.priority==="High"&&r.attempts===0);
+  const escalationCandidates=as.filter(r=>r.priority==="High"&&r.attempts>=2);
+  const unassignedHigh=sr.filter(r=>r.status==="Unassigned"&&r.priority==="High");
+  const missedNoRebook=cs.filter(r=>r.status==="Missed"&&r.followUpRequired&&!r.rebookedDate);
+  const lateVisits=wv.filter(r=>r.status==="Late");
+  const sections=[];
+  if (criticalNoContact.length) sections.push({label:"🚨 High Priority — No Contact Yet",color:"#f87171",rows:criticalNoContact,dataset:"agentSummary",note:`${criticalNoContact.length} high-priority visit${criticalNoContact.length>1?"s":""} with zero outreach — contact today.`});
+  if (escalationCandidates.length) sections.push({label:"⚠️ Escalation Candidates",color:"#fbbf24",rows:escalationCandidates,dataset:"agentSummary",note:`${escalationCandidates.length} high-priority visit${escalationCandidates.length>1?"s":""} with 2+ failed attempts — consider escalating.`});
+  if (unassignedHigh.length) sections.push({label:"📨 Unassigned High-Priority Requests",color:"#f87171",rows:unassignedHigh,dataset:"schedulingRequests",note:`${unassignedHigh.length} urgent request${unassignedHigh.length>1?"s":""} waiting for clinician assignment.`});
+  if (missedNoRebook.length) sections.push({label:"🔁 Missed — No Rebook Scheduled",color:"#c084fc",rows:missedNoRebook,dataset:"clientSchedule",note:`${missedNoRebook.length} client${missedNoRebook.length>1?"s":""} missed their visit and have not been rebooked.`});
+  if (lateVisits.length) sections.push({label:"📅 Late Visits This Week",color:"#fb923c",rows:lateVisits,dataset:"weeklyVisits",note:`${lateVisits.length} visit${lateVisits.length>1?"s":""} are running late and may need follow-up.`});
+  const total=criticalNoContact.length+escalationCandidates.length+unassignedHigh.length+missedNoRebook.length+lateVisits.length;
+  const summaryLine=total===0?"Everything looks good — no urgent actions outstanding.":`${total} item${total>1?"s":""} across ${sections.length} categor${sections.length>1?"ies":"y"} need your attention today.`;
+  return {type:"attention",sections,summaryLine,intent:"Action Summary"};
+}
+
+function handleReport(tool, args, ds, intent) {
+  const result=serverCall(tool, args);
+  return {type:"table",dataset:ds,columns:RC[ds].cols,rows:result.records||[],summary:result.summary||null,intent};
+}
+
+function sendChip(text) {
+  if (state.busy) return;
+  state.busy=true;
+  addMsg({role:"user",text});
+  addMsg({role:"typing",id:"typing-msg"});
+  renderApp();
 
   setTimeout(()=>{
-    if(old&&old.parentNode) old.remove();
-    next.style.cssText="flex:1;display:flex;flex-direction:column;overflow:hidden;";
-    sliding=false;
-  }, SLIDE_DUR+30);
+    removeTyping();
+    const handler=CHIP_ROUTING[text];
+    let result;
+    if (handler) {
+      result=handler();
+    } else {
+      result={type:"raw",text:"I can only respond to the suggested messages. Please use one of the chips below."};
+    }
+    addMsg({role:"assistant",...result});
+    state.busy=false;
+    renderApp();
+    scrollThread();
+  }, 400);
 }
 
-function renderTabsFixed(){
-  const el=document.getElementById("rtabs-fixed");
-  if(!el)return;
-  const iconMap=Object.fromEntries(RPTS.map(r=>[r.id,r.icon]));
-  el.innerHTML=`<button class="rt" id="dbk">← Dashboard</button>`+Object.entries(DSC).map(([k,c])=>`<button class="rt${k===ads?" active":""}" data-ds="${k}"><span style="font-size:13px;line-height:1">${iconMap[k]||""}</span>${c.label}<span class="rtb">${_store[k].length}</span></button>`).join("");
-  document.getElementById("dbk").addEventListener("click",()=>{lastNavDs=null;renderDash();});
-  el.querySelectorAll(".rt[data-ds]").forEach(b=>b.addEventListener("click",()=>{
-    if(b.dataset.ds===ads||sliding)return;
-    const prevIdx=DS_ORDER.indexOf(ads),nextIdx=DS_ORDER.indexOf(b.dataset.ds);
-    const d=nextIdx>=prevIdx?"right":"left";
-    ads=b.dataset.ds;rf={};rs="";rsc=null;rsd="asc";rtp=null;rtk=null;lastNavDs=ads;
-    renderReport(d);
-  }));
+// ─── Thread management ────────────────────────────────────────────────────────
+let msgIdCounter=0;
+function addMsg(msg) { state.thread.push({...msg, _id: ++msgIdCounter}); }
+function removeTyping() { state.thread = state.thread.filter(m=>m.role!=="typing"); }
+function scrollThread() { setTimeout(()=>{ const e=document.getElementById("thread-end"); if(e) e.scrollIntoView({behavior:"smooth"}); },50); }
+
+// ─── Rendering ────────────────────────────────────────────────────────────────
+function renderApp() {
+  const app=document.getElementById("app");
+
+  // Welcome modal
+  if (!state.username) {
+    app.innerHTML=renderWelcome();
+    bindAll();
+    document.getElementById("name-input")?.focus();
+    return;
+  }
+
+  app.innerHTML=`
+    ${renderTopBar()}
+    <div style="flex:1;display:flex;overflow:hidden;position:relative;">
+      ${state.paneExpand!=="right" ? renderChatPane() : ""}
+      ${state.paneExpand!=="left" ? renderRightPane() : ""}
+    </div>
+    ${state.modal ? renderActionModal() : ""}
+    ${state.summaryGroups ? renderSummaryModal() : ""}
+  `;
+  bindAll();
+  scrollThread();
 }
 
-function renderReport(dir="right"){
-  slideTransition(next=>{
-    next.innerHTML=`<div id="stiles"></div><div id="fb"><div class="sw"><svg class="sico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input id="sinput" placeholder="Search…"/></div><div id="fsel"></div><span class="fcount" id="fcount"></span></div><div id="rtw"><table><thead id="rth"></thead><tbody id="rtb"></tbody></table></div>`;
-    // Tiles
-    const tilesEl=next.querySelector("#stiles");
-    const sum=DSC[ads].sumFn(_store[ads]);
-    tilesEl.innerHTML=Object.entries(sum).map(([k,s])=>`<button class="st${rtk===k?" active":""}" data-k="${k}" data-f="${s.f}" style="${!s.f?'cursor:default;opacity:.55':''}"><div class="tv">${s.v}</div><div class="tl">${s.l}</div>${rtk===k?'<div class="stb"></div>':''}</button>`).join("");
-    tilesEl.querySelectorAll(".st").forEach(b=>{if(b.dataset.f!=="true")return;b.addEventListener("click",()=>{const k=b.dataset.k,s=DSC[ads].sumFn(_store[ads])[k];if(rtk===k){rtp=null;rtk=null;}else{rtp=s.p;rtk=k;}rTiles(next);rTbl(next);});});
-    // Filters
-    const fsel=next.querySelector("#fsel");
-    fsel.innerHTML=DSC[ads].filters.map(f=>`<select class="fs" data-k="${f.k}"><option value="">All ${f.l}</option>${f.o.map(o=>`<option value="${o}"${rf[f.k]===o?" selected":""}>${o}</option>`).join("")}</select>`).join("");
-    fsel.querySelectorAll("select").forEach(s=>s.addEventListener("change",()=>{if(s.value)rf[s.dataset.k]=s.value;else delete rf[s.dataset.k];rTbl(next);}));
-    // Search
-    next.querySelector("#sinput").addEventListener("input",e=>{rs=e.target.value;rTbl(next);});
-    rTbl(next);
-  }, dir);
-  // Update tab active state without sliding
-  renderTabsFixed();
+function renderWelcome() {
+  return `
+  <div class="modal-backdrop" style="z-index:100;">
+    <div style="background:#0f1117;border:1px solid rgba(99,102,241,.3);border-radius:18px;padding:40px 36px;width:360px;max-width:92vw;box-shadow:0 24px 80px rgba(0,0,0,.6);animation:fadeIn .3s ease;">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:22px;box-shadow:0 8px 24px rgba(99,102,241,.3);">🏥</div>
+      <h2 style="font-size:22px;font-weight:800;color:#f1f5f9;letter-spacing:-.5px;margin:0 0 6px;">Welcome to EHR Scheduler</h2>
+      <p style="font-size:13px;color:#64748b;margin:0 0 28px;line-height:1.6;">What should we call you? Used only to personalize your greeting.</p>
+      <input id="name-input" placeholder="Enter your name…" style="width:100%;box-sizing:border-box;background:rgba(255,255,255,.05);border:1px solid rgba(99,102,241,.35);border-radius:10px;padding:12px 14px;color:#f1f5f9;font-size:14px;font-family:inherit;margin-bottom:16px;" />
+      <button id="start-btn" style="width:100%;padding:12px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;border-radius:10px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(99,102,241,.35);">Get started →</button>
+    </div>
+  </div>`;
 }
-function rTiles(scope){const el=(scope||document).querySelector("#stiles");if(!el)return;const sum=DSC[ads].sumFn(_store[ads]);el.innerHTML=Object.entries(sum).map(([k,s])=>`<button class="st${rtk===k?" active":""}" data-k="${k}" data-f="${s.f}" style="${!s.f?'cursor:default;opacity:.55':''}"><div class="tv">${s.v}</div><div class="tl">${s.l}</div>${rtk===k?'<div class="stb"></div>':''}</button>`).join("");el.querySelectorAll(".st").forEach(b=>{if(b.dataset.f!=="true")return;b.addEventListener("click",()=>{const k=b.dataset.k,s=DSC[ads].sumFn(_store[ads])[k];if(rtk===k){rtp=null;rtk=null;}else{rtp=s.p;rtk=k;}rTiles(scope);rTbl(scope);});});}
-function rTbl(scope){const root=scope||document;const cfg=DSC[ads];let rows=_store[ads];if(rtp)rows=rows.filter(rtp);cfg.filters.forEach(f=>{if(rf[f.k])rows=rows.filter(r=>f.p(r,rf[f.k]));});if(rs){const q=rs.toLowerCase();rows=rows.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));}rows=srt(rows,rsc,rsd);const fc=root.querySelector("#fcount");if(fc)fc.textContent=`${rows.length} records`;const th=root.querySelector("#rth");if(!th)return;th.innerHTML="<tr>"+cfg.cols.map(c=>`<th class="${c===rsc?"srt":""}" data-c="${c}">${fmtC(c)}${sico(c,rsc,rsd)}</th>`).join("")+"</tr>";th.querySelectorAll("th").forEach(h=>h.addEventListener("click",()=>{const c=h.dataset.c;if(rsc===c)rsd=rsd==="asc"?"desc":"asc";else{rsc=c;rsd="asc";}rTbl(scope);}));const tb=root.querySelector("#rtb");if(!tb)return;tb.innerHTML=rows.length===0?`<tr class="nor"><td colspan="${cfg.cols.length}">No records match</td></tr>`:rows.map(r=>"<tr>"+cfg.cols.map(c=>`<td>${bc(c,r[c])}</td>`).join("")+"</tr>").join("");}
-// Inline Table
-const IS={};
-function buildIT(rows,cols,sum,id){IS[id]={rows,cols,sc:null,sd:"asc",fk:null,fp:null};const sc=sum?Object.entries(sum).map(([k,s])=>`<button class="sc" data-id="${id}" data-k="${k}" data-f="${s.f}" style="${!s.f?'cursor:default;opacity:.5':''}"><span class="num">${s.v}</span><span>${s.l}</span></button>`).join(""):"";const th="<tr>"+cols.map(c=>`<th data-id="${id}" data-c="${c}">${fmtC(c)}${sico(c,null,"asc")}</th>`).join("")+"</tr>";const tb=rows.length===0?`<tr class="nor"><td colspan="${cols.length}">No records match</td></tr>`:rows.map(r=>"<tr>"+cols.map(c=>`<td>${bc(c,r[c])}</td>`).join("")+"</tr>").join("");return`<div class="itw" id="itw-${id}"><div class="ttb">${sc}<div class="tsp"></div><span class="rct" id="rc-${id}">${rows.length} / ${rows.length}</span></div><div class="tscr"><table><thead id="th-${id}">${th}</thead><tbody id="tb-${id}">${tb}</tbody></table></div></div>`;}
-function wireIT(id,ds){const st=IS[id];if(!st)return;document.querySelectorAll(`.sc[data-id="${id}"]`).forEach(b=>{if(b.dataset.f!=="true")return;b.addEventListener("click",()=>{const k=b.dataset.k,s=DSC[ds].sumFn(st.rows)[k];if(st.fk===k){st.fk=null;st.fp=null;}else{st.fk=k;st.fp=s?.p||null;}refIT(id,ds);});});wireITH(id,ds);}
-function wireITH(id,ds){const th=document.getElementById(`th-${id}`);if(!th)return;th.querySelectorAll("th").forEach(h=>{h.style.cursor="pointer";h.addEventListener("click",()=>{const st=IS[id],c=h.dataset.c;if(st.sc===c)st.sd=st.sd==="asc"?"desc":"asc";else{st.sc=c;st.sd="asc";}refIT(id,ds);});});}
-function refIT(id,ds){const st=IS[id];if(!st)return;let rows=st.fp?st.rows.filter(st.fp):st.rows;rows=srt(rows,st.sc,st.sd);document.querySelectorAll(`.sc[data-id="${id}"]`).forEach(b=>b.classList.toggle("active",b.dataset.k===st.fk));const rc=document.getElementById(`rc-${id}`);if(rc)rc.textContent=`${rows.length} / ${st.rows.length}`;const th=document.getElementById(`th-${id}`);if(th){th.innerHTML="<tr>"+st.cols.map(c=>`<th class="${c===st.sc?"srt":""}" data-id="${id}" data-c="${c}" style="cursor:pointer">${fmtC(c)}${sico(c,st.sc,st.sd)}</th>`).join("")+"</tr>";wireITH(id,ds);}const tb=document.getElementById(`tb-${id}`);if(!tb)return;tb.innerHTML=rows.length===0?`<tr class="nor"><td colspan="${st.cols.length}">No records match</td></tr>`:rows.map(r=>"<tr>"+st.cols.map(c=>`<td>${bc(c,r[c])}</td>`).join("")+"</tr>").join("");}
-// Chat
-let mid=0;
-const thEl=document.getElementById("thread"),esEl=document.getElementById("es"),qbEl=document.getElementById("qbar"),sbEl=document.getElementById("sb"),ciEl=document.getElementById("ci");
-function app(html){const d=document.createElement("div");d.innerHTML=html;thEl.appendChild(d.firstElementChild);thEl.scrollTop=thEl.scrollHeight;}
-function sendChip(chip){if(esEl.style.display!=="none"){esEl.style.display="none";qbEl.style.display="flex";}app(`<div class="msg mu"><div class="mub">${chip.label}</div></div>`);const tid=`typ${++mid}`;app(`<div class="msg mb" id="${tid}"><div class="bav">🤖</div><div class="bbd"><div class="tybub"><div class="tyd"></div><div class="tyd"></div><div class="tyd"></div><span class="tyl">fetching records…</span></div></div></div>`);setTimeout(()=>{document.getElementById(tid)?.remove();let rows=_store[chip.ds];if(chip.f)rows=rows.filter(chip.f);const tid2=`t${++mid}`;const cfg=DSC[chip.ds];const sum=cfg.sumFn(rows);IS[tid2]={rows,cols:cfg.cols,sc:null,sd:"asc",fk:null,fp:null};const tbl=buildIT(rows,cfg.cols,sum,tid2);app(`<div class="msg mb"><div class="bav">🤖</div><div class="bbd"><div class="ir"><div class="idot"></div><span class="it">${chip.intent}</span></div>${tbl}<div class="fu">${rows.length} record${rows.length!==1?"s":""} · Click headers to sort · Click stat tiles to filter</div></div></div>`);wireIT(tid2,chip.ds);},600);}
-const cgEl=document.getElementById("cg");
-CHIPS.forEach(c=>{const b=document.createElement("button");b.className="chip";b.textContent=c.label;b.addEventListener("click",()=>sendChip(c));cgEl.appendChild(b);});
-CHIPS.slice(0,5).forEach(c=>{const b=document.createElement("button");b.className="qchip";b.textContent=c.label;b.addEventListener("click",()=>sendChip(c));qbEl.appendChild(b);});
-function handleSend(){const t=ciEl.value.trim();if(!t)return;ciEl.value="";autoR();const tl=t.toLowerCase();const chip=CHIPS.find(c=>c.label.toLowerCase()===tl)||(tl.includes("patel")&&CHIPS.find(c=>c.label.includes("Patel")))||(tl.includes("high")&&CHIPS.find(c=>c.label.includes("High")))||(tl.includes("late")&&CHIPS.find(c=>c.label.includes("Late")))||(tl.includes("miss")&&CHIPS.find(c=>c.label.includes("Missed")))||(tl.includes("declin")&&CHIPS.find(c=>c.label.includes("declined")))||(tl.includes("incomplet")&&CHIPS.find(c=>c.label.includes("incomplete")))||(tl.includes("unassign")&&CHIPS.find(c=>c.label.includes("unassigned")))||(tl.includes("week")&&CHIPS.find(c=>c.label.includes("Weekly")))||(tl.includes("agent")&&CHIPS.find(c=>c.label==="Agent summary"))||CHIPS[0];sendChip({...chip,label:t});}
-function autoR(){ciEl.style.height="auto";ciEl.style.height=Math.min(ciEl.scrollHeight,100)+"px";}
-ciEl.addEventListener("input",()=>{sbEl.disabled=!ciEl.value.trim();autoR();});
-ciEl.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();handleSend();}});
-sbEl.addEventListener("click",handleSend);
-// Boot — no slide on first load, set directly
-(function(){
-  document.getElementById("rtabs-fixed").style.display="none";
+
+function renderTopBar() {
+  return `
+  <div style="background:${SURF};border-bottom:1px solid ${BRD};padding:0 16px;height:48px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:30;">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;">🏥</div>
+      <span style="font-weight:700;font-size:14px;color:${TXT};letter-spacing:-.4px;">EHR Scheduler</span>
+      <span style="font-size:10px;background:${ACCBG};color:${ACC};font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.5px;">MCP APP</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);border-radius:20px;padding:3px 10px;">
+      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 2s infinite;"></span>
+      <span style="font-size:11px;color:#10b981;font-weight:600;">mcp-app-prototype · live</span>
+    </div>
+  </div>`;
+}
+
+function renderChatPane() {
+  const isExpanded=state.paneExpand==="left";
+  return `
+  <div style="width:${isExpanded?"100%":"44%"};display:flex;flex-direction:column;border-right:${isExpanded?"none":"1px solid "+BRD};transition:width .25s;position:relative;overflow:hidden;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 10px;height:36px;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;">
+      <span style="font-size:10px;font-weight:700;color:${MUT};text-transform:uppercase;letter-spacing:.8px;">Chat</span>
+      <button id="expand-chat" class="btn-icon" title="${isExpanded?"Restore split":"Expand chat"}">
+        ${isExpanded?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/><polyline points="20 18 14 12 20 6"/></svg>`:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/><polyline points="4 18 10 12 4 6"/></svg>`}
+      </button>
+    </div>
+    <div id="thread" style="flex:1;overflow-y:auto;padding:16px 16px 0;">${renderThread()}</div>
+    ${state.thread.length>0?`
+    <div style="padding:6px 12px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;">
+      ${CHIPS.slice(0,4).map(c=>`<button class="chip-sm send-chip" data-chip="${c}">${c}</button>`).join("")}
+    </div>`:""}
+    <div style="padding:10px 12px 12px;border-top:1px solid ${BRD};background:rgba(14,17,24,.95);flex-shrink:0;">
+      <div style="background:rgba(255,255,255,.04);border:1px solid ${BRD};border-radius:12px;padding:10px 14px;text-align:center;">
+        <p style="font-size:12px;color:${MUT};margin:0;">Select a suggested message above to ask the assistant</p>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderThread() {
+  if (state.thread.length===0) {
+    return `
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:32px;">
+      <div style="width:52px;height:52px;background:linear-gradient(135deg,#4f46e5,#7c3aed);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 8px 32px rgba(99,102,241,.25);">🏥</div>
+      <div style="text-align:center;max-width:320px;">
+        <h2 style="font-size:17px;font-weight:800;color:${TXT};letter-spacing:-.4px;margin-bottom:6px;">EHR Scheduling Assistant</h2>
+        <p style="color:${MUT};font-size:12px;line-height:1.7;">Click any suggestion below to get started. Results render as live UI — click any row for actions.</p>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;">
+        ${CHIPS.map(c=>`<button class="chip send-chip" data-chip="${c}">${c}</button>`).join("")}
+      </div>
+    </div>
+    <div id="thread-end"></div>`;
+  }
+  return state.thread.map(msg=>renderMsg(msg)).join("")+`<div id="thread-end"></div>`;
+}
+
+function renderMsg(msg) {
+  if (msg.role==="user") return `
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px;animation:fadeUp .2s ease;">
+      <div style="background:linear-gradient(135deg,#4f46e5,#6d28d9);border-radius:14px 14px 3px 14px;padding:9px 14px;max-width:80%;box-shadow:0 4px 14px rgba(99,102,241,.2);">
+        <p style="font-size:13px;color:#fff;line-height:1.6;margin:0;">${esc(msg.text)}</p>
+      </div>
+    </div>`;
+
+  if (msg.role==="typing") return `
+    <div style="display:flex;gap:8px;margin-bottom:14px;align-items:flex-start;">
+      <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;">🤖</div>
+      <div style="background:rgba(255,255,255,.04);border:1px solid ${BRD};border-radius:3px 14px 14px 14px;padding:10px 14px;display:flex;gap:5px;align-items:center;">
+        ${[0,1,2].map(i=>`<span style="width:6px;height:6px;border-radius:50%;background:${ACC};display:inline-block;animation:blink 1.3s ${i*.22}s infinite;"></span>`).join("")}
+        <span style="font-size:11px;color:${MUT};margin-left:4px;font-family:monospace;">processing…</span>
+      </div>
+    </div>`;
+
+  if (msg.role==="assistant") {
+    let content="";
+    if (msg.intent) content+=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;"><span style="width:4px;height:4px;border-radius:50%;background:${ACC};display:inline-block;"></span><span style="font-size:10px;font-weight:700;color:${ACC};text-transform:uppercase;letter-spacing:.8px;">${esc(msg.intent)}</span></div>`;
+    if (msg.type==="attention") content+=renderActionSummary(msg);
+    if (msg.type==="table") content+=renderTableMsg(msg);
+    if (msg.type==="action-result") content+=renderActionResult(msg);
+    if (msg.type==="raw") content+=`<pre style="color:#94a3b8;font-size:11px;white-space:pre-wrap;background:rgba(255,255,255,.03);padding:10px;border-radius:8px;border:1px solid ${BRD};">${esc(msg.text)}</pre>`;
+    if (msg.followUp) content+=`<div style="font-size:11px;color:${MUT};margin-top:7px;padding-top:6px;border-top:1px solid rgba(255,255,255,.05);">${esc(msg.followUp)}</div>`;
+    return `
+    <div style="display:flex;gap:8px;margin-bottom:16px;align-items:flex-start;animation:fadeUp .2s ease;">
+      <div style="width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;margin-top:1px;">🤖</div>
+      <div style="flex:1;min-width:0;">${content}</div>
+    </div>`;
+  }
+  return "";
+}
+
+function renderActionSummary(msg) {
+  const sections=msg.sections||[];
+  let html=`<p style="font-size:12.5px;color:#cbd5e1;line-height:1.6;margin:0 0 10px;">${esc(msg.summaryLine)}</p>`;
+  if (sections.length>0) {
+    html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">`;
+    sections.forEach(sec=>{
+      html+=`<span style="display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#cbd5e1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:3px 10px;"><span style="width:6px;height:6px;border-radius:50%;background:${sec.color};display:inline-block;flex-shrink:0;"></span>${sec.rows.length} ${sec.label.replace(/^[^\w]*/,"")}</span>`;
+    });
+    html+=`</div>`;
+    sections.forEach((sec,si)=>{
+      const isOpen=state.sectionOpenState[msg._id+"-"+si]||false;
+      const cfg=DS_COLS[sec.dataset]||[];
+      html+=`
+      <div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden;margin-bottom:6px;">
+        <button class="section-toggle section-header" data-msgid="${msg._id}" data-si="${si}" style="border-bottom:${isOpen?"1px solid rgba(255,255,255,.07)":"none"};">
+          <span style="width:3px;align-self:stretch;border-radius:2px;background:${sec.color};flex-shrink:0;display:block;"></span>
+          <span style="flex:1;font-size:11.5px;font-weight:700;color:#e2e8f0;">${sec.label}</span>
+          <span style="font-size:10px;color:#64748b;background:rgba(255,255,255,.05);border-radius:10px;padding:1px 7px;font-family:monospace;font-weight:700;">${sec.rows.length}</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" style="transform:${isOpen?"rotate(180deg)":"rotate(0deg)"};transition:transform .18s;flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        ${isOpen?`
+        <div style="padding:5px 12px 8px;font-size:11px;color:#64748b;border-bottom:1px solid rgba(255,255,255,.05);">${sec.note}</div>
+        <div style="overflow-x:auto;max-height:220px;overflow-y:auto;">
+          <table>
+            <thead><tr>${cfg.map(c=>`<th>${clbl(c)}</th>`).join("")}</tr></thead>
+            <tbody>${sec.rows.map(row=>`<tr class="action-row" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${sec.dataset}">${cfg.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
+          </table>
+        </div>`:""}
+      </div>`;
+    });
+  }
+  return html;
+}
+
+function renderTableMsg(msg) {
+  const cols=msg.columns||RC[msg.dataset]?.cols||[];
+  const rows=msg.rows||[];
+  if (rows.length===0) return `<div style="padding:20px;text-align:center;color:${MUT};font-size:12px;background:rgba(255,255,255,.02);border:1px solid ${BRD};border-radius:10px;">No records found</div>`;
+  return `
+  <div style="border:1px solid ${BRD};border-radius:10px;overflow:hidden;">
+    ${msg.summary?renderSummaryCards(msg.summary):""}
+    <div style="overflow-x:auto;max-height:280px;">
+      <table>
+        <thead><tr>${cols.map(c=>`<th>${clbl(c)}</th>`).join("")}</tr></thead>
+        <tbody>${rows.map(row=>`<tr class="action-row" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${msg.dataset}">${cols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
+      </table>
+    </div>
+  </div>`;
+}
+
+function renderSummaryCards(summary) {
+  const entries=Object.entries(summary).filter(([k])=>k!=="total"&&typeof summary[k]==="number");
+  if (!entries.length) return "";
+  return `<div style="display:flex;gap:8px;padding:10px 12px;border-bottom:1px solid ${BRD};background:${SURF};overflow-x:auto;">${entries.map(([k,v])=>`<div style="display:flex;flex-direction:column;align-items:center;padding:6px 12px;background:rgba(255,255,255,.03);border:1px solid ${BRD};border-radius:8px;min-width:60px;flex-shrink:0;"><span style="font-size:16px;font-weight:800;color:${TXT}">${v}</span><span style="font-size:9px;color:${MUT};text-transform:uppercase;letter-spacing:.7px;margin-top:2px;">${clbl(k)}</span></div>`).join("")}</div>`;
+}
+
+function renderActionResult(msg) {
+  const r=msg.result||{};
+  const ok=!r.error;
+  const p=ok?{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",text:"#34d399"}:{bg:"rgba(239,68,68,.1)",border:"rgba(239,68,68,.25)",text:"#f87171"};
+  const rec=r.record||{};
+  const title=r.error||(msg.mode||"action").replace(/_/g," ")+" — done";
+  let html=`<div style="border-radius:10px;border:1px solid ${p.border};overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:${p.bg};">
+      <span style="font-size:15px;">${ok?"✓":"✗"}</span>
+      <span style="font-weight:700;font-size:13px;color:${p.text};">${esc(title)}</span>
+      ${rec.id?`<span style="font-size:11px;color:${p.text};opacity:.7;font-family:monospace;margin-left:auto;">${rec.id}</span>`:""}
+    </div>`;
+  const fields=["patient","clinician","visitType","scheduledDate","status","priority","attempts"].filter(k=>rec[k]!==undefined);
+  if (fields.length>0) {
+    html+=`<div style="display:grid;grid-template-columns:1fr 1fr;">`;
+    fields.forEach(k=>{
+      html+=`<div style="padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.03);display:flex;gap:8px;align-items:center;"><span style="font-size:10px;color:${MUT};text-transform:uppercase;letter-spacing:.7px;flex-shrink:0;width:72px;">${clbl(k)}</span>${cell(k,rec[k])}</div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`</div>`;
+  return html;
+}
+
+
+function renderRightPane() {
+  const isExpanded=state.paneExpand==="right";
+  return `
+  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:0 10px;height:36px;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;">
+      <button id="expand-right" class="btn-icon" title="${isExpanded?"Restore split":"Expand reports"}">
+        ${isExpanded?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/><polyline points="4 18 10 12 4 6"/></svg>`:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/><polyline points="20 18 14 12 20 6"/></svg>`}
+      </button>
+      <span style="font-size:10px;font-weight:700;color:${MUT};text-transform:uppercase;letter-spacing:.8px;">Reports</span>
+    </div>
+    ${state.activeDs==="dashboard"?renderDashboard():renderReportView()}
+    ${state.summaryGroups?renderSummaryModal():""}
+  </div>`;
+}
+
+function renderDashboard() {
   const now=new Date();
-  const h=now.getHours(),gr=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":h<21?"Good evening":"Good night";
-  const tzLong=now.toLocaleTimeString("en",{timeZoneName:"long"}).split(" ").slice(1).join(" ");
-  const ds=now.toLocaleDateString(undefined,{weekday:"long",month:"long",day:"numeric",year:"numeric"});
-  const ts=now.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit",hour12:true})+" · "+tzLong;
-  const rws=RPTS.map((r,i)=>{const st=r.stats(),ug=r.urgency(),uc=UC[ug];const sc=st.map(s=>`<div class="rst"><div class="v" style="color:${CM[s.c].t}">${s.v}</div><div class="l" style="color:${CM[s.c].t}">${s.l}</div></div>`).join("");return`<button class="rr" data-ds="${r.id}" style="animation-delay:${i*60}ms"><div class="ra" style="background:${uc}"></div><div class="ri">${r.icon}</div><div class="rn"><div class="lb">${r.label}<span style="width:5px;height:5px;border-radius:50%;background:${uc};display:inline-block;flex-shrink:0"></span></div><div class="dc">${r.desc}</div></div>${sc}<div class="raro">›</div></button>`;}).join("");
-  document.getElementById("rc").innerHTML=`<div style="flex:1;display:flex;flex-direction:column;overflow-y:auto;background:var(--bg)"><div class="dh"><div class="dd"><span style="font-weight:600">${ds}</span><span style="color:rgba(255,255,255,.12)">·</span><span>${ts}</span></div><div class="dg">${gr}, <span class="nm">Scheduler</span> 👋</div><p class="dsub">Select a report below to view and act on records.</p></div><div class="rs"><div class="sl">Available Reports</div><div class="rch"><div></div><div></div><div class="ch" style="padding-left:2px">Report</div><div class="ch" style="text-align:center;grid-column:span 3">Stats</div><div></div></div>${rws}</div></div>`;
-  document.querySelectorAll(".rr").forEach(b=>b.addEventListener("click",()=>navTo(b.dataset.ds)));
-})();
+  const ist=new Date(now.getTime()+5.5*60*60000+now.getTimezoneOffset()*60000);
+  const h=ist.getHours();
+  const greeting=h<5?"Good night":h<12?"Good morning":h<17?"Good afternoon":h<21?"Good evening":"Good night";
+  const dateStr=ist.toLocaleDateString("en-IN",{weekday:"long",month:"long",day:"numeric",year:"numeric",timeZone:"Asia/Kolkata"});
+  const timeStr=ist.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit",hour12:true,timeZone:"Asia/Kolkata"})+" IST";
+
+  const CAP=3;
+  const attGroups=buildAttGroups();
+  const visible=attGroups.slice(0,CAP);
+  const hiddenGroups=attGroups.slice(CAP);
+  const overflow=hiddenGroups.reduce((s,g)=>s+g.rows.length,0);
+
+  const totalAlerts=attGroups.reduce((s,g)=>s+g.rows.length,0);
+
+  // Report cards data
+  const as=serverCall("get_agent_summary_report",{});
+  const wv=serverCall("get_agent_summary_weekly",{});
+  const sr=serverCall("get_scheduling_requests",{});
+  const cs=serverCall("get_client_schedule_report",{});
+
+  const reportLinks=[
+    {id:"agentSummary",icon:"📋",label:"Agent Summary",desc:"Pending visits requiring follow-up, escalation, or scheduling action.",stats:[{label:"Pending",value:as.total,color:"#fbbf24"},{label:"High priority",value:as.records.filter(r=>r.priority==="High").length,color:"#f87171"},{label:"No contact",value:as.records.filter(r=>r.attempts===0).length,color:"#22d3ee"}],urgency:as.records.filter(r=>r.priority==="High").length>0?"high":as.total>0?"medium":"clear"},
+    {id:"weeklyVisits",icon:"📅",label:"Weekly Summary",desc:"All visits from the current week — completed, late, and incomplete.",stats:[{label:"Late",value:wv.summary?.late||0,color:"#f87171"},{label:"Incomplete",value:wv.summary?.incomplete||0,color:"#fbbf24"},{label:"Completed",value:wv.summary?.completed||0,color:"#34d399"}],urgency:(wv.summary?.late||0)>0?"high":(wv.summary?.incomplete||0)>0?"medium":"clear"},
+    {id:"schedulingRequests",icon:"📨",label:"Scheduling Requests",desc:"New visit requests and reschedules awaiting clinician assignment.",stats:[{label:"Unassigned",value:sr.records.filter(r=>r.status==="Unassigned").length,color:"#fbbf24"},{label:"High priority",value:sr.records.filter(r=>r.priority==="High").length,color:"#f87171"},{label:"Reschedules",value:sr.records.filter(r=>r.requestType==="Reschedule").length,color:"#60a5fa"}],urgency:sr.records.filter(r=>r.priority==="High").length>0?"high":sr.total>0?"medium":"clear"},
+    {id:"clientSchedule",icon:"🔁",label:"Client Schedule",desc:"Missed, declined, and rescheduled visits needing outreach or rebooking.",stats:[{label:"Follow-up req.",value:cs.summary?.followUpPending||0,color:"#a78bfa"},{label:"Missed",value:cs.summary?.missed||0,color:"#f87171"},{label:"Declined",value:cs.summary?.declined||0,color:"#fbbf24"}],urgency:(cs.summary?.followUpPending||0)>0?"high":"clear"},
+  ];
+  const urgColor={high:"#f87171",medium:"#fbbf24",clear:"#34d399"};
+
+  return `
+  <div style="flex:1;display:flex;flex-direction:column;overflow-y:auto;background:${BG};">
+
+    ${totalAlerts>0?`
+    <div class="urgency-banner">
+      <span style="font-size:11px;color:#fca5a5;font-weight:700;flex:1;display:flex;align-items:center;gap:6px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;flex-shrink:0;animation:pulse 2s infinite;"></span>
+        ${totalAlerts} item${totalAlerts>1?"s":""} need attention today
+      </span>
+      <button id="view-summary-btn" style="font-size:10px;font-weight:600;color:#f87171;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);border-radius:5px;padding:2px 8px;cursor:pointer;white-space:nowrap;">View summary ↗</button>
+    </div>`:""}
+
+    <div style="padding:28px 28px 24px;background:linear-gradient(160deg,rgba(99,102,241,.08) 0%,rgba(139,92,246,.04) 50%,transparent 100%);border-bottom:1px solid ${BRD};flex-shrink:0;">
+      <div style="font-size:11px;color:${MUT};letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
+        <span>${dateStr}</span><span style="opacity:.3">·</span><span>${timeStr}</span>
+      </div>
+      <div style="font-size:28px;font-weight:800;color:${TXT};letter-spacing:-.8px;line-height:1.1;">
+        ${greeting}, <span style="background:linear-gradient(90deg,#818cf8,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">${esc(state.username)}</span> 👋
+      </div>
+    </div>
+
+    ${attGroups.length>0?`
+    <div class="att-box">
+      <p style="margin:0 0 10px;font-size:12px;color:${MUT};line-height:1.5;"><span style="color:#f87171;font-weight:700;">A few things need your attention</span> — here's what stands out today:</p>
+      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;">
+        ${visible.map((g,i)=>`
+        <li style="display:flex;align-items:center;gap:10px;">
+          <span style="width:5px;height:5px;border-radius:50%;background:${g.color};flex-shrink:0;display:block;"></span>
+          <span style="font-size:12px;color:${TXT};line-height:1.4;flex:1;">
+            ${esc(g.label)} — <button class="nav-report-btn" data-dataset="${g.nav.dataset}" data-filterkey="${g.nav.filterKey||''}" data-filterval="${g.nav.filterVal||''}" data-tilefilter="${g.nav.tileFilter||''}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12px;color:${ACC};font-family:inherit;font-weight:600;text-decoration:underline;text-decoration-color:rgba(99,102,241,.4);text-underline-offset:3px;">view in report →</button>
+          </span>
+        </li>`).join("")}
+        ${overflow>0?`
+        <li style="display:flex;align-items:center;gap:10px;padding-top:2px;">
+          <span style="width:5px;height:5px;flex-shrink:0;display:block;"></span>
+          <button id="overflow-btn" data-groups='${JSON.stringify(hiddenGroups)}' style="background:none;border:none;padding:0;cursor:pointer;font-size:12px;color:${MUT};font-family:inherit;font-weight:600;text-decoration:underline;text-decoration-color:rgba(100,116,139,.3);text-underline-offset:3px;">+${overflow} more item${overflow>1?"s":""} →</button>
+        </li>`:""}
+      </ul>
+    </div>`:""}
+
+    <div style="padding:20px 28px 28px;">
+      <div style="font-size:10px;color:${MUT};text-transform:uppercase;letter-spacing:.9px;font-weight:700;margin-bottom:14px;">Reports</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        ${reportLinks.map(rpt=>`
+        <button class="report-card nav-ds-btn" data-ds="${rpt.id}" style="padding:0;">
+          <div style="height:3px;background:linear-gradient(90deg,${urgColor[rpt.urgency]},${urgColor[rpt.urgency]}88);"></div>
+          <div style="padding:14px 16px 16px;">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+              <span style="font-size:16px;">${rpt.icon}</span>
+              <span style="font-size:13px;font-weight:700;color:${TXT};flex:1;text-align:left;">${rpt.label}</span>
+              <span style="font-size:18px;color:${MUT};">›</span>
+            </div>
+            <p style="font-size:11px;color:${MUT};line-height:1.5;margin:0 0 12px;text-align:left;">${rpt.desc}</p>
+            <div style="display:flex;gap:12px;">
+              ${rpt.stats.map(s=>`<div style="display:flex;flex-direction:column;"><span style="font-size:18px;font-weight:800;color:${s.color};line-height:1;">${s.value}</span><span style="font-size:9px;color:${MUT};margin-top:2px;white-space:nowrap;">${s.label}</span></div>`).join("")}
+            </div>
+          </div>
+        </button>`).join("")}
+      </div>
+    </div>
+  </div>`;
+}
+
+
+// ─── Summary tile config (label, colour, row predicate) ──────────────────────
+const TILE_META = {
+  // agentSummary
+  pending:        { label:"Pending",        color:"#fbbf24", pred: r => r.status==="Pending" },
+  high:           { label:"High Priority",  color:"#f87171", pred: r => r.priority==="High" },
+  medium:         { label:"Medium Priority",color:"#fb923c", pred: r => r.priority==="Medium" },
+  low:            { label:"Low Priority",   color:"#34d399", pred: r => r.priority==="Low" },
+  noContact:      { label:"No Contact",     color:"#22d3ee", pred: r => Number(r.attempts)===0 },
+  multiAttempt:   { label:"2+ Attempts",    color:"#a78bfa", pred: r => Number(r.attempts)>=2 },
+  // weeklyVisits
+  late:           { label:"Late",           color:"#f87171", pred: r => r.status==="Late" },
+  incomplete:     { label:"Incomplete",     color:"#fb923c", pred: r => r.status==="Incomplete" },
+  completed:      { label:"Completed",      color:"#34d399", pred: r => r.status==="Completed" },
+  // schedulingRequests
+  unassigned:     { label:"Unassigned",     color:"#fbbf24", pred: r => r.status==="Unassigned" },
+  assigned:       { label:"Assigned",       color:"#34d399", pred: r => r.status==="Assigned" },
+  newVisit:       { label:"New Visits",     color:"#60a5fa", pred: r => r.requestType==="New Visit" },
+  reschedules:    { label:"Reschedules",    color:"#818cf8", pred: r => r.requestType==="Reschedule" },
+  mediumReq:      { label:"Medium Priority",color:"#fb923c", pred: r => r.priority==="Medium" },
+  lowReq:         { label:"Low Priority",   color:"#34d399", pred: r => r.priority==="Low" },
+  // clientSchedule
+  missed:         { label:"Missed",         color:"#f87171", pred: r => r.status==="Missed" },
+  declined:       { label:"Declined",       color:"#a78bfa", pred: r => r.status==="Declined" },
+  rescheduled:    { label:"Rescheduled",    color:"#60a5fa", pred: r => r.status==="Rescheduled" },
+  reassigned:     { label:"Reassigned",     color:"#22d3ee", pred: r => r.status==="Reassigned" },
+  followUpPending:{ label:"Follow-Up Req",  color:"#c084fc", pred: r => r.followUpRequired===true },
+  noRebook:       { label:"No Rebook",        color:"#f87171", pred: r => r.status==="Missed"&&r.followUpRequired&&!r.rebookedDate },
+};
+
+
+function renderColPanel() {
+  const cfg = getColCfg(state.activeDs);
+  const cols = cfg.cols;
+  return `<div id="col-panel" style="position:absolute;top:0;right:0;bottom:0;width:220px;background:#0c0f18;border-left:1px solid rgba(255,255,255,.07);z-index:40;display:flex;flex-direction:column;box-shadow:-6px 0 28px rgba(0,0,0,.5);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0;">
+      <span style="font-size:11px;font-weight:700;color:#e2e8f0;letter-spacing:.2px;">Columns</span>
+      <div style="display:flex;gap:5px;align-items:center;">
+        <button id="col-reset" title="Reset" style="font-size:10px;color:#64748b;background:none;border:none;cursor:pointer;font-family:inherit;padding:2px 5px;">Reset</button>
+        <button id="col-panel-close" style="font-size:18px;color:#64748b;background:none;border:none;cursor:pointer;line-height:1;padding:0 2px;">&#215;</button>
+      </div>
+    </div>
+    <p style="font-size:10px;color:#64748b;padding:7px 13px 3px;margin:0;line-height:1.5;flex-shrink:0;">Drag &#8597; to reorder &middot; toggle eye to show/hide</p>
+    <ul id="col-list" style="list-style:none;margin:0;padding:4px 0;overflow-y:auto;flex:1;">
+      ${cols.map((col,i) => {
+        const hidden = cfg.hidden.has(col);
+        return `<li class="col-item" draggable="true" data-col="${col}" data-idx="${i}"
+          style="display:flex;align-items:center;gap:7px;padding:7px 13px;cursor:grab;user-select:none;border-bottom:1px solid rgba(255,255,255,.03);"
+          onmouseenter="this.style.background='rgba(255,255,255,.04)'" onmouseleave="this.style.background='transparent'">
+          <svg width="11" height="14" viewBox="0 0 11 14" fill="#2d3f55" style="flex-shrink:0;">
+            <circle cx="3" cy="2.5" r="1.3"/><circle cx="8" cy="2.5" r="1.3"/>
+            <circle cx="3" cy="7" r="1.3"/><circle cx="8" cy="7" r="1.3"/>
+            <circle cx="3" cy="11.5" r="1.3"/><circle cx="8" cy="11.5" r="1.3"/>
+          </svg>
+          <span style="flex:1;font-size:11.5px;color:${hidden?'#64748b':'#e2e8f0'};font-weight:${hidden?400:500};">${clbl(col)}</span>
+          <button class="col-vis-btn" data-col="${col}" title="${hidden?'Show':'Hide'}"
+            style="background:none;border:none;cursor:pointer;padding:2px;display:flex;align-items:center;color:${hidden?'#1e3a5f':'#6366f1'};">
+            ${hidden
+              ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19M1 1l22 22"/></svg>`
+              : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+            }
+          </button>
+        </li>`;
+      }).join('')}
+    </ul>
+  </div>`;
+}
+
+function renderReportView() {
+  const cfg=RC[state.activeDs];
+  if (!cfg) return "";
+  const args={};
+  Object.entries(state.filters).forEach(([k,v])=>{ if(v) args[k]=v==="true"?true:v==="false"?false:v; });
+  const result=serverCall(cfg.tool, args);
+  let rows=result.records||[];
+  if (state.search) {
+    const q=state.search.toLowerCase();
+    rows=rows.filter(r=>Object.values(r).some(v=>String(v).toLowerCase().includes(q)));
+  }
+  if (state.sortCol) {
+    rows=[...rows].sort((a,b)=>{
+      const av=a[state.sortCol]??"", bv=b[state.sortCol]??"";
+      return state.sortDir==="asc"?(av>bv?1:av<bv?-1:0):(av<bv?1:av>bv?-1:0);
+    });
+  }
+
+  // Summary from tool result (before tile filter, so counts stay accurate)
+  const summary = result.summary || {};
+
+  // Apply active tile filter
+  const tileRows = state.tileFilter && TILE_META[state.tileFilter]
+    ? rows.filter(TILE_META[state.tileFilter].pred)
+    : rows;
+
+  const totalAlerts=_store.agentSummary.length+_store.weeklyVisits.filter(r=>r.status!=="Completed").length+_store.schedulingRequests.filter(r=>r.status==="Unassigned").length+_store.clientSchedule.filter(r=>r.followUpRequired).length;
+
+  return `
+  <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative;">
+    ${totalAlerts>0?`
+    <div class="urgency-banner">
+      <span style="font-size:11px;color:#fca5a5;font-weight:700;flex:1;display:flex;align-items:center;gap:6px;">
+        <span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;animation:pulse 2s infinite;"></span>
+        ${totalAlerts} items need attention today
+      </span>
+      <button id="view-summary-btn" style="font-size:10px;font-weight:600;color:#f87171;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);border-radius:5px;padding:2px 8px;cursor:pointer;white-space:nowrap;">View summary ↗</button>
+    </div>`:""}
+
+    <div style="display:flex;align-items:stretch;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;">
+      <button id="back-dashboard" style="display:flex;align-items:center;gap:6px;padding:0 14px;border:none;border-right:1px solid ${BRD};background:none;cursor:pointer;color:${MUT};font-size:11px;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap;" onmouseenter="this.style.color='${ACC}';this.style.background='${ACCBG}';" onmouseleave="this.style.color='${MUT}';this.style.background='none';">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg> Dashboard
+      </button>
+      ${Object.entries(RC).map(([id,c])=>`
+      <button class="nav-ds-btn" data-ds="${id}" style="flex:1;padding:10px 4px;border:none;background:none;cursor:pointer;font-size:11px;font-weight:600;color:${state.activeDs===id?"#a5b4fc":MUT};border-bottom:2px solid ${state.activeDs===id?ACC:"transparent"};transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:2px;font-family:inherit;">
+        <span style="font-size:14px;">${c.icon}</span>
+        <span style="white-space:nowrap;font-size:10px;">${c.label.split(" ")[0]}</span>
+      </button>`).join("")}
+    </div>
+
+    <div style="display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;overflow-x:auto;align-items:center;min-height:44px;">
+      ${cfg.filters.map(f=>`<select class="filter-select report-filter" data-key="${f.k}" style="flex-shrink:0;height:28px;">
+        <option value="">All ${f.label}</option>
+        ${f.opts.map(o=>`<option value="${o}" ${state.filters[f.k]===String(o)?"selected":""}>${o}</option>`).join("")}
+      </select>`).join("")}
+      <input id="report-search" type="text" placeholder="Search…" value="${esc(state.search)}" style="background:${FAINT};border:1px solid ${BRD};border-radius:6px;padding:0 8px;color:${TXT};font-size:11px;height:28px;min-width:110px;flex-shrink:0;">
+      <button id="clear-filters" style="font-size:10px;color:${MUT};background:none;border:none;cursor:pointer;white-space:nowrap;padding:0 6px;height:28px;font-family:inherit;flex-shrink:0;">Clear</button>
+      <span style="font-size:10px;color:${MUT};margin-left:auto;flex-shrink:0;">${tileRows.length} record${tileRows.length===1?"":"s"}</span>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:6px 12px;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;">
+      <span style="font-size:10px;color:${MUT};font-weight:600;text-transform:uppercase;letter-spacing:.6px;">${RC[state.activeDs]?.label||""}</span>
+      <button id="col-panel-btn" style="display:flex;align-items:center;gap:6px;height:30px;padding:0 12px;font-size:11px;font-weight:600;color:${state.colPanelOpen?ACC:"#e2e8f0"};background:${state.colPanelOpen?ACCBG:"rgba(255,255,255,.06)"};border:1px solid ${state.colPanelOpen?ACCBR:"rgba(255,255,255,.12)"};border-radius:7px;cursor:pointer;font-family:inherit;flex-shrink:0;transition:all .15s;" onmouseenter="if(!${state.colPanelOpen})this.style.background='rgba(99,102,241,.12)';this.style.borderColor='#6366f1';" onmouseleave="if(!${state.colPanelOpen})this.style.background='rgba(255,255,255,.06)';this.style.borderColor='rgba(255,255,255,.12)';">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
+        Customise Columns${(()=>{const h=state.colConfig[state.activeDs]?.hidden?.size||0;return h>0?" · "+h+" hidden":""})()}
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity:.5;"><polyline points="${state.colPanelOpen?"18 15 12 9 6 15":"6 9 12 15 18 9"}"/></svg>
+      </button>
+    </div>
+
+    ${(()=>{
+      const tileEntries=Object.entries(summary).filter(([k,v])=>k!=="total"&&typeof v==="number"&&TILE_META[k]);
+      if (!tileEntries.length) return "";
+      return `<div style="display:flex;gap:6px;padding:8px 12px;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;overflow-x:auto;align-items:stretch;">
+        ${tileEntries.map(([k,v])=>{
+          const m=TILE_META[k];
+          const active=state.tileFilter===k;
+          return `<button class="tile-btn" data-key="${k}"
+            style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:7px 14px 8px;border-radius:8px;cursor:pointer;font-family:inherit;flex-shrink:0;transition:all .15s;min-width:72px;border:1px solid ${active?m.color+"55":"rgba(255,255,255,.06)"};background:${active?m.color+"18":"rgba(255,255,255,.025)"};">
+            <span style="font-size:20px;font-weight:800;color:${active?m.color:"#e2e8f0"};font-family:monospace;line-height:1;">${v}</span>
+            <span style="font-size:9px;font-weight:600;color:${active?m.color:"#64748b"};text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">${m.label}</span>
+          </button>`;
+        }).join("")}
+        ${state.tileFilter?`<button id="tile-clear" style="font-size:10px;color:${MUT};background:none;border:1px solid ${BRD};border-radius:8px;padding:4px 10px;cursor:pointer;font-family:inherit;flex-shrink:0;align-self:center;">✕ Clear</button>`:""}
+      </div>`;
+    })()}
+    <div style="flex:1;overflow-y:auto;overflow-x:auto;">
+      ${(()=>{const activeCols=getActiveCols();return `<table>
+        <thead><tr>
+          ${activeCols.map(c=>`<th class="sort-th" data-col="${c}" style="color:${state.sortCol===c?ACC:MUT};">${clbl(c)}${state.sortCol===c?`<span style="margin-left:3px;">${state.sortDir==="asc"?"↑":"↓"}</span>`:""}</th>`).join("")}
+          <th style="width:70px;"></th>
+        </tr></thead>
+        <tbody>
+          ${tileRows.length===0?`<tr><td colspan="${activeCols.length+1}" style="padding:32px;text-align:center;color:${MUT};">No records match</td></tr>`:""}
+          ${tileRows.map(row=>`<tr class="action-row" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${state.activeDs}">
+            ${activeCols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}
+            <td><button class="row-act-btn" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${state.activeDs}" style="font-size:10px;font-weight:600;color:${ACC};background:${ACCBG};border:1px solid ${ACCBR};border-radius:6px;padding:3px 8px;cursor:pointer;font-family:inherit;">Act</button></td>
+          </tr>`).join("")}
+        </tbody>
+      </table>`;})()}
+    </div>
+    ${state.colPanelOpen ? renderColPanel() : ""}
+  </div>`;
+}
+
+// ─── Summary Modal ────────────────────────────────────────────────────────────
+function renderSummaryModal() {
+  const groups=state.summaryGroups||[];
+  const total=groups.reduce((s,g)=>s+g.rows.length,0);
+  return `
+  <div id="summary-modal-backdrop" class="modal-backdrop">
+    <div class="summary-modal-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 28px;border-bottom:1px solid ${BRD};flex-shrink:0;">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:${TXT};letter-spacing:-.3px;">Items needing attention</div>
+          <div style="font-size:12px;color:${MUT};margin-top:4px;">${total} item${total>1?"s":""} across ${groups.length} categor${groups.length>1?"ies":"y"}</div>
+        </div>
+        <button id="close-summary-modal" style="background:none;border:none;cursor:pointer;color:${MUT};font-size:22px;line-height:1;padding:4px 8px;font-family:inherit;">×</button>
+      </div>
+      <div style="padding:20px 28px 26px;overflow-y:auto;">
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:0;">
+          ${groups.map((g,i)=>`
+          <li style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:${i<groups.length-1?"1px solid rgba(255,255,255,.05)":"none"};">
+            <span style="width:6px;height:6px;border-radius:50%;background:${g.color};flex-shrink:0;display:block;"></span>
+            <span style="font-size:13px;color:${TXT};line-height:1.5;flex:1;">${esc(g.label)}</span>
+            <button class="summary-nav-btn" data-dataset="${g.nav.dataset}" data-filterkey="${g.nav.filterKey||''}" data-filterval="${g.nav.filterVal||''}" data-tilefilter="${g.nav.tileFilter||''}" style="background:${ACCBG};border:1px solid ${ACCBR};border-radius:7px;padding:5px 14px;cursor:pointer;font-size:11px;color:${ACC};font-family:inherit;font-weight:700;flex-shrink:0;white-space:nowrap;">View in report →</button>
+          </li>`).join("")}
+        </ul>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ─── Action Modal ─────────────────────────────────────────────────────────────
+function renderActionModal() {
+  const {record,dataset}=state.modal;
+  const ACTIONS={
+    agentSummary:[{label:"Log Contact",key:"log_contact_attempt",color:"#6366f1"},{label:"Send Reminder",key:"send_reminder",color:"#0891b2"},{label:"Escalate",key:"escalate_visit",color:"#ef4444"},{label:"Reassign",key:"reassign_clinician",color:"#8b5cf6"},{label:"Resolve",key:"resolve_visit",color:"#10b981"}],
+    weeklyVisits:[{label:"Mark Complete",key:"mark_visit_complete",color:"#10b981"},{label:"Flag for Review",key:"flag_visit_for_review",color:"#f59e0b"},{label:"Reassign",key:"reassign_clinician",color:"#6366f1"}],
+    schedulingRequests:[{label:"Assign Clinician",key:"assign_clinician",color:"#6366f1"},{label:"Reschedule",key:"reschedule_visit",color:"#0891b2"},{label:"Mark Late",key:"mark_visit_late",color:"#f59e0b"}],
+    clientSchedule:[{label:"Rebook",key:"rebook_visit",color:"#6366f1"},{label:"Log Outreach",key:"log_outreach",color:"#0891b2"},{label:"Close Record",key:"close_record",color:"#64748b"}],
+  };
+  const actions=ACTIONS[dataset]||[];
+  const selectedMode=state.actionMode||null;
+
+  const formHtml=renderActionForm(selectedMode, record, dataset);
+
+  return `
+  <div id="action-modal-backdrop" class="modal-backdrop">
+    <div class="modal-box">
+      <div style="padding:16px 20px;border-bottom:1px solid ${BRD};display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="font-size:11px;color:${MUT};text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;">Actions · <span style="font-family:monospace;color:${ACC};">${record.id}</span></div>
+          <div style="font-size:15px;font-weight:700;color:${TXT};">${esc(record.patient)}</div>
+        </div>
+        <button id="close-action-modal" style="background:none;border:none;color:${MUT};cursor:pointer;font-size:20px;line-height:1;">✕</button>
+      </div>
+      <div style="padding:16px 20px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px;margin-bottom:16px;padding:12px;background:${BG};border-radius:8px;border:1px solid ${BRD};">
+          ${[["Clinician",record.clinician],["Type",record.visitType||record.requestType],["Status",record.status,"badge"],["Priority",record.priority,"badge"],["Date",record.scheduledDate||record.preferredDate||"—"]].map(([k,v,t])=>`
+          <div style="display:flex;gap:8px;align-items:center;">
+            <span style="font-size:10px;color:${MUT};text-transform:uppercase;letter-spacing:.6px;width:60px;flex-shrink:0;">${k}</span>
+            ${t==="badge"?badge(v):`<span style="font-size:12px;color:#94a3b8;">${v||"—"}</span>`}
+          </div>`).join("")}
+        </div>
+        ${!selectedMode?`
+        <div style="display:flex;flex-wrap:wrap;gap:8px;">
+          ${actions.map(a=>`<button class="action-mode-btn" data-mode="${a.key}" style="padding:8px 14px;border-radius:8px;border:1px solid ${a.color}44;background:${a.color}14;color:${a.color};font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;">${a.label}</button>`).join("")}
+        </div>`:`
+        <div style="background:${BG};border-radius:10px;padding:14px;border:1px solid ${BRD};">
+          ${formHtml}
+          <div style="display:flex;gap:8px;margin-top:14px;">
+            <button id="action-back-btn" style="flex:1;padding:8px;border-radius:8px;border:1px solid ${BRD};background:none;color:${MUT};font-size:12px;cursor:pointer;font-family:inherit;">← Back</button>
+            <button id="action-commit-btn" data-mode="${selectedMode}" style="flex:2;padding:8px;border-radius:8px;border:none;background:${ACC};color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;">Confirm</button>
+          </div>
+        </div>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderActionForm(mode, record, dataset) {
+  if (!mode) return "";
+  const fld=(label,id,type="text",opts=null)=>`
+  <div class="action-form-field">
+    <label>${label}</label>
+    ${opts?`<select id="af-${id}"><option value="">— Select —</option>${opts.map(o=>`<option>${o}</option>`).join("")}</select>`:`<input type="${type}" id="af-${id}" placeholder="${label}…">`}
+  </div>`;
+  switch(mode){
+    case "log_contact_attempt": return fld("Method","method","text",["Phone","Text","Email","Portal"])+fld("Notes","notes");
+    case "send_reminder": return fld("Channel","channel","text",["SMS","Email","App Notification"])+fld("Message","message");
+    case "escalate_visit": return fld("Reason","reason");
+    case "resolve_visit": return fld("Resolution","resolution","text",["Completed","Cancelled","No Longer Needed"])+fld("Notes","notes");
+    case "reassign_clinician": return fld("New Clinician","newClinician","text",CLINICIANS)+fld("Reason","reason");
+    case "mark_visit_complete": return fld("Completed Date","completedDate","date")+fld("Notes","notes");
+    case "flag_visit_for_review": return fld("Urgency","urgency","text",["Routine","Urgent"])+fld("Reason","reason");
+    case "assign_clinician": return fld("Clinician","clinician","text",CLINICIANS)+fld("Confirmed Date","confirmedDate","date");
+    case "reschedule_visit": return fld("New Date","newDate","date")+fld("New Time","newTime","time")+fld("Reason","reason");
+    case "rebook_visit": return fld("New Date","newDate","date")+fld("New Time","newTime","time")+fld("Clinician","clinician","text",CLINICIANS);
+    case "log_outreach": return fld("Method","method","text",["Phone","Text","Email","Portal","In-Person"])+fld("Outcome","outcome","text",["Reached","No Answer","Left Voicemail","Wrong Number","Refused"])+fld("Notes","notes");
+    case "close_record": return fld("Reason","reason","text",["Resolved","Patient Discharged","Duplicate","Error","Other"]);
+    default: return fld("Notes","notes");
+  }
+}
+
+// ─── Bind events ──────────────────────────────────────────────────────────────
+function bindAll() {
+  // Welcome
+  const startBtn=document.getElementById("start-btn");
+  if (startBtn) {
+    const ni=document.getElementById("name-input");
+    const doStart=()=>{ const n=ni?.value?.trim(); if(n){state.username=n;renderApp();} };
+    startBtn.addEventListener("click",doStart);
+    ni?.addEventListener("keydown",e=>{ if(e.key==="Enter") doStart(); });
+  }
+
+  // Expand/collapse panes
+  document.getElementById("expand-chat")?.addEventListener("click",()=>{ state.paneExpand=state.paneExpand==="left"?null:"left"; renderApp(); });
+  document.getElementById("expand-right")?.addEventListener("click",()=>{ state.paneExpand=state.paneExpand==="right"?null:"right"; renderApp(); });
+
+  // Chips (initial + bar)
+  document.querySelectorAll(".send-chip").forEach(btn=>{
+    btn.addEventListener("click",()=>sendChip(btn.dataset.chip));
+  });
+
+  // Section toggles (attention summary in chat)
+  document.querySelectorAll(".section-toggle").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const key=btn.dataset.msgid+"-"+btn.dataset.si;
+      state.sectionOpenState[key]=!state.sectionOpenState[key];
+      renderApp();
+    });
+  });
+
+  // Action rows (open modal)
+  document.querySelectorAll(".action-row").forEach(tr=>{
+    tr.addEventListener("click",()=>{
+      try{state.modal={record:JSON.parse(tr.dataset.record),dataset:tr.dataset.dataset};state.actionMode=null;renderApp();}catch(e){}
+    });
+  });
+
+  // Row act buttons
+  document.querySelectorAll(".row-act-btn").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.stopPropagation();
+      try{state.modal={record:JSON.parse(btn.dataset.record),dataset:btn.dataset.dataset};state.actionMode=null;renderApp();}catch(e){}
+    });
+  });
+
+  // Nav to report
+  document.querySelectorAll(".nav-ds-btn, .report-card").forEach(btn=>{
+    btn.addEventListener("click",()=>{ state.activeDs=btn.dataset.ds||btn.closest("[data-ds]")?.dataset.ds; state.filters={}; state.search=""; state.sortCol=null; state.tileFilter=null; renderApp(); });
+  });
+
+  // Nav report from attention item
+  document.querySelectorAll(".nav-report-btn").forEach(btn=>{
+    btn.addEventListener("click", e=>{
+      e.stopPropagation();
+      const ds=btn.dataset.dataset;
+      const fk=btn.dataset.filterkey;
+      const fv=btn.dataset.filterval;
+      const tf=btn.dataset.tilefilter||"";
+      if (!ds) return;
+      state.activeDs=ds;
+      state.search="";
+      state.sortCol=null;
+      state.summaryGroups=null;
+      state.filters=fk?{[fk]:fv}:{};
+      state.tileFilter=tf||null;
+      renderApp();
+    });
+  });
+
+  // Overflow button
+  document.getElementById("overflow-btn")?.addEventListener("click",btn=>{
+    try{state.summaryGroups=JSON.parse(document.getElementById("overflow-btn").dataset.groups);renderApp();}catch(e){}
+  });
+
+  // View summary button (banner)
+  document.getElementById("view-summary-btn")?.addEventListener("click",()=>{
+    state.summaryGroups=buildAttGroups(); renderApp();
+  });
+
+  // Summary modal close
+  document.getElementById("close-summary-modal")?.addEventListener("click",()=>{ state.summaryGroups=null; renderApp(); });
+  document.getElementById("summary-modal-backdrop")?.addEventListener("click",e=>{ if(e.target===e.currentTarget){state.summaryGroups=null;renderApp();} });
+
+  // Summary modal nav buttons
+  document.querySelectorAll(".summary-nav-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const ds=btn.dataset.dataset;
+      const fk=btn.dataset.filterkey;
+      const fv=btn.dataset.filterval;
+      const tf=btn.dataset.tilefilter||"";
+      state.summaryGroups=null;
+      state.activeDs=ds;
+      state.search="";
+      state.sortCol=null;
+      state.filters=fk?{[fk]:fv}:{};
+      state.tileFilter=tf||null;
+      renderApp();
+    });
+  });
+
+  // Back to dashboard
+  document.getElementById("back-dashboard")?.addEventListener("click",()=>{ state.activeDs="dashboard"; state.filters={}; state.search=""; renderApp(); });
+
+  // Report filters
+  document.querySelectorAll(".report-filter").forEach(sel=>{
+    sel.addEventListener("change",()=>{ state.filters[sel.dataset.key]=sel.value; state.sortCol=null; renderApp(); });
+  });
+
+  // Search
+  document.getElementById("report-search")?.addEventListener("input",e=>{ state.search=e.target.value; renderApp(); });
+  document.getElementById("clear-filters")?.addEventListener("click",()=>{ state.filters={}; state.search=""; state.sortCol=null; state.tileFilter=null; renderApp(); });
+
+  // Tile filter buttons
+  document.querySelectorAll(".tile-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      state.tileFilter = state.tileFilter===btn.dataset.key ? null : btn.dataset.key;
+      renderApp();
+    });
+  });
+  document.getElementById("tile-clear")?.addEventListener("click",()=>{ state.tileFilter=null; renderApp(); });
+
+  // ── Column panel ───────────────────────────────────────────────────────────
+  document.getElementById("col-panel-btn")?.addEventListener("click",()=>{
+    state.colPanelOpen=!state.colPanelOpen; renderApp();
+  });
+
+  document.getElementById("col-panel-close")?.addEventListener("click",()=>{
+    state.colPanelOpen=false; renderApp();
+  });
+
+  document.getElementById("col-reset")?.addEventListener("click",()=>{
+    const ds=state.activeDs;
+    state.colConfig[ds]={cols:[...RC[ds].cols], hidden:new Set()};
+    renderApp();
+  });
+
+  // Toggle column visibility
+  document.querySelectorAll(".col-vis-btn").forEach(btn=>{
+    btn.addEventListener("click",e=>{
+      e.stopPropagation();
+      const col=btn.dataset.col;
+      const ds=state.activeDs;
+      const cfg=getColCfg(ds);
+      if (cfg.hidden.has(col)) cfg.hidden.delete(col);
+      else cfg.hidden.add(col);
+      renderApp();
+    });
+  });
+
+  // Drag-to-reorder column list
+  let dragSrcIdx=null;
+  document.querySelectorAll(".col-item").forEach(item=>{
+    item.addEventListener("dragstart",e=>{
+      dragSrcIdx=parseInt(item.dataset.idx);
+      e.dataTransfer.effectAllowed="move";
+      item.style.opacity="0.45";
+    });
+    item.addEventListener("dragend",e=>{
+      item.style.opacity="1";
+      document.querySelectorAll(".col-item").forEach(i=>i.style.borderTop="");
+    });
+    item.addEventListener("dragover",e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect="move";
+      document.querySelectorAll(".col-item").forEach(i=>i.style.borderTop="");
+      item.style.borderTop="2px solid #6366f1";
+    });
+    item.addEventListener("dragleave",()=>{
+      item.style.borderTop="";
+    });
+    item.addEventListener("drop",e=>{
+      e.preventDefault();
+      item.style.borderTop="";
+      const dropIdx=parseInt(item.dataset.idx);
+      if (dragSrcIdx===null || dragSrcIdx===dropIdx) return;
+      const ds=state.activeDs;
+      const cfg=getColCfg(ds);
+      const cols=[...cfg.cols];
+      const [moved]=cols.splice(dragSrcIdx,1);
+      cols.splice(dropIdx,0,moved);
+      cfg.cols=cols;
+      dragSrcIdx=null;
+      renderApp();
+    });
+  });
+
+  // Sort headers
+  document.querySelectorAll(".sort-th").forEach(th=>{
+    th.addEventListener("click",()=>{
+      if(state.sortCol===th.dataset.col) state.sortDir=state.sortDir==="asc"?"desc":"asc";
+      else{state.sortCol=th.dataset.col;state.sortDir="asc";}
+      renderApp();
+    });
+  });
+
+  // Action modal
+  document.getElementById("close-action-modal")?.addEventListener("click",()=>{ state.modal=null; state.actionMode=null; renderApp(); });
+  document.getElementById("action-modal-backdrop")?.addEventListener("click",e=>{ if(e.target===e.currentTarget){state.modal=null;state.actionMode=null;renderApp();} });
+
+  document.querySelectorAll(".action-mode-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{ state.actionMode=btn.dataset.mode; renderApp(); });
+  });
+
+  document.getElementById("action-back-btn")?.addEventListener("click",()=>{ state.actionMode=null; renderApp(); });
+
+  document.getElementById("action-commit-btn")?.addEventListener("click",()=>{
+    const mode=state.actionMode;
+    const {record,dataset}=state.modal;
+    const id=record.id;
+    const gv=fid=>document.getElementById("af-"+fid)?.value||undefined;
+    const args={};
+    if(mode==="log_contact_attempt"){args.visitId=id;const m=gv("method"),n=gv("notes");if(m)args.method=m;if(n)args.notes=n;}
+    else if(mode==="send_reminder"){args.visitId=id;const c=gv("channel"),msg=gv("message");if(c)args.channel=c;if(msg)args.message=msg;}
+    else if(mode==="escalate_visit"){args.visitId=id;const r=gv("reason");if(r)args.reason=r;}
+    else if(mode==="resolve_visit"){args.visitId=id;args.resolution=gv("resolution")||"Completed";const n=gv("notes");if(n)args.notes=n;}
+    else if(mode==="reassign_clinician"){args.visitId=id;args.newClinician=gv("newClinician")||"";const r=gv("reason");if(r)args.reason=r;}
+    else if(mode==="mark_visit_complete"){args.visitId=id;const d=gv("completedDate");if(d)args.completedDate=d;}
+    else if(mode==="flag_visit_for_review"){args.visitId=id;const u=gv("urgency"),r=gv("reason");if(u)args.urgency=u;if(r)args.reason=r;}
+    else if(mode==="assign_clinician"){args.requestId=id;args.clinician=gv("clinician")||"";const d=gv("confirmedDate");if(d)args.confirmedDate=d;}
+    else if(mode==="reschedule_visit"){args.visitId=id;args.newDate=gv("newDate")||"";const t=gv("newTime"),r=gv("reason");if(t)args.newTime=t;if(r)args.reason=r;}
+    else if(mode==="rebook_visit"){args.recordId=id;args.newDate=gv("newDate")||"";const t=gv("newTime"),c=gv("clinician");if(t)args.newTime=t;if(c)args.clinician=c;}
+    else if(mode==="log_outreach"){args.recordId=id;const m=gv("method"),o=gv("outcome"),n=gv("notes");if(m)args.method=m;if(o)args.outcome=o;if(n)args.notes=n;}
+    else if(mode==="close_record"){args.recordId=id;args.reason=gv("reason")||"Resolved";}
+
+    const result=serverCall(mode,args);
+    state.modal=null; state.actionMode=null;
+    addMsg({role:"assistant",intent:mode.replace(/_/g," "),type:"action-result",result,mode});
+    renderApp();
+    scrollThread();
+  });
+}
+
+function esc(s){ if(!s)return ""; return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+// ─── Boot ─────────────────────────────────────────────────────────────────────
+renderApp();
 </script>
 </body>
 </html>
