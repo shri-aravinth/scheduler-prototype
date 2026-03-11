@@ -448,7 +448,6 @@ function renderApp() {
       ${state.paneExpand!=="right" ? renderChatPane() : ""}
       ${state.paneExpand!=="left" ? renderRightPane() : ""}
     </div>
-    ${state.modal ? renderActionModal() : ""}
     ${state.summaryGroups ? renderSummaryModal() : ""}
   `;
   bindAll();
@@ -583,7 +582,7 @@ function renderActionSummary(msg) {
         <div style="overflow-x:auto;max-height:220px;overflow-y:auto;">
           <table>
             <thead><tr>${cfg.map(c=>`<th>${clbl(c)}</th>`).join("")}</tr></thead>
-            <tbody>${sec.rows.map(row=>`<tr class="action-row" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${sec.dataset}">${cfg.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
+            <tbody>${sec.rows.map(row=>`<tr>${cfg.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
           </table>
         </div>`:""}
       </div>`;
@@ -602,7 +601,7 @@ function renderTableMsg(msg) {
     <div style="overflow-x:auto;max-height:280px;">
       <table>
         <thead><tr>${cols.map(c=>`<th>${clbl(c)}</th>`).join("")}</tr></thead>
-        <tbody>${rows.map(row=>`<tr class="action-row" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${msg.dataset}">${cols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
+        <tbody>${rows.map(row=>`<tr>${cols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
       </table>
     </div>
   </div>`;
@@ -650,7 +649,6 @@ function renderRightPane() {
       <span style="font-size:10px;font-weight:700;color:${MUT};text-transform:uppercase;letter-spacing:.8px;">Reports</span>
     </div>
     ${state.activeDs==="dashboard"?renderDashboard():renderReportView()}
-    ${state.summaryGroups?renderSummaryModal():""}
   </div>`;
 }
 
@@ -904,13 +902,11 @@ function renderReportView() {
       ${(()=>{const activeCols=getActiveCols();return `<table>
         <thead><tr>
           ${activeCols.map(c=>`<th class="sort-th" data-col="${c}" style="color:${state.sortCol===c?ACC:MUT};">${clbl(c)}${state.sortCol===c?`<span style="margin-left:3px;">${state.sortDir==="asc"?"↑":"↓"}</span>`:""}</th>`).join("")}
-          <th style="width:70px;"></th>
         </tr></thead>
         <tbody>
           ${tileRows.length===0?`<tr><td colspan="${activeCols.length+1}" style="padding:32px;text-align:center;color:${MUT};">No records match</td></tr>`:""}
-          ${tileRows.map(row=>`<tr class="action-row" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${state.activeDs}">
+          ${tileRows.map(row=>`<tr>
             ${activeCols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}
-            <td><button class="row-act-btn" data-record='${JSON.stringify(row).replace(/'/g,"&#39;")}' data-dataset="${state.activeDs}" style="font-size:10px;font-weight:600;color:${ACC};background:${ACCBG};border:1px solid ${ACCBR};border-radius:6px;padding:3px 8px;cursor:pointer;font-family:inherit;">Act</button></td>
           </tr>`).join("")}
         </tbody>
       </table>`;})()}
@@ -1048,20 +1044,7 @@ function bindAll() {
     });
   });
 
-  // Action rows (open modal)
-  document.querySelectorAll(".action-row").forEach(tr=>{
-    tr.addEventListener("click",()=>{
-      try{state.modal={record:JSON.parse(tr.dataset.record),dataset:tr.dataset.dataset};state.actionMode=null;renderApp();}catch(e){}
-    });
-  });
 
-  // Row act buttons
-  document.querySelectorAll(".row-act-btn").forEach(btn=>{
-    btn.addEventListener("click",e=>{
-      e.stopPropagation();
-      try{state.modal={record:JSON.parse(btn.dataset.record),dataset:btn.dataset.dataset};state.actionMode=null;renderApp();}catch(e){}
-    });
-  });
 
   // Nav to report
   document.querySelectorAll(".nav-ds-btn, .report-card").forEach(btn=>{
@@ -1214,8 +1197,7 @@ function bindAll() {
   });
 
   // Action modal
-  document.getElementById("close-action-modal")?.addEventListener("click",()=>{ state.modal=null; state.actionMode=null; renderApp(); });
-  document.getElementById("action-modal-backdrop")?.addEventListener("click",e=>{ if(e.target===e.currentTarget){state.modal=null;state.actionMode=null;renderApp();} });
+
 
   document.querySelectorAll(".action-mode-btn").forEach(btn=>{
     btn.addEventListener("click",()=>{ state.actionMode=btn.dataset.mode; renderApp(); });
