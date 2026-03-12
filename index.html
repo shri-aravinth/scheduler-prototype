@@ -43,12 +43,84 @@ tbody tr:hover{background:rgba(255,255,255,.025);}
 .filter-select{background:#1e2535;border:1px solid rgba(255,255,255,.07);border-radius:6px;padding:4px 8px;color:#e2e8f0;font-size:11px;cursor:pointer;}
 .report-card{display:flex;flex-direction:column;background:#0e1118;border:1px solid rgba(255,255,255,.07);border-radius:12px;overflow:hidden;cursor:pointer;text-align:left;padding:0;transition:border-color .18s,box-shadow .18s,transform .18s;}
 .report-card:hover{border-color:rgba(99,102,241,.4);box-shadow:0 8px 24px rgba(0,0,0,.35);transform:translateY(-1px);}
-.att-box{margin:16px 28px 0;border-radius:10px;border:1px solid rgba(248,113,113,.18);background:rgba(248,113,113,.03);padding:14px 18px;}
-.urgency-banner{display:flex;align-items:center;gap:8px;padding:6px 14px;background:rgba(248,113,113,.08);border-bottom:1px solid rgba(248,113,113,.18);flex-shrink:0;}
 .section-header{width:100%;display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,255,255,.025);border:none;cursor:pointer;text-align:left;}
 .action-form-field{margin-bottom:12px;}
 .action-form-field label{font-size:11px;color:#64748b;display:block;margin-bottom:5px;text-transform:uppercase;letter-spacing:.7px;}
 .action-form-field input,.action-form-field select,.action-form-field textarea{width:100%;background:#1e2535;border:1px solid rgba(255,255,255,.07);border-radius:7px;padding:8px 10px;color:#e2e8f0;font-size:13px;font-family:inherit;}
+
+/* ── Animations & Transitions ─────────────────────────────────── */
+@keyframes fadeSlideUp {
+  from { opacity:0; transform:translateY(10px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+@keyframes slideInRight {
+  from { opacity:0; transform:translateX(18px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes modalIn {
+  from { opacity:0; transform:translateY(16px) scale(.97); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+@keyframes backdropIn {
+  from { opacity:0; }
+  to   { opacity:1; }
+}
+@keyframes rowIn {
+  from { opacity:0; transform:translateX(-6px); }
+  to   { opacity:1; transform:translateX(0); }
+}
+@keyframes tileIn {
+  from { opacity:0; transform:translateY(6px) scale(.98); }
+  to   { opacity:1; transform:translateY(0) scale(1); }
+}
+
+/* Chat message entrance */
+.chat-msg { animation: fadeSlideUp .22s ease both; }
+
+/* Dashboard attention items */
+
+/* Report cards */
+.report-card { animation: tileIn .2s ease both; transition: transform .15s, box-shadow .15s, border-color .15s !important; }
+.report-card:nth-child(1) { animation-delay:.04s; }
+.report-card:nth-child(2) { animation-delay:.08s; }
+.report-card:nth-child(3) { animation-delay:.12s; }
+.report-card:nth-child(4) { animation-delay:.16s; }
+.report-card:hover { transform:translateY(-2px)!important; box-shadow:0 6px 24px rgba(0,0,0,.35)!important; border-color:rgba(99,102,241,.4)!important; }
+
+/* Summary modal */
+.modal-backdrop { animation: backdropIn .18s ease both; }
+.summary-modal-box { animation: modalIn .22s cubic-bezier(.16,1,.3,1) both; }
+
+/* Action items in modal */
+.summary-modal-box > div > div { animation: fadeSlideUp .16s ease both; }
+
+/* Table rows */
+tbody tr { transition: background .1s; }
+tbody tr:hover { background: rgba(99,102,241,.06) !important; }
+
+/* Tile filter buttons */
+.tile-btn { transition: background .12s, border-color .12s, color .12s, transform .1s !important; }
+.tile-btn:hover { transform: translateY(-1px); }
+
+/* Sort headers */
+.sort-th { transition: color .12s !important; }
+
+/* Nav buttons */
+.nav-report-btn, .summary-nav-btn { transition: background .12s, border-color .12s, opacity .12s !important; }
+
+/* Section toggles in attention cards */
+.section-header { transition: background .12s !important; }
+
+/* Col panel slide-in */
+#col-panel { animation: slideInRight .18s ease both; }
+
+/* Urgency banner */
+
+/* Dashboard welcome section */
 </style>
 </head>
 <body>
@@ -59,77 +131,80 @@ tbody tr:hover{background:rgba(255,255,255,.025);}
 // ─── Store ────────────────────────────────────────────────────────────────────
 const _store = {
   agentSummary: [
-    { id:"V001", patient:"Margaret Collins",   clinician:"Dr. Sarah Okonkwo",  visitType:"Home Health",    scheduledDate:"2026-03-04", scheduledTime:"09:00", status:"Pending", priority:"High",   phone:"(555) 234-8901", notes:"Post-surgery follow-up",           attempts:2, lastAttempt:"2026-03-05 14:32" },
-    { id:"V002", patient:"Harold Nguyen",      clinician:"Dr. James Patel",    visitType:"PT Assessment",  scheduledDate:"2026-03-04", scheduledTime:"11:30", status:"Pending", priority:"Medium", phone:"(555) 876-3421", notes:"Initial evaluation",                attempts:0, lastAttempt:null },
-    { id:"V003", patient:"Dorothy Reyes",      clinician:"NP Kim Yardley",     visitType:"Wound Care",     scheduledDate:"2026-03-05", scheduledTime:"14:00", status:"Pending", priority:"High",   phone:"(555) 543-9087", notes:"Wound dressing change",             attempts:1, lastAttempt:"2026-03-05 10:15" },
-    { id:"V004", patient:"Bernard Shaw",       clinician:"Dr. Sarah Okonkwo",  visitType:"Med Review",     scheduledDate:"2026-03-05", scheduledTime:"10:00", status:"Pending", priority:"Low",    phone:"(555) 321-7654", notes:"Quarterly medication review",       attempts:0, lastAttempt:null },
-    { id:"V005", patient:"Constance Li",       clinician:"RN Marco DiSalvo",   visitType:"Infusion",       scheduledDate:"2026-03-06", scheduledTime:"08:00", status:"Pending", priority:"High",   phone:"(555) 789-0123", notes:"IV antibiotic therapy",             attempts:3, lastAttempt:"2026-03-06 07:45" },
-    { id:"V006", patient:"Franklin Torres",    clinician:"Dr. James Patel",    visitType:"Home Health",    scheduledDate:"2026-03-06", scheduledTime:"13:30", status:"Pending", priority:"Medium", phone:"(555) 654-3210", notes:"Vital signs monitoring",            attempts:1, lastAttempt:"2026-03-05 16:00" },
-    { id:"V007", patient:"Gertrude Walsh",     clinician:"PT Rebecca Moss",    visitType:"PT Assessment",  scheduledDate:"2026-03-07", scheduledTime:"09:30", status:"Pending", priority:"High",   phone:"(555) 112-3344", notes:"Post-hip replacement mobility eval", attempts:0, lastAttempt:null },
-    { id:"V008", patient:"Howard Kim",         clinician:"NP Kim Yardley",     visitType:"Home Health",    scheduledDate:"2026-03-07", scheduledTime:"11:00", status:"Pending", priority:"Medium", phone:"(555) 223-4455", notes:"Diabetic foot care follow-up",      attempts:2, lastAttempt:"2026-03-07 09:00" },
-    { id:"V009", patient:"Iris Patel",         clinician:"RN Marco DiSalvo",   visitType:"Wound Care",     scheduledDate:"2026-03-07", scheduledTime:"15:30", status:"Pending", priority:"High",   phone:"(555) 334-5566", notes:"Stage 3 pressure ulcer management", attempts:1, lastAttempt:"2026-03-06 17:00" },
-    { id:"V010", patient:"Jerome Banks",       clinician:"Dr. Sarah Okonkwo",  visitType:"Med Review",     scheduledDate:"2026-03-08", scheduledTime:"10:00", status:"Pending", priority:"Low",    phone:"(555) 445-6677", notes:"Blood pressure monitoring",         attempts:0, lastAttempt:null },
-    { id:"V011", patient:"Karen Olsen",        clinician:"Dr. James Patel",    visitType:"Infusion",       scheduledDate:"2026-03-08", scheduledTime:"08:30", status:"Pending", priority:"High",   phone:"(555) 556-7788", notes:"Vancomycin IV — day 5 of 10",       attempts:0, lastAttempt:null },
-    { id:"V012", patient:"Leonard Cruz",       clinician:"PT Rebecca Moss",    visitType:"PT Session",     scheduledDate:"2026-03-08", scheduledTime:"13:00", status:"Pending", priority:"Medium", phone:"(555) 667-8899", notes:"Stroke rehab — gait training",      attempts:1, lastAttempt:"2026-03-07 14:00" },
-    { id:"V013", patient:"Miriam Santos",      clinician:"NP Kim Yardley",     visitType:"Home Health",    scheduledDate:"2026-03-09", scheduledTime:"09:00", status:"Pending", priority:"High",   phone:"(555) 778-9900", notes:"CHF exacerbation monitoring",       attempts:3, lastAttempt:"2026-03-08 16:30" },
-    { id:"V014", patient:"Nelson Adeyemi",     clinician:"RN Marco DiSalvo",   visitType:"Wound Care",     scheduledDate:"2026-03-09", scheduledTime:"14:00", status:"Pending", priority:"Medium", phone:"(555) 889-0011", notes:"Post-op abdominal wound check",     attempts:0, lastAttempt:null },
-    { id:"V015", patient:"Olivia Fernandez",   clinician:"Dr. Sarah Okonkwo",  visitType:"Assessment",     scheduledDate:"2026-03-09", scheduledTime:"11:30", status:"Pending", priority:"Low",    phone:"(555) 990-1122", notes:"Fall risk re-assessment",           attempts:0, lastAttempt:null },
-    { id:"V016", patient:"Percy Goldstein",    clinician:"Dr. James Patel",    visitType:"Med Review",     scheduledDate:"2026-03-10", scheduledTime:"10:30", status:"Pending", priority:"High",   phone:"(555) 101-2233", notes:"Warfarin dose adjustment needed",   attempts:2, lastAttempt:"2026-03-09 11:00" },
-    { id:"V017", patient:"Queenie Abara",      clinician:"PT Rebecca Moss",    visitType:"PT Assessment",  scheduledDate:"2026-03-10", scheduledTime:"08:00", status:"Pending", priority:"Medium", phone:"(555) 202-3344", notes:"Knee replacement — week 2 eval",    attempts:0, lastAttempt:null },
+    { visitNumber:"VN-10041", visitDate:"2026-03-12", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-501", clientName:"Margaret Collins",  branch:"B01", branchName:"North Metro",    reqEval:"N", serviceCode:"HC-01", discipline:"RN",  visitType:"Home Health",   visitZip:"30301", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-8821", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10042", visitDate:"2026-03-12", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-502", clientName:"Harold Nguyen",     branch:"B02", branchName:"South Metro",    reqEval:"Y", serviceCode:"PT-01", discipline:"PT",  visitType:"PT Assessment", visitZip:"30302", visitStatus:"Pending",    prodPoints:1.5, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid MCO",    team:"Team Beta",  mrn:"MRN-8822", branchCode:"SM02", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-10043", visitDate:"2026-03-12", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-503", clientName:"Dorothy Reyes",     branch:"B01", branchName:"North Metro",    reqEval:"N", serviceCode:"WC-01", discipline:"LPN", visitType:"Wound Care",    visitZip:"30303", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-8823", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10044", visitDate:"2026-03-12", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-504", clientName:"Bernard Shaw",      branch:"B03", branchName:"East District",  reqEval:"N", serviceCode:"MR-01", discipline:"RN",  visitType:"Med Review",    visitZip:"30304", visitStatus:"Pending",    prodPoints:0.5, active:"Y", payorType:"Private",   payorSource:"Blue Cross",      team:"Team Alpha", mrn:"MRN-8824", branchCode:"ED03", primaryPayor:"Blue Cross" },
+    { visitNumber:"VN-10045", visitDate:"2026-03-12", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-505", clientName:"Constance Li",      branch:"B02", branchName:"South Metro",    reqEval:"N", serviceCode:"IF-01", discipline:"RN",  visitType:"Infusion",      visitZip:"30305", visitStatus:"Pending",    prodPoints:2.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part B", team:"Team Beta",  mrn:"MRN-8825", branchCode:"SM02", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10046", visitDate:"2026-03-12", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-506", clientName:"Franklin Torres",   branch:"B04", branchName:"West Division",  reqEval:"N", serviceCode:"HC-01", discipline:"RN",  visitType:"Home Health",   visitZip:"30306", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid FFS",    team:"Team Gamma", mrn:"MRN-8826", branchCode:"WD04", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-10047", visitDate:"2026-03-12", agentName:"Rebecca Moss",    agentId:"AG-205", clientId:"CL-507", clientName:"Gertrude Walsh",    branch:"B01", branchName:"North Metro",    reqEval:"Y", serviceCode:"PT-01", discipline:"PT",  visitType:"PT Assessment", visitZip:"30307", visitStatus:"Pending",    prodPoints:1.5, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-8827", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10048", visitDate:"2026-03-12", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-508", clientName:"Howard Kim",        branch:"B03", branchName:"East District",  reqEval:"N", serviceCode:"HC-01", discipline:"LPN", visitType:"Home Health",   visitZip:"30308", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Private",   payorSource:"Aetna",           team:"Team Beta",  mrn:"MRN-8828", branchCode:"ED03", primaryPayor:"Aetna" },
+    { visitNumber:"VN-10049", visitDate:"2026-03-12", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-509", clientName:"Iris Patel",        branch:"B02", branchName:"South Metro",    reqEval:"N", serviceCode:"WC-01", discipline:"RN",  visitType:"Wound Care",    visitZip:"30309", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Beta",  mrn:"MRN-8829", branchCode:"SM02", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10050", visitDate:"2026-03-12", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-510", clientName:"Jerome Banks",      branch:"B04", branchName:"West Division",  reqEval:"N", serviceCode:"MR-01", discipline:"RN",  visitType:"Med Review",    visitZip:"30310", visitStatus:"Pending",    prodPoints:0.5, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid MCO",    team:"Team Gamma", mrn:"MRN-8830", branchCode:"WD04", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-10051", visitDate:"2026-03-12", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-511", clientName:"Karen Olsen",       branch:"B01", branchName:"North Metro",    reqEval:"N", serviceCode:"IF-01", discipline:"RN",  visitType:"Infusion",      visitZip:"30311", visitStatus:"Pending",    prodPoints:2.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part B", team:"Team Alpha", mrn:"MRN-8831", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10052", visitDate:"2026-03-12", agentName:"Rebecca Moss",    agentId:"AG-205", clientId:"CL-512", clientName:"Leonard Cruz",      branch:"B03", branchName:"East District",  reqEval:"N", serviceCode:"PT-02", discipline:"PT",  visitType:"PT Session",    visitZip:"30312", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid FFS",    team:"Team Beta",  mrn:"MRN-8832", branchCode:"ED03", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-10053", visitDate:"2026-03-12", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-513", clientName:"Miriam Santos",     branch:"B02", branchName:"South Metro",    reqEval:"N", serviceCode:"HC-01", discipline:"LPN", visitType:"Home Health",   visitZip:"30313", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Beta",  mrn:"MRN-8833", branchCode:"SM02", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10054", visitDate:"2026-03-12", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-514", clientName:"Nelson Adeyemi",    branch:"B04", branchName:"West Division",  reqEval:"N", serviceCode:"WC-01", discipline:"RN",  visitType:"Wound Care",    visitZip:"30314", visitStatus:"Pending",    prodPoints:1.0, active:"Y", payorType:"Private",   payorSource:"Aetna",           team:"Team Gamma", mrn:"MRN-8834", branchCode:"WD04", primaryPayor:"Aetna" },
+    { visitNumber:"VN-10055", visitDate:"2026-03-12", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-515", clientName:"Olivia Fernandez",  branch:"B01", branchName:"North Metro",    reqEval:"Y", serviceCode:"AS-01", discipline:"RN",  visitType:"Assessment",    visitZip:"30315", visitStatus:"Pending",    prodPoints:1.5, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-8835", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10056", visitDate:"2026-03-12", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-516", clientName:"Percy Goldstein",   branch:"B03", branchName:"East District",  reqEval:"N", serviceCode:"MR-01", discipline:"RN",  visitType:"Med Review",    visitZip:"30316", visitStatus:"Pending",    prodPoints:0.5, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid MCO",    team:"Team Beta",  mrn:"MRN-8836", branchCode:"ED03", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-10057", visitDate:"2026-03-12", agentName:"Rebecca Moss",    agentId:"AG-205", clientId:"CL-517", clientName:"Queenie Abara",     branch:"B02", branchName:"South Metro",    reqEval:"Y", serviceCode:"PT-01", discipline:"PT",  visitType:"PT Assessment", visitZip:"30317", visitStatus:"Pending",    prodPoints:1.5, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part B", team:"Team Gamma", mrn:"MRN-8837", branchCode:"SM02", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10058", visitDate:"2026-03-12", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-518", clientName:"Raymond Okafor",    branch:"B04", branchName:"West Division",  reqEval:"N", serviceCode:"HC-01", discipline:"RN",  visitType:"Home Health",   visitZip:"30318", visitStatus:"Checked Out",    prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-8838", branchCode:"WD04", primaryPayor:"Medicare" },
+    { visitNumber:"VN-10059", visitDate:"2026-03-12", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-519", clientName:"Sylvia Nakamura",   branch:"B01", branchName:"North Metro",    reqEval:"N", serviceCode:"IF-01", discipline:"LPN", visitType:"Infusion",      visitZip:"30319", visitStatus:"Checked Out",    prodPoints:2.0, active:"Y", payorType:"Private",   payorSource:"Blue Cross",      team:"Team Beta",  mrn:"MRN-8839", branchCode:"NM01", primaryPayor:"Blue Cross" },
+    { visitNumber:"VN-10060", visitDate:"2026-03-12", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-520", clientName:"Timothy Brooks",    branch:"B02", branchName:"South Metro",    reqEval:"N", serviceCode:"WC-01", discipline:"RN",  visitType:"Wound Care",    visitZip:"30320", visitStatus:"Checked Out",    prodPoints:1.0, active:"N", payorType:"Medicaid",  payorSource:"Medicaid FFS",    team:"Team Gamma", mrn:"MRN-8840", branchCode:"SM02", primaryPayor:"Medicaid" },
   ],
   weeklyVisits: [
-    { id:"W001", patient:"Alice Brennan",      clinician:"NP Kim Yardley",    visitType:"Home Health",  scheduledDate:"2026-03-03", completedDate:null,         status:"Late",       duration:60,  region:"North", agency:"CareFirst" },
-    { id:"W002", patient:"Robert Chu",         clinician:"Dr. Sarah Okonkwo", visitType:"PT Session",   scheduledDate:"2026-03-03", completedDate:"2026-03-03", status:"Completed",  duration:45,  region:"South", agency:"HomeCare Plus" },
-    { id:"W003", patient:"Susan Park",         clinician:"RN Marco DiSalvo",  visitType:"Wound Care",   scheduledDate:"2026-03-04", completedDate:null,         status:"Incomplete", duration:30,  region:"East",  agency:"CareFirst" },
-    { id:"W004", patient:"Thomas Green",       clinician:"Dr. James Patel",   visitType:"Med Review",   scheduledDate:"2026-03-04", completedDate:"2026-03-04", status:"Completed",  duration:20,  region:"West",  agency:"Wellness Home" },
-    { id:"W005", patient:"Nancy Wright",       clinician:"NP Kim Yardley",    visitType:"Assessment",   scheduledDate:"2026-03-04", completedDate:null,         status:"Late",       duration:90,  region:"North", agency:"HomeCare Plus" },
-    { id:"W006", patient:"Charles Moore",      clinician:"Dr. Sarah Okonkwo", visitType:"Infusion",     scheduledDate:"2026-03-04", completedDate:"2026-03-04", status:"Completed",  duration:120, region:"South", agency:"CareFirst" },
-    { id:"W007", patient:"Linda Harris",       clinician:"RN Marco DiSalvo",  visitType:"Home Health",  scheduledDate:"2026-03-05", completedDate:null,         status:"Incomplete", duration:60,  region:"East",  agency:"Wellness Home" },
-    { id:"W008", patient:"Mark Davis",         clinician:"Dr. James Patel",   visitType:"PT Session",   scheduledDate:"2026-03-05", completedDate:"2026-03-05", status:"Completed",  duration:45,  region:"West",  agency:"CareFirst" },
-    { id:"W009", patient:"Patricia Wilson",    clinician:"NP Kim Yardley",    visitType:"Wound Care",   scheduledDate:"2026-03-05", completedDate:null,         status:"Late",       duration:30,  region:"North", agency:"HomeCare Plus" },
-    { id:"W010", patient:"James Taylor",       clinician:"Dr. Sarah Okonkwo", visitType:"Med Review",   scheduledDate:"2026-03-05", completedDate:"2026-03-05", status:"Completed",  duration:25,  region:"South", agency:"Wellness Home" },
-    { id:"W011", patient:"Barbara Evans",      clinician:"PT Rebecca Moss",   visitType:"PT Session",   scheduledDate:"2026-03-06", completedDate:"2026-03-06", status:"Completed",  duration:50,  region:"East",  agency:"CareFirst" },
-    { id:"W012", patient:"Steven Adams",       clinician:"RN Marco DiSalvo",  visitType:"Infusion",     scheduledDate:"2026-03-06", completedDate:null,         status:"Incomplete", duration:90,  region:"West",  agency:"HomeCare Plus" },
-    { id:"W013", patient:"Donna Mitchell",     clinician:"Dr. James Patel",   visitType:"Home Health",  scheduledDate:"2026-03-06", completedDate:"2026-03-06", status:"Completed",  duration:55,  region:"North", agency:"Wellness Home" },
-    { id:"W014", patient:"Kevin Robinson",     clinician:"NP Kim Yardley",    visitType:"Assessment",   scheduledDate:"2026-03-07", completedDate:null,         status:"Late",       duration:40,  region:"South", agency:"CareFirst" },
-    { id:"W015", patient:"Michelle Carter",    clinician:"Dr. Sarah Okonkwo", visitType:"Wound Care",   scheduledDate:"2026-03-07", completedDate:"2026-03-07", status:"Completed",  duration:35,  region:"East",  agency:"HomeCare Plus" },
-    { id:"W016", patient:"Anthony Phillips",   clinician:"PT Rebecca Moss",   visitType:"PT Session",   scheduledDate:"2026-03-07", completedDate:null,         status:"Incomplete", duration:60,  region:"West",  agency:"Wellness Home" },
-    { id:"W017", patient:"Sharon Campbell",    clinician:"RN Marco DiSalvo",  visitType:"Med Review",   scheduledDate:"2026-03-08", completedDate:"2026-03-08", status:"Completed",  duration:20,  region:"North", agency:"CareFirst" },
-    { id:"W018", patient:"Donald Parker",      clinician:"Dr. James Patel",   visitType:"Home Health",  scheduledDate:"2026-03-08", completedDate:null,         status:"Late",       duration:70,  region:"South", agency:"HomeCare Plus" },
-    { id:"W019", patient:"Carol Edwards",      clinician:"NP Kim Yardley",    visitType:"Infusion",     scheduledDate:"2026-03-08", completedDate:"2026-03-08", status:"Completed",  duration:100, region:"East",  agency:"Wellness Home" },
-    { id:"W020", patient:"Jason Collins",      clinician:"Dr. Sarah Okonkwo", visitType:"Assessment",   scheduledDate:"2026-03-09", completedDate:"2026-03-09", status:"Completed",  duration:45,  region:"West",  agency:"CareFirst" },
+    { visitNumber:"VN-9801", visitDate:"2026-03-08", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-401", clientName:"Alice Brennan",     branch:"B01", branchName:"North Metro",   reqEval:"N", serviceCode:"HC-01", discipline:"LPN", visitType:"Home Health",   visitZip:"30201", visitStatus:"Late",     prodPoints:0.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-7701", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9802", visitDate:"2026-03-08", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-402", clientName:"Robert Chu",        branch:"B02", branchName:"South Metro",   reqEval:"N", serviceCode:"PT-02", discipline:"PT",  visitType:"PT Session",    visitZip:"30202", visitStatus:"Almost Complete",  prodPoints:1.0, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid MCO",    team:"Team Beta",  mrn:"MRN-7702", branchCode:"SM02", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-9803", visitDate:"2026-03-08", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-403", clientName:"Susan Park",        branch:"B03", branchName:"East District", reqEval:"N", serviceCode:"WC-01", discipline:"RN",  visitType:"Wound Care",    visitZip:"30203", visitStatus:"Incomplete", prodPoints:0.5, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-7703", branchCode:"ED03", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9804", visitDate:"2026-03-08", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-404", clientName:"Thomas Green",      branch:"B04", branchName:"West Division", reqEval:"N", serviceCode:"MR-01", discipline:"RN",  visitType:"Med Review",    visitZip:"30204", visitStatus:"Paused",  prodPoints:0.5, active:"Y", payorType:"Private",   payorSource:"Aetna",           team:"Team Gamma", mrn:"MRN-7704", branchCode:"WD04", primaryPayor:"Aetna" },
+    { visitNumber:"VN-9805", visitDate:"2026-03-09", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-405", clientName:"Nancy Wright",      branch:"B01", branchName:"North Metro",   reqEval:"Y", serviceCode:"AS-01", discipline:"LPN", visitType:"Assessment",    visitZip:"30205", visitStatus:"Late",     prodPoints:0.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part B", team:"Team Alpha", mrn:"MRN-7705", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9806", visitDate:"2026-03-09", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-406", clientName:"Charles Moore",     branch:"B02", branchName:"South Metro",   reqEval:"N", serviceCode:"IF-01", discipline:"RN",  visitType:"Infusion",      visitZip:"30206", visitStatus:"Almost Complete",  prodPoints:2.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Beta",  mrn:"MRN-7706", branchCode:"SM02", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9807", visitDate:"2026-03-09", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-407", clientName:"Linda Harris",      branch:"B03", branchName:"East District", reqEval:"N", serviceCode:"HC-01", discipline:"RN",  visitType:"Home Health",   visitZip:"30207", visitStatus:"Incomplete", prodPoints:0.5, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid FFS",    team:"Team Alpha", mrn:"MRN-7707", branchCode:"ED03", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-9808", visitDate:"2026-03-09", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-408", clientName:"Mark Davis",        branch:"B04", branchName:"West Division", reqEval:"N", serviceCode:"PT-02", discipline:"PT",  visitType:"PT Session",    visitZip:"30208", visitStatus:"Paused",  prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Gamma", mrn:"MRN-7708", branchCode:"WD04", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9809", visitDate:"2026-03-10", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-409", clientName:"Patricia Wilson",   branch:"B01", branchName:"North Metro",   reqEval:"N", serviceCode:"WC-01", discipline:"LPN", visitType:"Wound Care",    visitZip:"30209", visitStatus:"Late",     prodPoints:0.0, active:"Y", payorType:"Private",   payorSource:"Blue Cross",      team:"Team Beta",  mrn:"MRN-7709", branchCode:"NM01", primaryPayor:"Blue Cross" },
+    { visitNumber:"VN-9810", visitDate:"2026-03-10", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-410", clientName:"James Taylor",      branch:"B02", branchName:"South Metro",   reqEval:"N", serviceCode:"MR-01", discipline:"RN",  visitType:"Med Review",    visitZip:"30210", visitStatus:"Almost Complete",  prodPoints:0.5, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid MCO",    team:"Team Alpha", mrn:"MRN-7710", branchCode:"SM02", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-9811", visitDate:"2026-03-10", agentName:"Rebecca Moss",    agentId:"AG-205", clientId:"CL-411", clientName:"Barbara Evans",     branch:"B03", branchName:"East District", reqEval:"N", serviceCode:"PT-02", discipline:"PT",  visitType:"PT Session",    visitZip:"30211", visitStatus:"Incomplete",  prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Beta",  mrn:"MRN-7711", branchCode:"ED03", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9812", visitDate:"2026-03-10", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-412", clientName:"Steven Adams",      branch:"B04", branchName:"West Division", reqEval:"N", serviceCode:"IF-01", discipline:"RN",  visitType:"Infusion",      visitZip:"30212", visitStatus:"Paused", prodPoints:0.5, active:"N", payorType:"Medicare",  payorSource:"Medicare Part B", team:"Team Gamma", mrn:"MRN-7712", branchCode:"WD04", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9813", visitDate:"2026-03-11", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-413", clientName:"Donna Mitchell",    branch:"B01", branchName:"North Metro",   reqEval:"N", serviceCode:"HC-01", discipline:"RN",  visitType:"Home Health",   visitZip:"30213", visitStatus:"Late",  prodPoints:1.0, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid FFS",    team:"Team Alpha", mrn:"MRN-7713", branchCode:"NM01", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-9814", visitDate:"2026-03-11", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-414", clientName:"Kevin Robinson",    branch:"B02", branchName:"South Metro",   reqEval:"Y", serviceCode:"AS-01", discipline:"LPN", visitType:"Assessment",    visitZip:"30214", visitStatus:"Almost Complete",     prodPoints:0.0, active:"Y", payorType:"Private",   payorSource:"Aetna",           team:"Team Beta",  mrn:"MRN-7714", branchCode:"SM02", primaryPayor:"Aetna" },
+    { visitNumber:"VN-9815", visitDate:"2026-03-11", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-415", clientName:"Michelle Carter",   branch:"B03", branchName:"East District", reqEval:"N", serviceCode:"WC-01", discipline:"RN",  visitType:"Wound Care",    visitZip:"30215", visitStatus:"Incomplete",  prodPoints:1.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Alpha", mrn:"MRN-7715", branchCode:"ED03", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9816", visitDate:"2026-03-11", agentName:"Rebecca Moss",    agentId:"AG-205", clientId:"CL-416", clientName:"Anthony Phillips",  branch:"B04", branchName:"West Division", reqEval:"N", serviceCode:"PT-02", discipline:"PT",  visitType:"PT Session",    visitZip:"30216", visitStatus:"Almost Complete", prodPoints:0.5, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid MCO",    team:"Team Gamma", mrn:"MRN-7716", branchCode:"WD04", primaryPayor:"Medicaid" },
+    { visitNumber:"VN-9817", visitDate:"2026-03-12", agentName:"Marco DiSalvo",   agentId:"AG-204", clientId:"CL-417", clientName:"Sharon Campbell",   branch:"B01", branchName:"North Metro",   reqEval:"N", serviceCode:"MR-01", discipline:"RN",  visitType:"Med Review",    visitZip:"30217", visitStatus:"Late",  prodPoints:0.5, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part B", team:"Team Beta",  mrn:"MRN-7717", branchCode:"NM01", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9818", visitDate:"2026-03-12", agentName:"James Patel",      agentId:"AG-202", clientId:"CL-418", clientName:"Donald Parker",     branch:"B02", branchName:"South Metro",   reqEval:"N", serviceCode:"HC-01", discipline:"RN",  visitType:"Home Health",   visitZip:"30218", visitStatus:"Incomplete",     prodPoints:0.0, active:"Y", payorType:"Private",   payorSource:"Blue Cross",      team:"Team Alpha", mrn:"MRN-7718", branchCode:"SM02", primaryPayor:"Blue Cross" },
+    { visitNumber:"VN-9819", visitDate:"2026-03-12", agentName:"Kim Yardley",      agentId:"AG-203", clientId:"CL-419", clientName:"Carol Edwards",     branch:"B03", branchName:"East District", reqEval:"N", serviceCode:"IF-01", discipline:"LPN", visitType:"Infusion",      visitZip:"30219", visitStatus:"Paused",  prodPoints:2.0, active:"Y", payorType:"Medicare",  payorSource:"Medicare Part A", team:"Team Beta",  mrn:"MRN-7719", branchCode:"ED03", primaryPayor:"Medicare" },
+    { visitNumber:"VN-9820", visitDate:"2026-03-12", agentName:"Sarah Okonkwo",   agentId:"AG-201", clientId:"CL-420", clientName:"Jason Collins",     branch:"B04", branchName:"West Division", reqEval:"N", serviceCode:"AS-01", discipline:"RN",  visitType:"Assessment",    visitZip:"30220", visitStatus:"Almost Complete",  prodPoints:1.0, active:"Y", payorType:"Medicaid",  payorSource:"Medicaid MCO",    team:"Team Gamma", mrn:"MRN-7720", branchCode:"WD04", primaryPayor:"Medicaid" },
   ],
   schedulingRequests: [
-    { id:"SR001", patient:"Evelyn Martinez",   requestDate:"2026-03-04", requestType:"New Visit",  preferredDate:"2026-03-08", preferredTime:"Morning",   visitType:"Home Health",    diagnosis:"CHF",               insurance:"Medicare",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Patient recently discharged",          phone:"(555) 111-2233" },
-    { id:"SR002", patient:"George Anderson",   requestDate:"2026-03-04", requestType:"Reschedule", preferredDate:"2026-03-09", preferredTime:"Afternoon", visitType:"PT Assessment",  diagnosis:"Hip Fracture",      insurance:"Medicaid",    priority:"Medium", assignedClinician:null,              status:"Unassigned", notes:"Transport issues",                      phone:"(555) 444-5566" },
-    { id:"SR003", patient:"Helen Thompson",    requestDate:"2026-03-05", requestType:"New Visit",  preferredDate:"2026-03-07", preferredTime:"Any",       visitType:"Wound Care",     diagnosis:"Diabetic Ulcer",    insurance:"Blue Cross",  priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Urgent wound assessment needed",        phone:"(555) 777-8899" },
-    { id:"SR004", patient:"Ivan Jackson",      requestDate:"2026-03-05", requestType:"New Visit",  preferredDate:"2026-03-10", preferredTime:"Morning",   visitType:"Infusion",       diagnosis:"Osteomyelitis",     insurance:"Medicare",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"PICC line placed, day 1",              phone:"(555) 000-1122" },
-    { id:"SR005", patient:"Julia White",       requestDate:"2026-03-06", requestType:"Reschedule", preferredDate:"2026-03-11", preferredTime:"Evening",   visitType:"Med Review",     diagnosis:"Hypertension",      insurance:"Aetna",       priority:"Low",    assignedClinician:null,              status:"Unassigned", notes:"Work schedule conflict",                phone:"(555) 333-4455" },
-    { id:"SR006", patient:"Raymond Okafor",    requestDate:"2026-03-06", requestType:"New Visit",  preferredDate:"2026-03-09", preferredTime:"Morning",   visitType:"Home Health",    diagnosis:"COPD exacerbation", insurance:"Medicare",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"O2 sats 88% at discharge",             phone:"(555) 123-6789" },
-    { id:"SR007", patient:"Sylvia Nakamura",   requestDate:"2026-03-06", requestType:"New Visit",  preferredDate:"2026-03-10", preferredTime:"Any",       visitType:"PT Session",     diagnosis:"Lumbar Surgery",    insurance:"Blue Cross",  priority:"Medium", assignedClinician:"PT Rebecca Moss", status:"Assigned",   notes:"Post-laminectomy rehab",               phone:"(555) 234-7890" },
-    { id:"SR008", patient:"Timothy Brooks",    requestDate:"2026-03-07", requestType:"Reschedule", preferredDate:"2026-03-11", preferredTime:"Afternoon", visitType:"Wound Care",     diagnosis:"Venous Ulcer",      insurance:"Medicaid",    priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Previous visit missed — urgent re-care", phone:"(555) 345-8901" },
-    { id:"SR009", patient:"Uma Krishnamurthy", requestDate:"2026-03-07", requestType:"New Visit",  preferredDate:"2026-03-12", preferredTime:"Morning",   visitType:"Assessment",     diagnosis:"Dementia",          insurance:"Medicare",    priority:"Medium", assignedClinician:"NP Kim Yardley",  status:"Assigned",   notes:"Family requesting cognitive assessment",phone:"(555) 456-9012" },
-    { id:"SR010", patient:"Victor Mensah",     requestDate:"2026-03-08", requestType:"New Visit",  preferredDate:"2026-03-12", preferredTime:"Any",       visitType:"Infusion",       diagnosis:"Cellulitis",        insurance:"Aetna",       priority:"High",   assignedClinician:null,              status:"Unassigned", notes:"Ceftriaxone 1g daily × 7 days",         phone:"(555) 567-0123" },
-    { id:"SR011", patient:"Wanda Johansson",   requestDate:"2026-03-08", requestType:"Reschedule", preferredDate:"2026-03-13", preferredTime:"Morning",   visitType:"Med Review",     diagnosis:"Diabetes T2",       insurance:"Medicaid",    priority:"Low",    assignedClinician:"Dr. James Patel", status:"Assigned",   notes:"Insulin regimen adjustment",            phone:"(555) 678-1234" },
-    { id:"SR012", patient:"Xavier Osei",       requestDate:"2026-03-09", requestType:"New Visit",  preferredDate:"2026-03-13", preferredTime:"Afternoon", visitType:"Home Health",    diagnosis:"Post-op Knee",      insurance:"Medicare",    priority:"Medium", assignedClinician:null,              status:"Unassigned", notes:"Day 3 post total knee replacement",     phone:"(555) 789-2345" },
-  ],
+    { groupBy:"Unscheduled", clientSortOrder:1, sortRequestsBy:"Date", epiId:"EP-9901", clientId:"CL-601", clientName:"Evelyn Martinez",    clientPhone:"404-555-0101", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"Home Health", branch:"B01", branchName:"North Metro",   team:"Team Alpha", location:"30401", cslAddress:"101 Maple St",  cslCity:"Atlanta", cslState:"GA", cslZip:"30401", shiftDate:"2026-03-12", begTime:"09:00", endTime:"11:00", shiftHrs:2.0, jdCode:"HC-01", rateType:"Standard", serviceCode:"HC-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:2.0, requestStatus:"Unscheduled", dx:"M79.3" },
+    { groupBy:"Unscheduled", clientSortOrder:2, sortRequestsBy:"Date", epiId:"EP-9902", clientId:"CL-602", clientName:"George Anderson",    clientPhone:"404-555-0102", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"PT",         branch:"B02", branchName:"South Metro",   team:"Team Beta",  location:"30402", cslAddress:"202 Oak Ave",   cslCity:"Atlanta", cslState:"GA", cslZip:"30402", shiftDate:"2026-03-12", begTime:"10:00", endTime:"11:30", shiftHrs:1.5, jdCode:"PT-01", rateType:"Standard", serviceCode:"PT-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:1.5, requestStatus:"Unscheduled", dx:"M54.5" },
+    { groupBy:"Unscheduled", clientSortOrder:3, sortRequestsBy:"Date", epiId:"EP-9903", clientId:"CL-603", clientName:"Helen Thompson",      clientPhone:"404-555-0103", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"LPN",        branch:"B03", branchName:"East District", team:"Team Alpha", location:"30403", cslAddress:"303 Pine Rd",   cslCity:"Decatur",  cslState:"GA", cslZip:"30403", shiftDate:"2026-03-13", begTime:"09:00", endTime:"10:30", shiftHrs:1.5, jdCode:"WC-01", rateType:"Standard", serviceCode:"WC-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:1.5, requestStatus:"Unscheduled", dx:"L89.0" },
+    { groupBy:"Unscheduled", clientSortOrder:4, sortRequestsBy:"Date", epiId:"EP-9904", clientId:"CL-604", clientName:"Ivan Jackson",        clientPhone:"404-555-0104", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"RN",         branch:"B04", branchName:"West Division", team:"Team Beta",  location:"30404", cslAddress:"404 Elm Blvd",  cslCity:"Smyrna",   cslState:"GA", cslZip:"30404", shiftDate:"2026-03-14", begTime:"08:00", endTime:"10:00", shiftHrs:2.0, jdCode:"IF-01", rateType:"Standard", serviceCode:"IF-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:2.0, requestStatus:"Unscheduled", dx:"E11.9" },
+    { groupBy:"Unscheduled", clientSortOrder:5, sortRequestsBy:"Date", epiId:"EP-9905", clientId:"CL-605", clientName:"Julia White",         clientPhone:"404-555-0105", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"PT",         branch:"B01", branchName:"North Metro",   team:"Team Gamma", location:"30405", cslAddress:"505 Cedar Ln",  cslCity:"Atlanta",  cslState:"GA", cslZip:"30405", shiftDate:"2026-03-10", begTime:"13:00", endTime:"14:00", shiftHrs:1.0, jdCode:"MR-01", rateType:"Standard", serviceCode:"MR-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:1.0, requestStatus:"Unscheduled", dx:"I10" },
+    { groupBy:"Unscheduled", clientSortOrder:6, sortRequestsBy:"Date", epiId:"EP-9906", clientId:"CL-606", clientName:"Raymond Okafor",      clientPhone:"404-555-0106", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"RN",         branch:"B02", branchName:"South Metro",   team:"Team Alpha", location:"30406", cslAddress:"606 Birch Way",  cslCity:"Atlanta",  cslState:"GA", cslZip:"30406", shiftDate:"2026-03-11", begTime:"09:00", endTime:"11:00", shiftHrs:2.0, jdCode:"HC-01", rateType:"Standard", serviceCode:"HC-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:2.0, requestStatus:"Unscheduled", dx:"J18.9" },
+    { groupBy:"Unscheduled", clientSortOrder:7, sortRequestsBy:"Date", epiId:"EP-9907", clientId:"CL-607", clientName:"Sylvia Nakamura",     clientPhone:"404-555-0107", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"PT",         branch:"B03", branchName:"East District", team:"Team Beta",  location:"30407", cslAddress:"707 Willow Ct",  cslCity:"Decatur",  cslState:"GA", cslZip:"30407", shiftDate:"2026-03-09", begTime:"14:00", endTime:"15:30", shiftHrs:1.5, jdCode:"PT-02", rateType:"Standard", serviceCode:"PT-02", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:1.5, requestStatus:"Unscheduled", dx:"M25.5" },
+    { groupBy:"Unscheduled", clientSortOrder:8, sortRequestsBy:"Date", epiId:"EP-9908", clientId:"CL-608", clientName:"Timothy Brooks",      clientPhone:"404-555-0108", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"LPN",        branch:"B04", branchName:"West Division", team:"Team Gamma", location:"30408", cslAddress:"808 Ash Ave",    cslCity:"Smyrna",   cslState:"GA", cslZip:"30408", shiftDate:"2026-03-08", begTime:"10:00", endTime:"11:00", shiftHrs:1.0, jdCode:"WC-01", rateType:"Standard", serviceCode:"WC-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:1.0, requestStatus:"Unscheduled", dx:"L89.2" },
+    { groupBy:"Unscheduled", clientSortOrder:9, sortRequestsBy:"Date", epiId:"EP-9909", clientId:"CL-609", clientName:"Uma Krishnamurthy",    clientPhone:"404-555-0109", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"RN",         branch:"B01", branchName:"North Metro",   team:"Team Alpha", location:"30409", cslAddress:"909 Poplar Dr",  cslCity:"Atlanta",  cslState:"GA", cslZip:"30409", shiftDate:"2026-03-01", begTime:"09:00", endTime:"10:30", shiftHrs:1.5, jdCode:"AS-01", rateType:"Standard", serviceCode:"AS-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:1.5, requestStatus:"Unscheduled", dx:"F41.1" },
+    { groupBy:"Unscheduled", clientSortOrder:10, sortRequestsBy:"Date", epiId:"EP-9910", clientId:"CL-610", clientName:"Victor Mensah",       clientPhone:"404-555-0110", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"PT",         branch:"B02", branchName:"South Metro",   team:"Team Beta",  location:"30410", cslAddress:"10 Spruce Blvd", cslCity:"Atlanta",  cslState:"GA", cslZip:"30410", shiftDate:"2026-03-02", begTime:"11:00", endTime:"12:30", shiftHrs:1.5, jdCode:"IF-01", rateType:"Standard", serviceCode:"IF-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:1.5, requestStatus:"Unscheduled", dx:"E11.9" },
+    { groupBy:"Unscheduled", clientSortOrder:11, sortRequestsBy:"Date", epiId:"EP-9911", clientId:"CL-611", clientName:"Wanda Johansson",     clientPhone:"404-555-0111", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"RN",         branch:"B03", branchName:"East District", team:"Team Gamma", location:"30411", cslAddress:"11 Magnolia St", cslCity:"Decatur",  cslState:"GA", cslZip:"30411", shiftDate:"2026-02-28", begTime:"09:00", endTime:"11:00", shiftHrs:2.0, jdCode:"MR-01", rateType:"Standard", serviceCode:"MR-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:2.0, requestStatus:"Unscheduled", dx:"I10" },
+    { groupBy:"Unscheduled", clientSortOrder:12, sortRequestsBy:"Date", epiId:"EP-9912", clientId:"CL-612", clientName:"Xavier Osei",         clientPhone:"404-555-0112", statusName:"Unscheduled", unusedServiceCode:"", serviceLine:"RN",         branch:"B04", branchName:"West Division", team:"Team Alpha", location:"30412", cslAddress:"12 Cypress Ct",  cslCity:"Smyrna",   cslState:"GA", cslZip:"30412", shiftDate:"2026-02-27", begTime:"10:00", endTime:"12:00", shiftHrs:2.0, jdCode:"HC-01", rateType:"Standard", serviceCode:"HC-01", requested:1, scheduled:0, noNeed:0, openShifts:1, openHours:2.0, requestStatus:"Unscheduled", dx:"J18.9" },
+    ],
   clientSchedule: [
-    { id:"CS001", patient:"Kenneth Brown",     clinician:"Dr. Sarah Okonkwo", visitType:"Home Health",   scheduledDate:"2026-03-02", status:"Missed",      reason:"Patient not home",             followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS002", patient:"Laura Garcia",      clinician:"RN Marco DiSalvo",  visitType:"Wound Care",    scheduledDate:"2026-03-03", status:"Declined",    reason:"Patient refused service",      followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS003", patient:"Michael Lee",       clinician:"NP Kim Yardley",    visitType:"PT Session",    scheduledDate:"2026-03-03", status:"Rescheduled", reason:"Clinician availability",       followUpRequired:false, rebookedDate:"2026-03-07", outreachLog:[] },
-    { id:"CS004", patient:"Nancy Hill",        clinician:"Dr. James Patel",   visitType:"Assessment",    scheduledDate:"2026-03-04", status:"Reassigned",  reason:"Clinician OOO",                followUpRequired:false, rebookedDate:"2026-03-05", newClinician:"Dr. Sarah Okonkwo", outreachLog:[] },
-    { id:"CS005", patient:"Oscar King",        clinician:"Dr. Sarah Okonkwo", visitType:"Infusion",      scheduledDate:"2026-03-05", status:"Missed",      reason:"Emergency hospitalization",    followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS006", patient:"Paula Scott",       clinician:"RN Marco DiSalvo",  visitType:"Med Review",    scheduledDate:"2026-03-05", status:"Rescheduled", reason:"Patient request",              followUpRequired:false, rebookedDate:"2026-03-08", outreachLog:[] },
-    { id:"CS007", patient:"Quincy Davis",      clinician:"PT Rebecca Moss",   visitType:"PT Session",    scheduledDate:"2026-03-05", status:"Declined",    reason:"Patient feeling unwell",       followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS008", patient:"Rachel Thompson",   clinician:"NP Kim Yardley",    visitType:"Home Health",   scheduledDate:"2026-03-06", status:"Missed",      reason:"Family emergency",             followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS009", patient:"Samuel Wright",     clinician:"Dr. James Patel",   visitType:"Med Review",    scheduledDate:"2026-03-06", status:"Rescheduled", reason:"Provider schedule change",     followUpRequired:false, rebookedDate:"2026-03-10", outreachLog:[] },
-    { id:"CS010", patient:"Teresa Nguyen",     clinician:"RN Marco DiSalvo",  visitType:"Wound Care",    scheduledDate:"2026-03-06", status:"Missed",      reason:"Patient not reachable",        followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS011", patient:"Ulrich Baumann",    clinician:"Dr. Sarah Okonkwo", visitType:"Infusion",      scheduledDate:"2026-03-07", status:"Declined",    reason:"Patient at ER",                followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS012", patient:"Vivian Morales",    clinician:"PT Rebecca Moss",   visitType:"PT Session",    scheduledDate:"2026-03-07", status:"Rescheduled", reason:"Equipment not available",      followUpRequired:false, rebookedDate:"2026-03-11", outreachLog:[] },
-    { id:"CS013", patient:"Walter Obi",        clinician:"NP Kim Yardley",    visitType:"Assessment",    scheduledDate:"2026-03-07", status:"Missed",      reason:"Wrong address on file",        followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS014", patient:"Xena Petrova",      clinician:"Dr. James Patel",   visitType:"Home Health",   scheduledDate:"2026-03-08", status:"Declined",    reason:"Caregiver refused entry",      followUpRequired:true,  rebookedDate:null,         outreachLog:[] },
-    { id:"CS015", patient:"Yusuf Al-Rashid",   clinician:"Dr. Sarah Okonkwo", visitType:"Wound Care",    scheduledDate:"2026-03-08", status:"Rescheduled", reason:"Patient hospitalized briefly", followUpRequired:false, rebookedDate:"2026-03-12", outreachLog:[] },
-  ],
+    { serviceLineGroup:"Home Health", branch:"B01", payorSourceGroup:"Medicare",  cltId:"CL-701", epiId:"EP-8001", clientSort:"Brown K",    clientName:"Kenneth Brown",      mrNum:"MRN-8001", zip:"30501", cltPhone:"404-555-0201", statusName:"Missed",      team:"Team Alpha", location:"30501", wkrId:"AG-201", scheduleId:"SC-10041", wkrFullname:"Sarah Okonkwo",  visitSort:1, visitJobDesc:"Home Health RN",        shiftDate:"2026-03-02", begTime:"09:00", endTime:"11:00", shiftHrs:2.0, serviceCodeType:"Skilled", serviceCode:"HC-01", prn:false, verified:false, visitStatus:"Missed",      summaryDetailRow:1, summaryRowId:1, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicare Part A", billable:true,  censusTract:"001", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Home Health", branch:"B02", payorSourceGroup:"Medicaid",   cltId:"CL-702", epiId:"EP-8002", clientSort:"Garcia L",   clientName:"Laura Garcia",       mrNum:"MRN-8002", zip:"30502", cltPhone:"404-555-0202", statusName:"Declined",    team:"Team Beta",  location:"30502", wkrId:"AG-204", scheduleId:"SC-10042", wkrFullname:"Marco DiSalvo",  visitSort:2, visitJobDesc:"Wound Care RN",          shiftDate:"2026-03-03", begTime:"10:00", endTime:"11:30", shiftHrs:1.5, serviceCodeType:"Skilled", serviceCode:"WC-01", prn:false, verified:false, visitStatus:"Declined",    summaryDetailRow:1, summaryRowId:2, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicaid MCO",    billable:false, censusTract:"002", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Therapy",     branch:"B03", payorSourceGroup:"Private",    cltId:"CL-703", epiId:"EP-8003", clientSort:"Lee M",      clientName:"Michael Lee",        mrNum:"MRN-8003", zip:"30503", cltPhone:"404-555-0203", statusName:"Rescheduled", team:"Team Alpha", location:"30503", wkrId:"AG-203", scheduleId:"SC-10043", wkrFullname:"Kim Yardley",    visitSort:3, visitJobDesc:"PT Session",             shiftDate:"2026-03-03", begTime:"11:00", endTime:"12:00", shiftHrs:1.0, serviceCodeType:"Therapy", serviceCode:"PT-02", prn:false, verified:false, visitStatus:"Rescheduled", summaryDetailRow:1, summaryRowId:3, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Blue Cross",      billable:true,  censusTract:"003", followUpRequired:false, rebookedDate:"2026-03-07" },
+    { serviceLineGroup:"Home Health", branch:"B04", payorSourceGroup:"Medicare",   cltId:"CL-704", epiId:"EP-8004", clientSort:"Hill N",     clientName:"Nancy Hill",         mrNum:"MRN-8004", zip:"30504", cltPhone:"404-555-0204", statusName:"Reassigned",  team:"Team Gamma", location:"30504", wkrId:"AG-202", scheduleId:"SC-10044", wkrFullname:"James Patel",    visitSort:4, visitJobDesc:"Assessment RN",          shiftDate:"2026-03-04", begTime:"09:00", endTime:"10:30", shiftHrs:1.5, serviceCodeType:"Skilled", serviceCode:"AS-01", prn:false, verified:false, visitStatus:"Reassigned",  summaryDetailRow:1, summaryRowId:4, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicare Part B", billable:true,  censusTract:"004", followUpRequired:false, rebookedDate:"2026-03-05" },
+    { serviceLineGroup:"Home Health", branch:"B01", payorSourceGroup:"Medicare",   cltId:"CL-705", epiId:"EP-8005", clientSort:"King O",     clientName:"Oscar King",         mrNum:"MRN-8005", zip:"30505", cltPhone:"404-555-0205", statusName:"Missed",      team:"Team Alpha", location:"30505", wkrId:"AG-201", scheduleId:"SC-10045", wkrFullname:"Sarah Okonkwo",  visitSort:5, visitJobDesc:"Infusion RN",            shiftDate:"2026-03-05", begTime:"08:00", endTime:"10:00", shiftHrs:2.0, serviceCodeType:"Skilled", serviceCode:"IF-01", prn:false, verified:false, visitStatus:"Missed",      summaryDetailRow:1, summaryRowId:5, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicare Part A", billable:true,  censusTract:"005", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Home Health", branch:"B02", payorSourceGroup:"Private",    cltId:"CL-706", epiId:"EP-8006", clientSort:"Scott P",    clientName:"Paula Scott",        mrNum:"MRN-8006", zip:"30506", cltPhone:"404-555-0206", statusName:"Rescheduled", team:"Team Beta",  location:"30506", wkrId:"AG-204", scheduleId:"SC-10046", wkrFullname:"Marco DiSalvo",  visitSort:6, visitJobDesc:"Med Review RN",          shiftDate:"2026-03-05", begTime:"13:00", endTime:"14:00", shiftHrs:1.0, serviceCodeType:"Skilled", serviceCode:"MR-01", prn:false, verified:false, visitStatus:"Rescheduled", summaryDetailRow:1, summaryRowId:6, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Aetna",           billable:true,  censusTract:"006", followUpRequired:false, rebookedDate:"2026-03-08" },
+    { serviceLineGroup:"Therapy",     branch:"B03", payorSourceGroup:"Medicaid",   cltId:"CL-707", epiId:"EP-8007", clientSort:"Davis Q",    clientName:"Quincy Davis",       mrNum:"MRN-8007", zip:"30507", cltPhone:"404-555-0207", statusName:"Declined",    team:"Team Gamma", location:"30507", wkrId:"AG-205", scheduleId:"SC-10047", wkrFullname:"Rebecca Moss",   visitSort:7, visitJobDesc:"PT Session",             shiftDate:"2026-03-05", begTime:"14:00", endTime:"15:00", shiftHrs:1.0, serviceCodeType:"Therapy", serviceCode:"PT-02", prn:false, verified:false, visitStatus:"Declined",    summaryDetailRow:1, summaryRowId:7, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicaid FFS",    billable:false, censusTract:"007", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Home Health", branch:"B04", payorSourceGroup:"Medicare",   cltId:"CL-708", epiId:"EP-8008", clientSort:"Thompson R",  clientName:"Rachel Thompson",    mrNum:"MRN-8008", zip:"30508", cltPhone:"404-555-0208", statusName:"Missed",      team:"Team Alpha", location:"30508", wkrId:"AG-203", scheduleId:"SC-10048", wkrFullname:"Kim Yardley",    visitSort:8, visitJobDesc:"Home Health LPN",        shiftDate:"2026-03-06", begTime:"09:00", endTime:"11:00", shiftHrs:2.0, serviceCodeType:"Skilled", serviceCode:"HC-01", prn:false, verified:false, visitStatus:"Missed",      summaryDetailRow:1, summaryRowId:8, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicare Part A", billable:true,  censusTract:"008", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Home Health", branch:"B04", payorSourceGroup:"Medicaid",   cltId:"CL-709", epiId:"EP-8009", clientSort:"Wright S",   clientName:"Samuel Wright",      mrNum:"MRN-8009", zip:"30509", cltPhone:"404-555-0209", statusName:"Rescheduled", team:"Team Beta",  location:"30509", wkrId:"AG-202", scheduleId:"SC-10049", wkrFullname:"James Patel",    visitSort:9, visitJobDesc:"Med Review RN",          shiftDate:"2026-03-06", begTime:"10:00", endTime:"11:00", shiftHrs:1.0, serviceCodeType:"Skilled", serviceCode:"MR-01", prn:false, verified:false, visitStatus:"Rescheduled", summaryDetailRow:1, summaryRowId:9, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicaid MCO",    billable:true,  censusTract:"009", followUpRequired:false, rebookedDate:"2026-03-10" },
+    { serviceLineGroup:"Home Health", branch:"B02", payorSourceGroup:"Medicare",   cltId:"CL-710", epiId:"EP-8010", clientSort:"Nguyen T",   clientName:"Teresa Nguyen",      mrNum:"MRN-8010", zip:"30510", cltPhone:"404-555-0210", statusName:"Missed",      team:"Team Gamma", location:"30510", wkrId:"AG-204", scheduleId:"SC-10050", wkrFullname:"Marco DiSalvo",  visitSort:10, visitJobDesc:"Wound Care RN",         shiftDate:"2026-03-06", begTime:"11:00", endTime:"12:30", shiftHrs:1.5, serviceCodeType:"Skilled", serviceCode:"WC-01", prn:false, verified:false, visitStatus:"Missed",      summaryDetailRow:1, summaryRowId:10, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicare Part A", billable:true,  censusTract:"010", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Home Health", branch:"B01", payorSourceGroup:"Private",    cltId:"CL-711", epiId:"EP-8011", clientSort:"Baumann U",  clientName:"Ulrich Baumann",     mrNum:"MRN-8011", zip:"30511", cltPhone:"404-555-0211", statusName:"Declined",    team:"Team Alpha", location:"30511", wkrId:"AG-201", scheduleId:"SC-10051", wkrFullname:"Sarah Okonkwo",  visitSort:11, visitJobDesc:"Infusion RN",            shiftDate:"2026-03-07", begTime:"09:00", endTime:"11:00", shiftHrs:2.0, serviceCodeType:"Skilled", serviceCode:"IF-01", prn:false, verified:false, visitStatus:"Declined",    summaryDetailRow:1, summaryRowId:11, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Blue Cross",      billable:false, censusTract:"011", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Therapy",     branch:"B03", payorSourceGroup:"Medicaid",   cltId:"CL-712", epiId:"EP-8012", clientSort:"Morales V",  clientName:"Vivian Morales",     mrNum:"MRN-8012", zip:"30512", cltPhone:"404-555-0212", statusName:"Rescheduled", team:"Team Beta",  location:"30512", wkrId:"AG-205", scheduleId:"SC-10052", wkrFullname:"Rebecca Moss",   visitSort:12, visitJobDesc:"PT Session",             shiftDate:"2026-03-07", begTime:"13:00", endTime:"14:00", shiftHrs:1.0, serviceCodeType:"Therapy", serviceCode:"PT-02", prn:false, verified:false, visitStatus:"Rescheduled", summaryDetailRow:1, summaryRowId:12, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicaid FFS",    billable:true,  censusTract:"012", followUpRequired:false, rebookedDate:"2026-03-11" },
+    { serviceLineGroup:"Home Health", branch:"B01", payorSourceGroup:"Medicare",   cltId:"CL-713", epiId:"EP-8013", clientSort:"Obi W",      clientName:"Walter Obi",         mrNum:"MRN-8013", zip:"30513", cltPhone:"404-555-0213", statusName:"Missed",      team:"Team Alpha", location:"30513", wkrId:"AG-203", scheduleId:"SC-10053", wkrFullname:"Kim Yardley",    visitSort:13, visitJobDesc:"Assessment LPN",         shiftDate:"2026-03-07", begTime:"10:00", endTime:"11:30", shiftHrs:1.5, serviceCodeType:"Skilled", serviceCode:"AS-01", prn:false, verified:false, visitStatus:"Missed",      summaryDetailRow:1, summaryRowId:13, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicare Part B", billable:true,  censusTract:"013", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Home Health", branch:"B02", payorSourceGroup:"Medicaid",   cltId:"CL-714", epiId:"EP-8014", clientSort:"Petrova X",  clientName:"Xena Petrova",       mrNum:"MRN-8014", zip:"30514", cltPhone:"404-555-0214", statusName:"Declined",    team:"Team Gamma", location:"30514", wkrId:"AG-202", scheduleId:"SC-10054", wkrFullname:"James Patel",    visitSort:14, visitJobDesc:"Home Health RN",         shiftDate:"2026-03-08", begTime:"09:00", endTime:"11:00", shiftHrs:2.0, serviceCodeType:"Skilled", serviceCode:"HC-01", prn:false, verified:false, visitStatus:"Declined",    summaryDetailRow:1, summaryRowId:14, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicaid MCO",    billable:false, censusTract:"014", followUpRequired:true,  rebookedDate:null },
+    { serviceLineGroup:"Home Health", branch:"B03", payorSourceGroup:"Medicare",   cltId:"CL-715", epiId:"EP-8015", clientSort:"Al-Rashid Y", clientName:"Yusuf Al-Rashid",   mrNum:"MRN-8015", zip:"30515", cltPhone:"404-555-0215", statusName:"Reassigned",  team:"Team Beta",  location:"30515", wkrId:"AG-201", scheduleId:"SC-10055", wkrFullname:"Sarah Okonkwo",  visitSort:15, visitJobDesc:"Wound Care RN",          shiftDate:"2026-03-08", begTime:"11:00", endTime:"12:30", shiftHrs:1.5, serviceCodeType:"Skilled", serviceCode:"WC-01", prn:false, verified:false, visitStatus:"Reassigned",  summaryDetailRow:1, summaryRowId:15, summaryColumnId:1, autoScheduled:false, autoScheduleDate:"", autoScheduleUser:"", payorSource:"Medicare Part A", billable:true,  censusTract:"015", followUpRequired:false, rebookedDate:"2026-03-12" },
+    ],
 };
 
 const _ts = () => new Date().toISOString().slice(0,16).replace("T"," ");
@@ -138,45 +213,78 @@ const CLINICIANS = ["Dr. Sarah Okonkwo","Dr. James Patel","NP Kim Yardley","RN M
 // ─── serverCall ───────────────────────────────────────────────────────────────
 function serverCall(name, args) {
   switch(name) {
-    case "get_agent_summary_report": {
+        case "get_agent_summary_report": {
       let r = [..._store.agentSummary];
-      if (args.id)        r = r.filter(x => x.id === args.id);
-      if (args.priority)  r = r.filter(x => x.priority === args.priority);
-      if (args.clinician) r = r.filter(x => x.clinician.toLowerCase().includes(args.clinician.toLowerCase()));
-      if (args.visitType) r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
-      if (args.attempts !== undefined) r = r.filter(x => String(x.attempts) === String(args.attempts));
-      if (args.noContactOnly) r = r.filter(x => x.attempts === 0);
-      return { total:r.length, summary:{total:r.length,pending:r.filter(x=>x.status==="Pending").length,high:r.filter(x=>x.priority==="High").length,medium:r.filter(x=>x.priority==="Medium").length,low:r.filter(x=>x.priority==="Low").length,noContact:r.filter(x=>x.attempts===0).length,multiAttempt:r.filter(x=>x.attempts>=2).length}, records:r };
+      if (args.visitNumber) r = r.filter(x => x.visitNumber === args.visitNumber);
+      if (args.agentName)   r = r.filter(x => x.agentName.toLowerCase().includes(args.agentName.toLowerCase()));
+      if (args.agentId)     r = r.filter(x => x.agentId === args.agentId);
+      if (args.clientId)    r = r.filter(x => x.clientId === args.clientId);
+      if (args.clientName)  r = r.filter(x => x.clientName.toLowerCase().includes(args.clientName.toLowerCase()));
+      if (args.discipline)  r = r.filter(x => x.discipline === args.discipline);
+      if (args.visitType)   r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      if (args.visitStatus) r = r.filter(x => x.visitStatus === args.visitStatus);
+      if (args.payorType)   r = r.filter(x => x.payorType === args.payorType);
+      if (args.branchName)  r = r.filter(x => x.branchName === args.branchName);
+      if (args.team)        r = r.filter(x => x.team === args.team);
+      if (args.reqEval)     r = r.filter(x => x.reqEval === args.reqEval);
+      if (args.active)      r = r.filter(x => x.active === args.active);
+      return { total:r.length, summary:{total:r.length,pending:r.filter(x=>x.visitStatus==="Pending").length,checkedOut:r.filter(x=>x.visitStatus==="Checked Out").length,medicare:r.filter(x=>x.payorType==="Medicare").length,medicaid:r.filter(x=>x.payorType==="Medicaid").length,reqEval:r.filter(x=>x.reqEval==="Y").length,inactive:r.filter(x=>x.active==="N").length}, records:r };
     }
-    case "get_agent_summary_weekly": {
+        case "get_agent_summary_weekly": {
       let r = [..._store.weeklyVisits];
-      if (args.id)        r = r.filter(x => x.id === args.id);
-      if (args.status)    r = r.filter(x => x.status === args.status);
-      if (args.region)    r = r.filter(x => x.region.toLowerCase().includes(args.region.toLowerCase()));
-      if (args.agency)    r = r.filter(x => x.agency.toLowerCase().includes(args.agency.toLowerCase()));
-      if (args.clinician) r = r.filter(x => x.clinician.toLowerCase().includes(args.clinician.toLowerCase()));
-      if (args.visitType) r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
-      return { summary:{total:r.length,late:r.filter(x=>x.status==="Late").length,incomplete:r.filter(x=>x.status==="Incomplete").length,completed:r.filter(x=>x.status==="Completed").length}, records:r };
+      if (args.visitNumber) r = r.filter(x => x.visitNumber === args.visitNumber);
+      if (args.agentName)   r = r.filter(x => x.agentName.toLowerCase().includes(args.agentName.toLowerCase()));
+      if (args.agentId)     r = r.filter(x => x.agentId === args.agentId);
+      if (args.clientId)    r = r.filter(x => x.clientId === args.clientId);
+      if (args.clientName)  r = r.filter(x => x.clientName.toLowerCase().includes(args.clientName.toLowerCase()));
+      if (args.discipline)  r = r.filter(x => x.discipline === args.discipline);
+      if (args.visitType)   r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      if (args.visitStatus) r = r.filter(x => x.visitStatus === args.visitStatus);
+      if (args.payorType)   r = r.filter(x => x.payorType === args.payorType);
+      if (args.branchName)  r = r.filter(x => x.branchName === args.branchName);
+      if (args.team)        r = r.filter(x => x.team === args.team);
+      return { summary:{total:r.length,late:r.filter(x=>x.visitStatus==="Late").length,paused:r.filter(x=>x.visitStatus==="Paused").length,incomplete:r.filter(x=>x.visitStatus==="Incomplete").length,almostComplete:r.filter(x=>x.visitStatus==="Almost Complete").length,medicare:r.filter(x=>x.payorType==="Medicare").length,medicaid:r.filter(x=>x.payorType==="Medicaid").length}, records:r };
     }
-    case "get_scheduling_requests": {
+        case "get_scheduling_requests": {
       let r = [..._store.schedulingRequests];
-      if (args.id)           r = r.filter(x => x.id === args.id);
-      if (args.priority)     r = r.filter(x => x.priority === args.priority);
-      if (args.visitType)    r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
-      if (args.insurance)    r = r.filter(x => x.insurance.toLowerCase().includes(args.insurance.toLowerCase()));
-      if (args.requestType)  r = r.filter(x => x.requestType === args.requestType);
-      if (args.status)       r = r.filter(x => x.status === args.status);
-      if (args.preferredTime)r = r.filter(x => x.preferredTime === args.preferredTime);
-      return { total:r.length, summary:{total:r.length,unassigned:r.filter(x=>x.status==="Unassigned").length,assigned:r.filter(x=>x.status==="Assigned").length,high:r.filter(x=>x.priority==="High").length,mediumReq:r.filter(x=>x.priority==="Medium").length,lowReq:r.filter(x=>x.priority==="Low").length,newVisit:r.filter(x=>x.requestType==="New Visit").length,reschedules:r.filter(x=>x.requestType==="Reschedule").length}, records:r };
+      if (args.clientId)       r = r.filter(x => x.clientId === args.clientId);
+      if (args.clientName)     r = r.filter(x => x.clientName.toLowerCase().includes(args.clientName.toLowerCase()));
+      if (args.branchName)     r = r.filter(x => x.branchName === args.branchName);
+      if (args.team)           r = r.filter(x => x.team === args.team);
+      if (args.serviceCode)    r = r.filter(x => x.serviceCode === args.serviceCode);
+      if (args.serviceLine)    r = r.filter(x => x.serviceLine === args.serviceLine);
+      // requestStatus is the canonical status field for SR records
+      if (args.requestStatus)  r = r.filter(x => x.requestStatus === args.requestStatus);
+      // also accept visitStatus key for backwards-compat (filter dropdowns still use it)
+      if (args.visitStatus)    r = r.filter(x => x.requestStatus === args.visitStatus);
+      {
+        const today=new Date(); today.setHours(0,0,0,0);
+        const sun=new Date(today); sun.setDate(today.getDate()-today.getDay());
+        return { total:r.length, summary:{
+          total:       r.length,
+          unscheduled: r.filter(x=>x.requestStatus==="Unscheduled").length,
+          openShifts:  r.filter(x=>(x.openShifts||0)>0).length,
+          srToday:     r.filter(x=>{ const d=new Date((x.shiftDate||"")+"T00:00:00"); return d.getTime()===today.getTime(); }).length,
+          srThisWeek:  r.filter(x=>{ const d=new Date((x.shiftDate||"")+"T00:00:00"); return d>=sun && d<today; }).length,
+          srOverdue:   r.filter(x=>{ const d=new Date((x.shiftDate||"")+"T00:00:00"); return d<sun; }).length,
+        }, records:r };
+      }
     }
-    case "get_client_schedule_report": {
+        case "get_client_schedule_report": {
       let r = [..._store.clientSchedule];
-      if (args.id)        r = r.filter(x => x.id === args.id);
-      if (args.status)    r = r.filter(x => x.status === args.status);
-      if (args.clinician) r = r.filter(x => x.clinician.toLowerCase().includes(args.clinician.toLowerCase()));
-      if (args.visitType) r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      if (args.visitNumber) r = r.filter(x => x.visitNumber === args.visitNumber);
+      if (args.agentName)   r = r.filter(x => x.agentName.toLowerCase().includes(args.agentName.toLowerCase()));
+      if (args.agentId)     r = r.filter(x => x.agentId === args.agentId);
+      if (args.clientId)    r = r.filter(x => x.clientId === args.clientId);
+      if (args.clientName)  r = r.filter(x => x.clientName.toLowerCase().includes(args.clientName.toLowerCase()));
+      if (args.discipline)  r = r.filter(x => x.discipline === args.discipline);
+      if (args.visitType)   r = r.filter(x => x.visitType.toLowerCase().includes(args.visitType.toLowerCase()));
+      if (args.visitStatus) r = r.filter(x => x.visitStatus === args.visitStatus);
+      if (args.payorType)   r = r.filter(x => x.payorType === args.payorType);
+      if (args.branchName)  r = r.filter(x => x.branchName === args.branchName);
+      if (args.team)        r = r.filter(x => x.team === args.team);
       if (args.followUpRequired !== undefined) r = r.filter(x => x.followUpRequired === args.followUpRequired);
-      return { summary:{total:r.length,missed:r.filter(x=>x.status==="Missed").length,declined:r.filter(x=>x.status==="Declined").length,rescheduled:r.filter(x=>x.status==="Rescheduled").length,reassigned:r.filter(x=>x.status==="Reassigned").length,followUpPending:r.filter(x=>x.followUpRequired).length,noRebook:r.filter(x=>x.status==="Missed"&&x.followUpRequired&&!x.rebookedDate).length}, records:r };
+      return { summary:{total:r.length,missed:r.filter(x=>x.visitStatus==="Missed").length,declined:r.filter(x=>x.visitStatus==="Declined").length,rescheduled:r.filter(x=>x.visitStatus==="Rescheduled").length,reassigned:r.filter(x=>x.visitStatus==="Reassigned").length,followUpPending:r.filter(x=>x.followUpRequired).length,noRebook:r.filter(x=>x.visitStatus==="Missed"&&x.followUpRequired&&!x.rebookedDate).length}, records:r };
     }
     case "log_contact_attempt": {
       const v = _store.agentSummary.find(r=>r.id===args.visitId);
@@ -259,10 +367,40 @@ function serverCall(name, args) {
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const BG="#07090f",SURF="#0e1118",BRD="rgba(255,255,255,.07)",TXT="#e2e8f0",MUT="#64748b",FAINT="#1e2535",ACC="#6366f1",ACCBG="rgba(99,102,241,.12)",ACCBR="rgba(99,102,241,.3)";
-const SP={Pending:{bg:"rgba(251,191,36,.1)",border:"rgba(251,191,36,.25)",text:"#fbbf24"},Late:{bg:"rgba(239,68,68,.1)",border:"rgba(239,68,68,.25)",text:"#f87171"},Incomplete:{bg:"rgba(249,115,22,.1)",border:"rgba(249,115,22,.25)",text:"#fb923c"},Completed:{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",text:"#34d399"},Missed:{bg:"rgba(239,68,68,.1)",border:"rgba(239,68,68,.25)",text:"#f87171"},Declined:{bg:"rgba(139,92,246,.1)",border:"rgba(139,92,246,.25)",text:"#a78bfa"},Rescheduled:{bg:"rgba(59,130,246,.1)",border:"rgba(59,130,246,.25)",text:"#60a5fa"},Reassigned:{bg:"rgba(6,182,212,.1)",border:"rgba(6,182,212,.25)",text:"#22d3ee"},High:{bg:"rgba(239,68,68,.1)",border:"rgba(239,68,68,.25)",text:"#f87171"},Medium:{bg:"rgba(251,191,36,.1)",border:"rgba(251,191,36,.25)",text:"#fbbf24"},Low:{bg:"rgba(100,116,139,.1)",border:"rgba(100,116,139,.25)",text:"#94a3b8"},Assigned:{bg:"rgba(16,185,129,.1)",border:"rgba(16,185,129,.25)",text:"#34d399"},Unassigned:{bg:"rgba(251,191,36,.1)",border:"rgba(251,191,36,.25)",text:"#fbbf24"},Closed:{bg:"rgba(100,116,139,.1)",border:"rgba(100,116,139,.25)",text:"#94a3b8"}};
+const SP = {
+  // ── Agent Summary & Weekly ──────────────────────────────────────────────────
+  "Pending":        { bg:"rgba(251,191,36,.12)",  border:"rgba(251,191,36,.3)",  text:"#fbbf24" },
+  "Checked Out":    { bg:"rgba(239,68,68,.12)",   border:"rgba(239,68,68,.3)",   text:"#f87171" },
+  "Completed":      { bg:"rgba(16,185,129,.12)",  border:"rgba(16,185,129,.3)",  text:"#34d399" },
+  "Late":           { bg:"rgba(239,68,68,.12)",   border:"rgba(239,68,68,.3)",   text:"#f87171" },
+  "Paused":         { bg:"rgba(96,165,250,.12)",  border:"rgba(96,165,250,.3)",  text:"#60a5fa" },
+  "Incomplete":     { bg:"rgba(249,115,22,.12)",  border:"rgba(249,115,22,.3)",  text:"#fb923c" },
+  "Almost Complete":{ bg:"rgba(52,211,153,.12)",  border:"rgba(52,211,153,.3)",  text:"#34d399" },
+  // ── Scheduling Requests ─────────────────────────────────────────────────────
+  "Unscheduled":    { bg:"rgba(245,158,11,.12)",  border:"rgba(245,158,11,.3)",  text:"#f59e0b" },
+  "Scheduled":      { bg:"rgba(16,185,129,.12)",  border:"rgba(16,185,129,.3)",  text:"#34d399" },
+  "Open":           { bg:"rgba(6,182,212,.12)",   border:"rgba(6,182,212,.3)",   text:"#22d3ee" },
+  // ── Client Schedule ─────────────────────────────────────────────────────────
+  "Missed":         { bg:"rgba(239,68,68,.12)",   border:"rgba(239,68,68,.3)",   text:"#f87171" },
+  "Declined":       { bg:"rgba(139,92,246,.12)",  border:"rgba(139,92,246,.3)",  text:"#a78bfa" },
+  "Rescheduled":    { bg:"rgba(59,130,246,.12)",  border:"rgba(59,130,246,.3)",  text:"#60a5fa" },
+  "Reassigned":     { bg:"rgba(6,182,212,.12)",   border:"rgba(6,182,212,.3)",   text:"#22d3ee" },
+  // ── Boolean / flag fields ───────────────────────────────────────────────────
+  "Y":              { bg:"rgba(16,185,129,.1)",   border:"rgba(16,185,129,.25)", text:"#34d399" },
+  "N":              { bg:"rgba(100,116,139,.07)", border:"rgba(100,116,139,.2)", text:"#64748b" },
+  "Yes":            { bg:"rgba(16,185,129,.1)",   border:"rgba(16,185,129,.25)", text:"#34d399" },
+  "No":             { bg:"rgba(100,116,139,.07)", border:"rgba(100,116,139,.2)", text:"#64748b" },
+  // ── Priority / generic ──────────────────────────────────────────────────────
+  "High":           { bg:"rgba(239,68,68,.12)",   border:"rgba(239,68,68,.3)",   text:"#f87171" },
+  "Medium":         { bg:"rgba(251,191,36,.12)",  border:"rgba(251,191,36,.3)",  text:"#fbbf24" },
+  "Low":            { bg:"rgba(100,116,139,.1)",  border:"rgba(100,116,139,.25)",text:"#94a3b8" },
+  "Assigned":       { bg:"rgba(16,185,129,.12)",  border:"rgba(16,185,129,.3)",  text:"#34d399" },
+  "Unassigned":     { bg:"rgba(245,158,11,.12)",  border:"rgba(245,158,11,.3)",  text:"#f59e0b" },
+  "Closed":         { bg:"rgba(100,116,139,.1)",  border:"rgba(100,116,139,.25)",text:"#94a3b8" },
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const clbl = c => ({id:"ID",visitType:"Type",scheduledDate:"Date",preferredDate:"Pref. Date",completedDate:"Completed",followUpRequired:"Follow-up",assignedClinician:"Assigned",requestDate:"Requested",scheduledTime:"Time",rebookedDate:"Rebooked",lastAttempt:"Last Contact"}[c]||(c.charAt(0).toUpperCase()+c.slice(1)));
+const clbl = c => ({visitNumber:"Visit #",visitDate:"Date",agentName:"Agent",agentId:"Agent ID",clientId:"Client ID",clientName:"Client",branchName:"Branch",branchCode:"Branch Code",reqEval:"Req Eval",serviceCode:"Service Code",visitZip:"ZIP",visitStatus:"Visit Status",prodPoints:"Prod Pts",payorType:"Payor Type",primaryPayor:"Primary Payor",payorSource:"Payor Source",mrn:"MRN",active:"Active",discipline:"Discipline",team:"Team",id:"ID",visitType:"Visit Type",scheduledDate:"Sched. Date",preferredDate:"Pref. Date",completedDate:"Completed",followUpRequired:"Follow-up",assignedClinician:"Assigned",requestDate:"Requested",scheduledTime:"Time",rebookedDate:"Rebooked",lastAttempt:"Last Contact",requestType:"Type",status:"Status",priority:"Priority",phone:"Phone",notes:"Notes",region:"Region",agency:"Agency",duration:"Duration",diagnosis:"Diagnosis",insurance:"Insurance",preferredTime:"Pref. Time",newClinician:"New Clinician",reason:"Reason",outreachLog:"Outreach",patient:"Patient",clinician:"Clinician",branch:"Branch",groupBy:"Group By",clientSortOrder:"Sort Order",sortRequestsBy:"Sort By",epiId:"Epi ID",clientPhone:"Client Phone",statusName:"Status",unusedServiceCode:"Unused Svc Code",serviceLine:"Service Line",location:"Location",cslAddress:"Address",cslCity:"City",cslState:"State",cslZip:"ZIP",shiftDate:"Shift Date",begTime:"Start Time",endTime:"End Time",shiftHrs:"Hours",jdCode:"JD Code",rateType:"Rate Type",requested:"Requested",scheduled:"Scheduled",noNeed:"No Need",openShifts:"Open Shifts",openHours:"Open Hours",requestStatus:"Request Status",dx:"Dx",serviceLineGroup:"Service Line",payorSourceGroup:"Payor Group",cltId:"Client ID",clientSort:"Client Sort",mrNum:"MRN",zip:"Zip",cltPhone:"Client Phone",wkrId:"Worker ID",scheduleId:"Schedule ID",wkrFullname:"Worker",visitSort:"Visit Sort",visitJobDesc:"Job Description",serviceCodeType:"Service Type",prn:"PRN",verified:"Verified",summaryDetailRow:"Detail Row",summaryRowId:"Row ID",summaryColumnId:"Column ID",autoScheduled:"Auto Scheduled",autoScheduleDate:"Auto Schedule Date",autoScheduleUser:"Auto Schedule User",billable:"Billable",censusTract:"Census Tract"}[c]||(c.charAt(0).toUpperCase()+c.slice(1)));
 
 function badge(val) {
   if (val===null||val===undefined||val==="") return `<span style="color:${MUT};font-size:11px">—</span>`;
@@ -272,7 +410,7 @@ function badge(val) {
 
 function cell(col, val) {
   if (val===null||val===undefined) return `<span style="color:${FAINT};font-size:11px">—</span>`;
-  const BADGE=new Set(["status","priority","requestType"]);
+  const BADGE=new Set(["status","priority","requestType","visitStatus","reqEval","active","followUpRequired","rebookedDate","statusName","requestStatus","billable","verified","prn"]);
   if (BADGE.has(col)) return badge(val);
   if (col==="followUpRequired") return val?badge("Yes"):`<span style="color:${MUT};font-size:11px">No</span>`;
   if (col==="attempts") return `<span style="font-family:monospace;font-weight:700;font-size:12px;color:${val===0?"#ef4444":"#94a3b8"}">${val}${val===0?" ⚠":""}</span>`;
@@ -283,41 +421,139 @@ function cell(col, val) {
 
 // ─── Report Configs ───────────────────────────────────────────────────────────
 const RC = {
-  agentSummary:{label:"Agent Summary",icon:"📋",tool:"get_agent_summary_report",cols:["id","patient","clinician","visitType","scheduledDate","scheduledTime","priority","status","attempts","lastAttempt","phone","notes"],filters:[{k:"priority",label:"Priority",opts:["High","Medium","Low"]},{k:"clinician",label:"Clinician",opts:CLINICIANS},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Assessment","Wound Care","Med Review","Infusion","Assessment","PT Session"]},{k:"attempts",label:"Attempts",opts:["0","1","2","3"]}]},
-  weeklyVisits:{label:"Weekly Summary",icon:"📅",tool:"get_agent_summary_weekly",cols:["id","patient","clinician","visitType","scheduledDate","completedDate","status","duration","region","agency"],filters:[{k:"status",label:"Status",opts:["Late","Incomplete","Completed"]},{k:"clinician",label:"Clinician",opts:CLINICIANS},{k:"region",label:"Region",opts:["North","South","East","West"]},{k:"agency",label:"Agency",opts:["CareFirst","HomeCare Plus","Wellness Home"]},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Session","Wound Care","Med Review","Assessment","Infusion"]}]},
-  schedulingRequests:{label:"Scheduling Requests",icon:"📨",tool:"get_scheduling_requests",cols:["id","patient","visitType","requestType","requestDate","preferredDate","preferredTime","diagnosis","insurance","priority","assignedClinician","status"],filters:[{k:"status",label:"Status",opts:["Unassigned","Assigned"]},{k:"priority",label:"Priority",opts:["High","Medium","Low"]},{k:"requestType",label:"Request Type",opts:["New Visit","Reschedule"]},{k:"insurance",label:"Insurance",opts:["Medicare","Medicaid","Blue Cross","Aetna"]},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Assessment","Wound Care","Infusion","Med Review","Assessment","PT Session"]},{k:"preferredTime",label:"Preferred Time",opts:["Morning","Afternoon","Evening","Any"]}]},
-  clientSchedule:{label:"Client Schedule",icon:"🔁",tool:"get_client_schedule_report",cols:["id","patient","clinician","visitType","scheduledDate","status","reason","followUpRequired","rebookedDate"],filters:[{k:"status",label:"Status",opts:["Missed","Declined","Rescheduled","Reassigned"]},{k:"followUpRequired",label:"Follow-Up",opts:["true","false"]},{k:"clinician",label:"Clinician",opts:CLINICIANS},{k:"visitType",label:"Visit Type",opts:["Home Health","Wound Care","PT Session","Assessment","Infusion","Med Review"]}]},
+    agentSummary:{label:"Agent Summary",icon:"📋",tool:"get_agent_summary_report",cols:["visitDate","visitNumber","agentName","agentId","clientId","clientName","branch","branchName","reqEval","serviceCode","discipline","visitType","visitZip","visitStatus","prodPoints","active","payorType","payorSource","team","mrn","branchCode","primaryPayor"],filters:[{k:"agentName",label:"Agent",opts:["Sarah Okonkwo","James Patel","Kim Yardley","Marco DiSalvo","Rebecca Moss"]},{k:"discipline",label:"Discipline",opts:["RN","LPN","PT"]},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Assessment","Wound Care","Med Review","Infusion","Assessment","PT Session"]},{k:"visitStatus",label:"Status",opts:["Pending","Checked Out"]},{k:"payorType",label:"Payor",opts:["Medicare","Medicaid","Private"]},{k:"branchName",label:"Branch",opts:["North Metro","South Metro","East District","West Division"]},{k:"team",label:"Team",opts:["Team Alpha","Team Beta","Team Gamma"]}]},
+    weeklyVisits:{label:"Weekly Summary",icon:"📅",tool:"get_agent_summary_weekly",cols:["visitDate","visitNumber","agentName","agentId","clientId","clientName","branch","branchName","reqEval","serviceCode","discipline","visitType","visitZip","visitStatus","prodPoints","active","payorType","payorSource","team","mrn","branchCode","primaryPayor"],filters:[{k:"agentName",label:"Agent",opts:["Sarah Okonkwo","James Patel","Kim Yardley","Marco DiSalvo","Rebecca Moss"]},{k:"discipline",label:"Discipline",opts:["RN","LPN","PT"]},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Assessment","Wound Care","Med Review","Infusion","Assessment","PT Session"]},{k:"visitStatus",label:"Status",opts:["Late","Paused","Incomplete","Almost Complete"]},{k:"payorType",label:"Payor",opts:["Medicare","Medicaid","Private"]},{k:"branchName",label:"Branch",opts:["North Metro","South Metro","East District","West Division"]},{k:"team",label:"Team",opts:["Team Alpha","Team Beta","Team Gamma"]}]},
+    schedulingRequests:{label:"Scheduling Requests",icon:"📨",tool:"get_scheduling_requests",cols:["groupBy","clientSortOrder","sortRequestsBy","epiId","clientId","clientName","clientPhone","statusName","unusedServiceCode","serviceLine","branch","branchName","team","location","cslAddress","cslCity","cslState","cslZip","shiftDate","begTime","endTime","shiftHrs","jdCode","rateType","serviceCode","requested","scheduled","noNeed","openShifts","openHours","requestStatus","dx"],filters:[{k:"agentName",label:"Agent",opts:["Sarah Okonkwo","James Patel","Kim Yardley","Marco DiSalvo","Rebecca Moss"]},{k:"discipline",label:"Discipline",opts:["RN","LPN","PT"]},{k:"visitType",label:"Visit Type",opts:["Home Health","PT Assessment","Wound Care","Med Review","Infusion","Assessment","PT Session"]},{k:"requestStatus",label:"Status",opts:["Unscheduled"]},{k:"payorType",label:"Payor",opts:["Medicare","Medicaid","Private"]},{k:"branchName",label:"Branch",opts:["North Metro","South Metro","East District","West Division"]},{k:"team",label:"Team",opts:["Team Alpha","Team Beta","Team Gamma"]}]},
+    clientSchedule:{label:"Client Schedule",icon:"🔁",tool:"get_client_schedule_report",cols:["serviceLineGroup","branch","payorSourceGroup","cltId","epiId","clientSort","clientName","mrNum","zip","cltPhone","statusName","team","location","wkrId","scheduleId","wkrFullname","visitSort","visitJobDesc","shiftDate","begTime","endTime","shiftHrs","serviceCodeType","serviceCode","prn","verified","visitStatus","summaryDetailRow","summaryRowId","summaryColumnId","autoScheduled","autoScheduleDate","autoScheduleUser","payorSource","billable","censusTract"],filters:[{k:"agentName",label:"Agent",opts:["Sarah Okonkwo","James Patel","Kim Yardley","Marco DiSalvo","Rebecca Moss"]},{k:"discipline",label:"Discipline",opts:["RN","LPN","PT"]},{k:"visitType",label:"Visit Type",opts:["Home Health","Wound Care","PT Session","Assessment","Infusion","Med Review"]},{k:"visitStatus",label:"Status",opts:["Missed","Declined","Rescheduled","Reassigned"]},{k:"payorType",label:"Payor",opts:["Medicare","Medicaid","Private"]},{k:"branchName",label:"Branch",opts:["North Metro","South Metro","East District","West Division"]},{k:"team",label:"Team",opts:["Team Alpha","Team Beta","Team Gamma"]},{k:"followUpRequired",label:"Follow-Up",opts:["true","false"]}]},
 };
 
 const DS_COLS={agentSummary:["id","patient","clinician","visitType","scheduledDate","priority","status","attempts"],weeklyVisits:["id","patient","clinician","visitType","scheduledDate","status","region"],schedulingRequests:["id","patient","requestDate","requestType","visitType","priority","status"],clientSchedule:["id","patient","clinician","visitType","scheduledDate","status","followUpRequired"]};
 
 // ─── buildAttGroups ───────────────────────────────────────────────────────────
 function buildAttGroups() {
-  const as=serverCall("get_agent_summary_report",{});
-  const wv=serverCall("get_agent_summary_weekly",{});
-  const sr=serverCall("get_scheduling_requests",{});
-  const cs=serverCall("get_client_schedule_report",{});
-  const criticalNoContact=as.records.filter(r=>r.priority==="High"&&r.attempts===0);
-  const unassignedHigh=sr.records.filter(r=>r.status==="Unassigned"&&r.priority==="High");
-  const escalationCandidates=as.records.filter(r=>r.priority==="High"&&r.attempts>=2);
-  const missedNoRebook=cs.records.filter(r=>r.status==="Missed"&&r.followUpRequired&&!r.rebookedDate);
-  const lateVisits=wv.records.filter(r=>r.status==="Late");
-  const declinedFollowUp=cs.records.filter(r=>r.status==="Declined"&&r.followUpRequired);
-  const incompleteVisits=wv.records.filter(r=>r.status==="Incomplete");
-  const rescheduleRequests=sr.records.filter(r=>r.requestType==="Reschedule"&&r.status==="Unassigned");
-  const mediumMultiAttempt=as.records.filter(r=>r.priority==="Medium"&&r.attempts>=2);
-  const unassignedMedium=sr.records.filter(r=>r.status==="Unassigned"&&r.priority==="Medium");
+  const today = new Date(); today.setHours(0,0,0,0);
+  const now = new Date();
+  const isAfternoon = now.getHours() >= 12;
+  const dayOfWeek = today.getDay();
+  const medicareWeekStart = new Date(today); medicareWeekStart.setDate(today.getDate() - dayOfWeek);
+  const todayStr = today.toISOString().slice(0,10);
+
+  const as = serverCall("get_agent_summary_report",{});
+  const wv = serverCall("get_agent_summary_weekly",{});
+  const sr = serverCall("get_scheduling_requests",{});
+  const cs = serverCall("get_client_schedule_report",{});
+
+  // ── Agent Summary (today's records only) ──────────────────────────────────
+  const pendingToday      = as.records.filter(r=>r.visitStatus==="Pending" && r.visitDate===todayStr);
+  const checkedOutToday   = as.records.filter(r=>r.visitStatus==="Checked Out" && r.visitDate===todayStr);
+
+  // ── Weekly Summary (past days in current week, not today) ─────────────────
+  const pastThisWeek      = r => { const d=new Date(r.visitDate+"T00:00:00"); return d>=medicareWeekStart && d<today; };
+  const lateVisits        = wv.records.filter(r=>r.visitStatus==="Late" && pastThisWeek(r));
+  const incompleteBefore  = wv.records.filter(r=>r.visitStatus==="Incomplete" && pastThisWeek(r) && !isAfternoon);
+  const incompleteAfter   = wv.records.filter(r=>r.visitStatus==="Incomplete" && pastThisWeek(r) && isAfternoon);
+  const almostComplete    = wv.records.filter(r=>r.visitStatus==="Almost Complete" && pastThisWeek(r));
+
+  // ── Scheduling Requests ───────────────────────────────────────────────────
+  const srToday    = sr.records.filter(r=>{ const d=new Date((r.shiftDate||r.visitDate||"")+"T00:00:00"); return d>=today; });
+  const srThisWeek = sr.records.filter(r=>{ const d=new Date((r.shiftDate||r.visitDate||"")+"T00:00:00"); return d>=medicareWeekStart && d<today; });
+  const srOld      = sr.records.filter(r=>{ const d=new Date((r.shiftDate||r.visitDate||"")+"T00:00:00"); return d<medicareWeekStart; });
+
+  // ── Client Schedule ───────────────────────────────────────────────────────
+  const csNeedsSchedule = cs.records.filter(r=>["Missed","Declined","Rescheduled","Reassigned"].includes(r.visitStatus||r.statusName));
+
+  const G = (label, color, nav, rows, actions, description) =>
+    rows.length && { label, color, nav, rows, actions, description };
+
   return [
-    criticalNoContact.length&&{label:`${criticalNoContact.length} high-priority visit${criticalNoContact.length>1?"s":""} with no contact yet`,color:"#f87171",nav:{dataset:"agentSummary",filterKey:"priority",filterVal:"High",tileFilter:"noContact"},rows:criticalNoContact},
-    unassignedHigh.length&&{label:`${unassignedHigh.length} unassigned high-priority request${unassignedHigh.length>1?"s":""}`,color:"#f87171",nav:{dataset:"schedulingRequests",filterKey:"status",filterVal:"Unassigned",tileFilter:"high"},rows:unassignedHigh},
-    escalationCandidates.length&&{label:`${escalationCandidates.length} visit${escalationCandidates.length>1?"s":""} ready to escalate`,color:"#fbbf24",nav:{dataset:"agentSummary",filterKey:"priority",filterVal:"High",tileFilter:"multiAttempt"},rows:escalationCandidates},
-    missedNoRebook.length&&{label:`${missedNoRebook.length} missed visit${missedNoRebook.length>1?"s":""} with no rebook scheduled`,color:"#c084fc",nav:{dataset:"clientSchedule",filterKey:"status",filterVal:"Missed",tileFilter:"noRebook"},rows:missedNoRebook},
-    lateVisits.length&&{label:`${lateVisits.length} late visit${lateVisits.length>1?"s":""} this week`,color:"#fb923c",nav:{dataset:"weeklyVisits",filterKey:"status",filterVal:"Late",tileFilter:"late"},rows:lateVisits},
-    declinedFollowUp.length&&{label:`${declinedFollowUp.length} declined visit${declinedFollowUp.length>1?"s":""} requiring re-engagement`,color:"#e879f9",nav:{dataset:"clientSchedule",filterKey:"status",filterVal:"Declined",tileFilter:"followUpPending"},rows:declinedFollowUp},
-    incompleteVisits.length&&{label:`${incompleteVisits.length} incomplete visit${incompleteVisits.length>1?"s":""} with no completion logged`,color:"#94a3b8",nav:{dataset:"weeklyVisits",filterKey:"status",filterVal:"Incomplete",tileFilter:"incomplete"},rows:incompleteVisits},
-    rescheduleRequests.length&&{label:`${rescheduleRequests.length} unassigned reschedule request${rescheduleRequests.length>1?"s":""}`,color:"#38bdf8",nav:{dataset:"schedulingRequests",filterKey:"requestType",filterVal:"Reschedule",tileFilter:"unassigned"},rows:rescheduleRequests},
-    mediumMultiAttempt.length&&{label:`${mediumMultiAttempt.length} medium-priority visit${mediumMultiAttempt.length>1?"s":""} stalled at 2+ attempts`,color:"#a3e635",nav:{dataset:"agentSummary",filterKey:"priority",filterVal:"Medium",tileFilter:"multiAttempt"},rows:mediumMultiAttempt},
-    unassignedMedium.length&&{label:`${unassignedMedium.length} medium-priority request${unassignedMedium.length>1?"s":""} awaiting assignment`,color:"#67e8f9",nav:{dataset:"schedulingRequests",filterKey:"status",filterVal:"Unassigned",tileFilter:"mediumReq"},rows:unassignedMedium},
+    // Agent Summary
+    G(`${pendingToday.length} pending visit${pendingToday.length>1?"s":""} today`,
+      "#0ea5e9",
+      {dataset:"agentSummary", filterKey:"visitStatus", filterVal:"Pending", tileFilter:"pending"},
+      pendingToday,
+      ["Follow Up"],
+      "Follow up with the agent on each pending visit to confirm status."),
+
+    G(`${checkedOutToday.length} checked-out visit${checkedOutToday.length>1?"s":""} today`,
+      "#0ea5e9",
+      {dataset:"agentSummary", filterKey:"visitStatus", filterVal:"Checked Out", tileFilter:"checkedOut"},
+      checkedOutToday,
+      ["Follow Up"],
+      "Contact the agent to follow up on each checked-out visit and confirm current status."),
+
+    // Weekly Summary
+    G(`${lateVisits.length} late visit${lateVisits.length>1?"s":""} from earlier this week`,
+      "#ef4444",
+      {dataset:"weeklyVisits", filterKey:"visitStatus", filterVal:"Late", tileFilter:"late"},
+      lateVisits,
+      ["Mark Missed"],
+      "These visits are late with no resolution. Mark each as missed in the system."),
+
+    ...( incompleteBefore.length ? [
+    { label:`${incompleteBefore.length} incomplete visit${incompleteBefore.length>1?"s":""} — resolve before afternoon`,
+      color:"#d97706",
+      nav:{dataset:"weeklyVisits", filterKey:"visitStatus", filterVal:"Incomplete", tileFilter:"incomplete"},
+      rows:incompleteBefore, actions:["Resolve Before Afternoon"],
+      description:"These visits must be resolved before afternoon. This is a reminder — no external action required yet." }
+    ] : []),
+
+    ...( incompleteAfter.length ? [
+    { label:`${incompleteAfter.length} incomplete visit${incompleteAfter.length>1?"s":""} — past afternoon deadline`,
+      color:"#dc2626",
+      nav:{dataset:"weeklyVisits", filterKey:"visitStatus", filterVal:"Incomplete", tileFilter:"incomplete"},
+      rows:incompleteAfter, actions:["Follow Up with Agent"],
+      description:"These visits are past the afternoon deadline. Contact the agent immediately to resolve." }
+    ] : []),
+
+    G(almostComplete.length ? `${almostComplete.length} almost-complete visit${almostComplete.length>1?"s":""} — HCHB ticket needed` : "",
+      "#8b5cf6",
+      {dataset:"weeklyVisits", filterKey:"visitStatus", filterVal:"Almost Complete", tileFilter:"almostComplete"},
+      almostComplete,
+      ["Create HCHB Ticket"],
+      "Each almost-complete visit requires a corresponding HCHB ticket to be created and closed."),
+
+    // ── Paused visits ──────────────────────────────────────────────────────
+    ...(() => {
+      const pausedVisits = wv.records.filter(r=>r.visitStatus==="Paused" && pastThisWeek(r));
+      return pausedVisits.length ? [{
+        label:`${pausedVisits.length} paused visit${pausedVisits.length>1?"s":""} from earlier this week`,
+        color:"#0ea5e9",
+        nav:{dataset:"weeklyVisits", filterKey:"visitStatus", filterVal:"Paused", tileFilter:"paused"},
+        rows:pausedVisits, actions:["Follow Up with Agent"],
+        description:"Follow up with the assigned agent on each paused visit to determine next steps."
+      }] : [];
+    })(),
+
+    // Scheduling Requests
+    G(`${srToday.length} unscheduled request${srToday.length>1?"s":""} for today or a future date`,
+      "#6366f1",
+      {dataset:"schedulingRequests", filterKey:"requestStatus", filterVal:"Unscheduled", tileFilter:"unscheduled"},
+      srToday,
+      ["Assign to Clinician"],
+      "Assign each of these requests to an available clinician as soon as possible."),
+
+    G(`${srThisWeek.length} unscheduled request${srThisWeek.length>1?"s":""} from earlier this week`,
+      "#059669",
+      {dataset:"schedulingRequests", filterKey:"requestStatus", filterVal:"Unscheduled", tileFilter:"unscheduled"},
+      srThisWeek,
+      ["Reschedule in Week"],
+      "These visits are from earlier this Medicare week and can be rescheduled within the same week."),
+
+    G(`${srOld.length} unscheduled request${srOld.length>1?"s":""} from a previous Medicare week`,
+      "#dc2626",
+      {dataset:"schedulingRequests", filterKey:"requestStatus", filterVal:"Unscheduled", tileFilter:"unscheduled"},
+      srOld,
+      ["Mark as Missed", "Write New Order"],
+      "These visits are from a prior Medicare week. Mark them as missed or write a new order to void."),
+
+    // Client Schedule
+    G(`${csNeedsSchedule.length} client visit${csNeedsSchedule.length>1?"s":""} requiring scheduling`,
+      "#6366f1",
+      {dataset:"clientSchedule", filterKey:"visitStatus", filterVal:"", tileFilter:""},
+      csNeedsSchedule,
+      ["Schedule in Console"],
+      "Open the scheduling console and schedule each of these client visits."),
+
   ].filter(Boolean);
 }
 
@@ -338,10 +574,24 @@ const state = {
   colConfig: {},         // per-dataset: { cols:[...], hidden:Set }
   colPanelOpen: false,
   tileFilter: null,
+  msgTileFilter: {},    // per-message tile filter: { [msg._id]: tileKey }
+};
+
+// Default visible columns per dataset — everything else is hidden but accessible via Customise Columns
+const DEFAULT_VISIBLE = {
+  agentSummary:        ["visitDate","visitNumber","agentName","agentId","clientName","branchName","discipline","visitType","visitStatus","prodPoints","payorType","team"],
+  weeklyVisits:        ["visitDate","visitNumber","agentName","agentId","clientName","branchName","discipline","visitType","visitStatus","prodPoints","team"],
+  schedulingRequests:  ["shiftDate","clientName","clientId","branchName","team","serviceLine","serviceCode","begTime","endTime","shiftHrs","requestStatus","openShifts"],
+  clientSchedule:      ["shiftDate","clientName","cltId","wkrFullname","branchName","team","visitJobDesc","serviceCode","visitStatus","billable","followUpRequired","rebookedDate"],
 };
 
 function getColCfg(ds) {
-  if (!state.colConfig[ds]) state.colConfig[ds] = { cols:[...RC[ds].cols], hidden:new Set() };
+  if (!state.colConfig[ds]) {
+    const allCols = [...RC[ds].cols];
+    const visible = new Set(DEFAULT_VISIBLE[ds] || allCols);
+    const hidden  = new Set(allCols.filter(c => !visible.has(c)));
+    state.colConfig[ds] = { cols: allCols, hidden };
+  }
   return state.colConfig[ds];
 }
 function getActiveCols() {
@@ -350,55 +600,134 @@ function getActiveCols() {
 }
 
 // ─── Chat response processor (predefined only) ────────────────────────────────
-const CHIPS = [
-  "What needs attention today?",
-  "Show all pending visits",
-  "High priority pending visits",
-  "Late visits this week",
-  "All unassigned requests",
-  "Missed visits needing follow-up",
-  "Show incomplete visits",
-  "Show declined visits",
-  "Show visits for Dr. James Patel",
-  "Agent summary",
-  "Weekly summary",
+// Grouped chip definitions — used for empty-state and post-message suggestions
+const CHIP_GROUPS = [
+  {
+    label: "Overview",
+    icon: "🔍",
+    chips: [
+      "What needs attention today?",
+      "Agent summary",
+      "Weekly summary",
+      "Scheduling requests",
+      "Client schedule",
+    ]
+  },
+  {
+    label: "Agent Summary",
+    icon: "📋",
+    chips: [
+      "Show all pending visits",
+      "Checked out visits",
+      "Visits requiring eval sign-off",
+      "Show visits for Dr. James Patel",
+    ]
+  },
+  {
+    label: "Weekly Summary",
+    icon: "📅",
+    chips: [
+      "Late visits this week",
+      "Show incomplete visits",
+      "Almost complete visits",
+      "Paused visits",
+    ]
+  },
+  {
+    label: "Scheduling Requests",
+    icon: "📨",
+    chips: [
+      "Show unscheduled requests",
+      "Requests due today",
+      "Requests this week",
+      "Overdue requests",
+    ]
+  },
+  {
+    label: "Client Schedule",
+    icon: "🔁",
+    chips: [
+      "Missed visits needing follow-up",
+      "Show declined visits",
+      "Rescheduled visits",
+      "Reassigned visits",
+    ]
+  },
 ];
 
+// Flat list for backwards compat (post-message bar etc.)
+const CHIPS = CHIP_GROUPS.flatMap(g => g.chips);
+
 const CHIP_ROUTING = {
-  "What needs attention today?": () => handleAttentionQuery(),
-  "Show all pending visits": () => handleReport("get_agent_summary_report", {}, "agentSummary", "Pending Visits"),
-  "High priority pending visits": () => handleReport("get_agent_summary_report", {priority:"High"}, "agentSummary", "High Priority Visits"),
-  "Late visits this week": () => handleReport("get_agent_summary_weekly", {status:"Late"}, "weeklyVisits", "Late Visits"),
-  "All unassigned requests": () => handleReport("get_scheduling_requests", {status:"Unassigned"}, "schedulingRequests", "Unassigned Requests"),
+  "What needs attention today?": () => {
+    const groups = buildAttGroups();
+    const total = groups.reduce((s,g)=>s+g.rows.length,0);
+    const summaryLine = total===0
+      ? "Everything looks good — no urgent actions outstanding."
+      : `${total} item${total>1?"s":""} across ${groups.length} category${groups.length>1?"s":""} need your attention today.`;
+    // Convert buildAttGroups groups into attention sections
+    const sections = groups.map(g => ({
+      label:   g.label,
+      color:   g.color,
+      rows:    g.rows,
+      dataset: g.nav.dataset,
+      filterKey: g.nav.filterKey||"",
+      filterVal: g.nav.filterVal||"",
+      tileFilter: g.nav.tileFilter||"",
+      description: g.description||"",
+      actions: g.actions||[],
+      note:    g.description||"",
+    }));
+    return {type:"attention", sections, summaryLine, intent:"Action Summary"};
+  },
+  "Show all pending visits": () => handleReport("get_agent_summary_report", {visitStatus:"Pending"}, "agentSummary", "Pending Visits"),
+  "Checked out visits": () => handleReport("get_agent_summary_report", {visitStatus:"Checked Out"}, "agentSummary", "Overdue Visits"),
+  "Late visits this week": () => handleReport("get_agent_summary_weekly", {visitStatus:"Late"}, "weeklyVisits", "Late Visits"),
+  "Show unscheduled requests": () => handleReport("get_scheduling_requests", {requestStatus:"Unscheduled"}, "schedulingRequests", "Unscheduled Requests"),
   "Missed visits needing follow-up": () => handleReport("get_client_schedule_report", {status:"Missed",followUpRequired:true}, "clientSchedule", "Missed Visits — Follow-Up Required"),
-  "Show incomplete visits": () => handleReport("get_agent_summary_weekly", {status:"Incomplete"}, "weeklyVisits", "Incomplete Visits"),
+  "Show incomplete visits": () => handleReport("get_agent_summary_weekly", {visitStatus:"Incomplete"}, "weeklyVisits", "Incomplete Visits"),
   "Show declined visits": () => handleReport("get_client_schedule_report", {status:"Declined"}, "clientSchedule", "Declined Visits"),
   "Show visits for Dr. James Patel": () => handleReport("get_agent_summary_report", {clinician:"Patel"}, "agentSummary", "Visits — Dr. James Patel"),
-  "Agent summary": () => handleReport("get_agent_summary_report", {}, "agentSummary", "Agent Summary"),
-  "Weekly summary": () => handleReport("get_agent_summary_weekly", {}, "weeklyVisits", "Weekly Summary"),
+  "Agent summary":               () => handleReport("get_agent_summary_report",    {},                                    "agentSummary",       "Agent Summary"),
+  "Weekly summary":              () => handleReport("get_agent_summary_weekly",     {},                                    "weeklyVisits",       "Weekly Summary"),
+  "Scheduling requests":         () => handleReport("get_scheduling_requests",      {},                                    "schedulingRequests", "Scheduling Requests"),
+  "Client schedule":             () => handleReport("get_client_schedule_report",   {},                                    "clientSchedule",     "Client Schedule"),
+  // Agent Summary filters
+  "All unassigned requests":     () => handleReport("get_scheduling_requests",      {requestStatus:"Unscheduled"},         "schedulingRequests", "Unscheduled Requests"),
+  "Visits requiring eval sign-off": () => handleReport("get_agent_summary_report",  {reqEval:"Y"},                         "agentSummary",       "Eval Sign-Off Required"),
+  // Weekly Summary filters
+  "Almost complete visits":      () => handleReport("get_agent_summary_weekly",     {visitStatus:"Almost Complete"},       "weeklyVisits",       "Almost Complete Visits"),
+  "Paused visits":               () => handleReport("get_agent_summary_weekly",     {visitStatus:"Paused"},                "weeklyVisits",       "Paused Visits"),
+  // Scheduling Requests filters
+  "Requests due today":          () => handleReport("get_scheduling_requests",      {},                                    "schedulingRequests", "Requests Due Today",    "srToday"),
+  "Requests this week":          () => handleReport("get_scheduling_requests",      {},                                    "schedulingRequests", "Requests This Week",    "srThisWeek"),
+  "Overdue requests":            () => handleReport("get_scheduling_requests",      {},                                    "schedulingRequests", "Overdue Requests",      "srOverdue"),
+  // Client Schedule filters
+  "Rescheduled visits":          () => handleReport("get_client_schedule_report",   {visitStatus:"Rescheduled"},           "clientSchedule",     "Rescheduled Visits"),
+  "Reassigned visits":           () => handleReport("get_client_schedule_report",   {visitStatus:"Reassigned"},            "clientSchedule",     "Reassigned Visits"),
 };
 
 function handleAttentionQuery() {
   const as=_store.agentSummary, sr=_store.schedulingRequests, cs=_store.clientSchedule, wv=_store.weeklyVisits;
-  const criticalNoContact=as.filter(r=>r.priority==="High"&&r.attempts===0);
-  const escalationCandidates=as.filter(r=>r.priority==="High"&&r.attempts>=2);
-  const unassignedHigh=sr.filter(r=>r.status==="Unassigned"&&r.priority==="High");
-  const missedNoRebook=cs.filter(r=>r.status==="Missed"&&r.followUpRequired&&!r.rebookedDate);
-  const lateVisits=wv.filter(r=>r.status==="Late");
+  const checkedOut=as.filter(r=>r.visitStatus==="Checked Out");
+  const reqEvalPending=as.filter(r=>r.reqEval==="Y");
+  const unscheduledReqEval=sr.filter(r=>r.requestStatus==="Unscheduled"&&r.reqEval==="Y");
+  const missedNoRebook=cs.filter(r=>r.visitStatus==="Missed"&&r.followUpRequired&&!r.rebookedDate);
+  const lateVisits=wv.filter(r=>r.visitStatus==="Late");
   const sections=[];
-  if (criticalNoContact.length) sections.push({label:"🚨 High Priority — No Contact Yet",color:"#f87171",rows:criticalNoContact,dataset:"agentSummary",note:`${criticalNoContact.length} high-priority visit${criticalNoContact.length>1?"s":""} with zero outreach — contact today.`});
-  if (escalationCandidates.length) sections.push({label:"⚠️ Escalation Candidates",color:"#fbbf24",rows:escalationCandidates,dataset:"agentSummary",note:`${escalationCandidates.length} high-priority visit${escalationCandidates.length>1?"s":""} with 2+ failed attempts — consider escalating.`});
-  if (unassignedHigh.length) sections.push({label:"📨 Unassigned High-Priority Requests",color:"#f87171",rows:unassignedHigh,dataset:"schedulingRequests",note:`${unassignedHigh.length} urgent request${unassignedHigh.length>1?"s":""} waiting for clinician assignment.`});
-  if (missedNoRebook.length) sections.push({label:"🔁 Missed — No Rebook Scheduled",color:"#c084fc",rows:missedNoRebook,dataset:"clientSchedule",note:`${missedNoRebook.length} client${missedNoRebook.length>1?"s":""} missed their visit and have not been rebooked.`});
-  if (lateVisits.length) sections.push({label:"📅 Late Visits This Week",color:"#fb923c",rows:lateVisits,dataset:"weeklyVisits",note:`${lateVisits.length} visit${lateVisits.length>1?"s":""} are running late and may need follow-up.`});
-  const total=criticalNoContact.length+escalationCandidates.length+unassignedHigh.length+missedNoRebook.length+lateVisits.length;
+  if (checkedOut.length) sections.push({label:"🚨 Checked-Out Visits",color:"#dc2626",rows:checkedOut,dataset:"agentSummary",note:`${checkedOut.length} visit${checkedOut.length>1?"s":""} are checked out and require follow-up.`});
+  if (reqEvalPending.length) sections.push({label:"📋 Evaluation Sign-Off Pending",color:"#22d3ee",rows:reqEvalPending,dataset:"agentSummary",note:`${reqEvalPending.length} visit${reqEvalPending.length>1?"s":""} require evaluation sign-off.`});
+  if (unscheduledReqEval.length) sections.push({label:"📨 Unscheduled — Eval Required",color:"#d97706",rows:unscheduledReqEval,dataset:"schedulingRequests",note:`${unscheduledReqEval.length} request${unscheduledReqEval.length>1?"s":""} are unscheduled and need evaluation.`});
+  if (missedNoRebook.length) sections.push({label:"🔁 Missed — No Rebook Scheduled",color:"#dc2626",rows:missedNoRebook,dataset:"clientSchedule",note:`${missedNoRebook.length} client${missedNoRebook.length>1?"s":""} missed their visit with no rebook on file.`});
+  if (lateVisits.length) sections.push({label:"📅 Late Visits This Week",color:"#d97706",rows:lateVisits,dataset:"weeklyVisits",note:`${lateVisits.length} visit${lateVisits.length>1?"s":""} are running late and may need follow-up.`});
+  const total=checkedOut.length+reqEvalPending.length+unscheduledReqEval.length+missedNoRebook.length+lateVisits.length;
   const summaryLine=total===0?"Everything looks good — no urgent actions outstanding.":`${total} item${total>1?"s":""} across ${sections.length} categor${sections.length>1?"ies":"y"} need your attention today.`;
   return {type:"attention",sections,summaryLine,intent:"Action Summary"};
 }
 
-function handleReport(tool, args, ds, intent) {
-  const result=serverCall(tool, args);
-  return {type:"table",dataset:ds,columns:RC[ds].cols,rows:result.records||[],summary:result.summary||null,intent};
+function handleReport(tool, args, ds, intent, tileFilter) {
+  const result = serverCall(tool, args);
+  return {type:"table", dataset:ds, columns:RC[ds].cols, rows:result.records||[], summary:result.summary||null, intent};
 }
 
 function sendChip(text) {
@@ -406,7 +735,7 @@ function sendChip(text) {
   state.busy=true;
   addMsg({role:"user",text});
   addMsg({role:"typing",id:"typing-msg"});
-  renderApp();
+  renderChatOnly();
 
   setTimeout(()=>{
     removeTyping();
@@ -419,7 +748,7 @@ function sendChip(text) {
     }
     addMsg({role:"assistant",...result});
     state.busy=false;
-    renderApp();
+    renderChatOnly();
     scrollThread();
   }, 400);
 }
@@ -429,6 +758,41 @@ let msgIdCounter=0;
 function addMsg(msg) { state.thread.push({...msg, _id: ++msgIdCounter}); }
 function removeTyping() { state.thread = state.thread.filter(m=>m.role!=="typing"); }
 function scrollThread() { setTimeout(()=>{ const e=document.getElementById("thread-end"); if(e) e.scrollIntoView({behavior:"smooth"}); },50); }
+
+// ── Smart partial re-renders (avoid full DOM wipe + scroll jump) ──────────────
+function renderRightPaneOnly() {
+  const rp = document.getElementById("right-pane");
+  if (!rp) { renderApp(); return; }
+  // Save scroll positions of ALL scrollable descendants
+  const scrollMap = [];
+  rp.querySelectorAll("*").forEach(el => {
+    if (el.scrollTop > 0) scrollMap.push({ id: el.id, cls: el.className, scrollTop: el.scrollTop });
+  });
+  // Replace only the right pane
+  const tmp = document.createElement("div");
+  tmp.innerHTML = renderRightPane();
+  const newRp = tmp.firstElementChild;
+  rp.replaceWith(newRp);
+  bindAll();
+  // Restore scroll positions by matching id or className
+  scrollMap.forEach(({ id, cls, scrollTop }) => {
+    const el = id
+      ? document.getElementById(id)
+      : document.getElementById("right-pane")?.querySelector(`.${cls.trim().split(" ")[0]}`);
+    if (el) el.scrollTop = scrollTop;
+  });
+}
+
+function renderChatOnly() {
+  const ct = document.getElementById("chat-thread");
+  if (!ct) { renderApp(); return; }
+  // Save chat scroll position
+  const scrollTop = ct.scrollTop;
+  ct.innerHTML = renderThread();
+  bindAll();
+  // Restore chat scroll (don't snap to bottom — user is reading)
+  ct.scrollTop = scrollTop;
+}
 
 // ─── Rendering ────────────────────────────────────────────────────────────────
 function renderApp() {
@@ -473,12 +837,9 @@ function renderTopBar() {
     <div style="display:flex;align-items:center;gap:9px;">
       <div style="width:26px;height:26px;background:linear-gradient(135deg,#6366f1,#8b5cf6);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;">🏥</div>
       <span style="font-weight:700;font-size:14px;color:${TXT};letter-spacing:-.4px;">EHR Scheduler</span>
-      <span style="font-size:10px;background:${ACCBG};color:${ACC};font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:.5px;">MCP APP</span>
+
     </div>
-    <div style="display:flex;align-items:center;gap:6px;background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.18);border-radius:20px;padding:3px 10px;">
-      <span style="width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block;animation:pulse 2s infinite;"></span>
-      <span style="font-size:11px;color:#10b981;font-weight:600;">mcp-app-prototype · live</span>
-    </div>
+
   </div>`;
 }
 
@@ -492,11 +853,14 @@ function renderChatPane() {
         ${isExpanded?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/><polyline points="20 18 14 12 20 6"/></svg>`:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/><polyline points="4 18 10 12 4 6"/></svg>`}
       </button>
     </div>
-    <div id="thread" style="flex:1;overflow-y:auto;padding:16px 16px 0;">${renderThread()}</div>
-    ${state.thread.length>0?`
-    <div style="padding:6px 12px;display:flex;gap:6px;overflow-x:auto;border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;">
-      ${CHIPS.slice(0,4).map(c=>`<button class="chip-sm send-chip" data-chip="${c}">${c}</button>`).join("")}
-    </div>`:""}
+    <div id="chat-thread" style="flex:1;overflow-y:auto;padding:16px 16px 0;">${renderThread()}</div>
+    <div style="padding:5px 10px;display:flex;gap:5px;overflow-x:auto;border-top:1px solid rgba(255,255,255,.04);flex-shrink:0;scrollbar-width:none;">
+      <button class="chip-sm send-chip" data-chip="What needs attention today?">🔍 Attention</button>
+      <button class="chip-sm send-chip" data-chip="Agent summary">📋 Agent Summary</button>
+      <button class="chip-sm send-chip" data-chip="Weekly summary">📅 Weekly Summary</button>
+      <button class="chip-sm send-chip" data-chip="Scheduling requests">📨 Scheduling Requests</button>
+      <button class="chip-sm send-chip" data-chip="Client schedule">🔁 Client Schedule</button>
+    </div>
     <div style="padding:10px 12px 12px;border-top:1px solid ${BRD};background:rgba(14,17,24,.95);flex-shrink:0;">
       <div style="background:rgba(255,255,255,.04);border:1px solid ${BRD};border-radius:12px;padding:10px 14px;text-align:center;">
         <p style="font-size:12px;color:${MUT};margin:0;">Select a suggested message above to ask the assistant</p>
@@ -514,8 +878,12 @@ function renderThread() {
         <h2 style="font-size:17px;font-weight:800;color:${TXT};letter-spacing:-.4px;margin-bottom:6px;">EHR Scheduling Assistant</h2>
         <p style="color:${MUT};font-size:12px;line-height:1.7;">Click any suggestion below to get started. Results render as live UI — click any row for actions.</p>
       </div>
-      <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;">
-        ${CHIPS.map(c=>`<button class="chip send-chip" data-chip="${c}">${c}</button>`).join("")}
+      <div style="display:flex;flex-wrap:wrap;gap:7px;justify-content:center;max-width:360px;">
+        <button class="chip send-chip" data-chip="What needs attention today?">🔍 What needs attention today?</button>
+        <button class="chip send-chip" data-chip="Agent summary">📋 Agent Summary</button>
+        <button class="chip send-chip" data-chip="Weekly summary">📅 Weekly Summary</button>
+        <button class="chip send-chip" data-chip="Scheduling requests">📨 Scheduling Requests</button>
+        <button class="chip send-chip" data-chip="Client schedule">🔁 Client Schedule</button>
       </div>
     </div>
     <div id="thread-end"></div>`;
@@ -544,6 +912,7 @@ function renderMsg(msg) {
     let content="";
     if (msg.intent) content+=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:7px;"><span style="width:4px;height:4px;border-radius:50%;background:${ACC};display:inline-block;"></span><span style="font-size:10px;font-weight:700;color:${ACC};text-transform:uppercase;letter-spacing:.8px;">${esc(msg.intent)}</span></div>`;
     if (msg.type==="attention") content+=renderActionSummary(msg);
+
     if (msg.type==="table") content+=renderTableMsg(msg);
     if (msg.type==="action-result") content+=renderActionResult(msg);
     if (msg.type==="raw") content+=`<pre style="color:#94a3b8;font-size:11px;white-space:pre-wrap;background:rgba(255,255,255,.03);padding:10px;border-radius:8px;border:1px solid ${BRD};">${esc(msg.text)}</pre>`;
@@ -558,50 +927,132 @@ function renderMsg(msg) {
 }
 
 function renderActionSummary(msg) {
-  const sections=msg.sections||[];
-  let html=`<p style="font-size:12.5px;color:#cbd5e1;line-height:1.6;margin:0 0 10px;">${esc(msg.summaryLine)}</p>`;
-  if (sections.length>0) {
-    html+=`<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;">`;
-    sections.forEach(sec=>{
-      html+=`<span style="display:flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;color:#cbd5e1;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:20px;padding:3px 10px;"><span style="width:6px;height:6px;border-radius:50%;background:${sec.color};display:inline-block;flex-shrink:0;"></span>${sec.rows.length} ${sec.label.replace(/^[^\w]*/,"")}</span>`;
-    });
-    html+=`</div>`;
-    sections.forEach((sec,si)=>{
-      const isOpen=state.sectionOpenState[msg._id+"-"+si]||false;
-      const cfg=DS_COLS[sec.dataset]||[];
-      html+=`
-      <div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden;margin-bottom:6px;">
-        <button class="section-toggle section-header" data-msgid="${msg._id}" data-si="${si}" style="border-bottom:${isOpen?"1px solid rgba(255,255,255,.07)":"none"};">
-          <span style="width:3px;align-self:stretch;border-radius:2px;background:${sec.color};flex-shrink:0;display:block;"></span>
-          <span style="flex:1;font-size:11.5px;font-weight:700;color:#e2e8f0;">${sec.label}</span>
-          <span style="font-size:10px;color:#64748b;background:rgba(255,255,255,.05);border-radius:10px;padding:1px 7px;font-family:monospace;font-weight:700;">${sec.rows.length}</span>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2.5" style="transform:${isOpen?"rotate(180deg)":"rotate(0deg)"};transition:transform .18s;flex-shrink:0;"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        ${isOpen?`
-        <div style="padding:5px 12px 8px;font-size:11px;color:#64748b;border-bottom:1px solid rgba(255,255,255,.05);">${sec.note}</div>
-        <div style="overflow-x:auto;max-height:220px;overflow-y:auto;">
+  const sections = msg.sections || [];
+
+  let html = `<p style="font-size:12.5px;color:#cbd5e1;line-height:1.6;margin:0 0 10px;">${esc(msg.summaryLine)}</p>`;
+  if (sections.length === 0) return html;
+
+  html += `<div style="display:flex;flex-direction:column;gap:6px;">`;
+
+  sections.forEach((sec, si) => {
+    const c       = sec.color || "#6366f1";
+    const openKey = (msg._id||"att") + "-" + si;
+    const isOpen  = !!state.sectionOpenState[openKey];
+
+    // Which cols to show — use DEFAULT_VISIBLE for the dataset
+    const dv   = DEFAULT_VISIBLE[sec.dataset] || RC[sec.dataset]?.cols || [];
+    const cols = dv.slice(0, 8); // cap at 8 for readability in chat
+
+    html += `
+    <div style="border:1px solid rgba(255,255,255,.07);border-radius:10px;overflow:hidden;background:rgba(255,255,255,.012);">
+
+      <!-- Header row -->
+      <div style="display:flex;align-items:stretch;">
+        <div style="width:3px;background:${c};flex-shrink:0;"></div>
+        <div style="flex:1;padding:9px 12px;min-width:0;">
+          <div style="display:flex;align-items:center;gap:7px;">
+            <span style="font-size:11.5px;font-weight:700;color:#e2e8f0;flex:1;line-height:1.3;">${esc(sec.label)}</span>
+            <span style="font-size:10px;font-weight:700;color:${c};background:${c}22;border-radius:10px;padding:1px 7px;flex-shrink:0;">${sec.rows.length}</span>
+            <!-- Toggle button -->
+            <button class="section-toggle"
+              data-msgid="${msg._id||"att"}"
+              data-si="${si}"
+              style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;font-size:10px;font-weight:600;border-radius:20px;border:1.5px solid ${c}55;background:${isOpen ? c+"28" : c+"12"};color:${c};cursor:pointer;font-family:inherit;transition:background .12s,border-color .12s;flex-shrink:0;"
+              onmouseenter="this.style.background='${c}28';this.style.borderColor='${c}99';"
+              onmouseleave="this.style.background='${isOpen ? c+"28" : c+"12"}';this.style.borderColor='${c}55';">
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="transition:transform .18s;transform:${isOpen?"rotate(180deg)":"rotate(0deg)"}"><polyline points="6 9 12 15 18 9"/></svg>
+              ${isOpen ? "Hide" : "View report"}
+            </button>
+          </div>
+          ${!isOpen && (sec.description||sec.note) ? `<p style="font-size:10.5px;color:#64748b;margin:4px 0 0;line-height:1.45;">${esc(sec.description||sec.note)}</p>` : ""}
+        </div>
+      </div>
+
+      <!-- Collapsible table -->
+      ${isOpen ? `
+      <div style="border-top:1px solid rgba(255,255,255,.06);">
+        ${sec.description||sec.note ? `<div style="padding:5px 12px 6px;font-size:10.5px;color:#64748b;border-bottom:1px solid rgba(255,255,255,.04);line-height:1.45;">${esc(sec.description||sec.note)}</div>` : ""}
+        <div style="overflow-x:auto;max-height:260px;overflow-y:auto;">
           <table>
-            <thead><tr>${cfg.map(c=>`<th>${clbl(c)}</th>`).join("")}</tr></thead>
-            <tbody>${sec.rows.map(row=>`<tr>${cfg.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
+            <thead><tr>
+              ${cols.map(c2=>`<th style="white-space:nowrap;">${clbl(c2)}</th>`).join("")}
+              <th style="color:${MUT};white-space:nowrap;min-width:140px;">Actions</th>
+            </tr></thead>
+            <tbody>
+              ${sec.rows.length===0
+                ? `<tr><td colspan="${cols.length+1}" style="padding:20px;text-align:center;color:${MUT};">No records</td></tr>`
+                : sec.rows.map(row=>`<tr>
+                    ${cols.map(col=>`<td>${cell(col,row[col])}</td>`).join("")}
+                    <td style="padding:5px 8px;vertical-align:middle;">${renderActionBtns(sec.dataset,row,true)}</td>
+                  </tr>`).join("")
+              }
+            </tbody>
           </table>
-        </div>`:""}
-      </div>`;
-    });
-  }
+        </div>
+      </div>` : ""}
+
+    </div>`;
+  });
+
+  html += `</div>`;
   return html;
 }
 
 function renderTableMsg(msg) {
-  const cols=msg.columns||RC[msg.dataset]?.cols||[];
-  const rows=msg.rows||[];
-  if (rows.length===0) return `<div style="padding:20px;text-align:center;color:${MUT};font-size:12px;background:rgba(255,255,255,.02);border:1px solid ${BRD};border-radius:10px;">No records found</div>`;
+  const ds      = msg.dataset;
+  const msgId   = msg._id || "msg";
+  // Per-message tile filter (independent of right-pane tileFilter)
+  const activeTile = state.msgTileFilter[msgId] || null;
+
+  // Respect user column config (DEFAULT_VISIBLE + any customisations)
+  const cfg  = ds ? getColCfg(ds) : null;
+  const cols = cfg
+    ? cfg.cols.filter(c => !cfg.hidden.has(c))
+    : (msg.columns || RC[ds]?.cols || []);
+
+  const allRows  = msg.rows || [];
+  // Apply tile filter if active
+  const rows = activeTile && TILE_META[activeTile]
+    ? allRows.filter(TILE_META[activeTile].pred)
+    : allRows;
+
+  if (allRows.length===0) return `<div style="padding:20px;text-align:center;color:${MUT};font-size:12px;background:rgba(255,255,255,.02);border:1px solid ${BRD};border-radius:10px;">No records found</div>`;
+
+  // Build tile bar from summary keys that exist in TILE_META
+  const summary   = msg.summary || {};
+  const tileEntries = Object.entries(summary).filter(([k,v]) => k!=="total" && typeof v==="number" && TILE_META[k]);
+  const tileBar = tileEntries.length ? `
+    <div style="display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;overflow-x:auto;align-items:stretch;">
+      ${tileEntries.map(([k,v]) => {
+        const m = TILE_META[k];
+        const active = activeTile === k;
+        return `<button class="tile-btn msg-tile-btn" data-key="${k}" data-msgid="${msgId}"
+          style="display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:5px 12px 6px;border-radius:7px;cursor:pointer;font-family:inherit;flex-shrink:0;transition:all .15s;min-width:60px;border:1px solid ${active?m.color+"55":"rgba(255,255,255,.06)"};background:${active?m.color+"18":"rgba(255,255,255,.025)"};">
+          <span style="font-size:17px;font-weight:800;color:${active?m.color:"#e2e8f0"};font-family:monospace;line-height:1;">${v}</span>
+          <span style="font-size:9px;font-weight:600;color:${active?m.color:"#64748b"};text-transform:uppercase;letter-spacing:.6px;white-space:nowrap;">${m.label}</span>
+        </button>`;
+      }).join("")}
+      ${activeTile ? `<button class="msg-tile-clear" data-msgid="${msgId}" style="font-size:10px;color:${MUT};background:none;border:1px solid ${BRD};border-radius:7px;padding:3px 9px;cursor:pointer;font-family:inherit;flex-shrink:0;align-self:center;">✕ Clear</button>` : ""}
+    </div>` : "";
+
+  const hasActions = ds && rows.some(r => getRowActions(ds, r).length > 0);
   return `
   <div style="border:1px solid ${BRD};border-radius:10px;overflow:hidden;">
-    ${msg.summary?renderSummaryCards(msg.summary):""}
-    <div style="overflow-x:auto;max-height:280px;">
+    ${tileBar}
+    <div style="overflow-x:auto;max-height:260px;">
       <table>
-        <thead><tr>${cols.map(c=>`<th>${clbl(c)}</th>`).join("")}</tr></thead>
-        <tbody>${rows.map(row=>`<tr>${cols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}</tr>`).join("")}</tbody>
+        <thead><tr>
+          ${cols.map(c=>`<th>${clbl(c)}</th>`).join("")}
+          ${hasActions?`<th style="color:${MUT};white-space:nowrap;min-width:140px;">Actions</th>`:""}
+        </tr></thead>
+        <tbody>
+          ${rows.length===0
+            ? `<tr><td colspan="${cols.length + (hasActions?1:0)}" style="padding:20px;text-align:center;color:${MUT};">No records match filter</td></tr>`
+            : rows.map(row=>`<tr>
+                ${cols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}
+                ${hasActions?`<td style="padding:5px 8px;vertical-align:middle;">${renderActionBtns(ds,row,true)}</td>`:""}
+              </tr>`).join("")}
+        </tbody>
       </table>
     </div>
   </div>`;
@@ -641,7 +1092,7 @@ function renderActionResult(msg) {
 function renderRightPane() {
   const isExpanded=state.paneExpand==="right";
   return `
-  <div style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;">
+  <div id="right-pane" style="flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative;">
     <div style="display:flex;align-items:center;justify-content:space-between;padding:0 10px;height:36px;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;">
       <button id="expand-right" class="btn-icon" title="${isExpanded?"Restore split":"Expand reports"}">
         ${isExpanded?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/><polyline points="4 18 10 12 4 6"/></svg>`:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/><polyline points="20 18 14 12 20 6"/></svg>`}
@@ -660,14 +1111,6 @@ function renderDashboard() {
   const dateStr=ist.toLocaleDateString("en-IN",{weekday:"long",month:"long",day:"numeric",year:"numeric",timeZone:"Asia/Kolkata"});
   const timeStr=ist.toLocaleTimeString("en-IN",{hour:"numeric",minute:"2-digit",hour12:true,timeZone:"Asia/Kolkata"})+" IST";
 
-  const CAP=3;
-  const attGroups=buildAttGroups();
-  const visible=attGroups.slice(0,CAP);
-  const hiddenGroups=attGroups.slice(CAP);
-  const overflow=hiddenGroups.reduce((s,g)=>s+g.rows.length,0);
-
-  const totalAlerts=attGroups.reduce((s,g)=>s+g.rows.length,0);
-
   // Report cards data
   const as=serverCall("get_agent_summary_report",{});
   const wv=serverCall("get_agent_summary_weekly",{});
@@ -675,25 +1118,21 @@ function renderDashboard() {
   const cs=serverCall("get_client_schedule_report",{});
 
   const reportLinks=[
-    {id:"agentSummary",icon:"📋",label:"Agent Summary",desc:"Pending visits requiring follow-up, escalation, or scheduling action.",stats:[{label:"Pending",value:as.total,color:"#fbbf24"},{label:"High priority",value:as.records.filter(r=>r.priority==="High").length,color:"#f87171"},{label:"No contact",value:as.records.filter(r=>r.attempts===0).length,color:"#22d3ee"}],urgency:as.records.filter(r=>r.priority==="High").length>0?"high":as.total>0?"medium":"clear"},
-    {id:"weeklyVisits",icon:"📅",label:"Weekly Summary",desc:"All visits from the current week — completed, late, and incomplete.",stats:[{label:"Late",value:wv.summary?.late||0,color:"#f87171"},{label:"Incomplete",value:wv.summary?.incomplete||0,color:"#fbbf24"},{label:"Completed",value:wv.summary?.completed||0,color:"#34d399"}],urgency:(wv.summary?.late||0)>0?"high":(wv.summary?.incomplete||0)>0?"medium":"clear"},
-    {id:"schedulingRequests",icon:"📨",label:"Scheduling Requests",desc:"New visit requests and reschedules awaiting clinician assignment.",stats:[{label:"Unassigned",value:sr.records.filter(r=>r.status==="Unassigned").length,color:"#fbbf24"},{label:"High priority",value:sr.records.filter(r=>r.priority==="High").length,color:"#f87171"},{label:"Reschedules",value:sr.records.filter(r=>r.requestType==="Reschedule").length,color:"#60a5fa"}],urgency:sr.records.filter(r=>r.priority==="High").length>0?"high":sr.total>0?"medium":"clear"},
+    {id:"agentSummary",icon:"📋",label:"Agent Summary",desc:"Pending visits requiring follow-up, escalation, or scheduling action.",stats:[{label:"Pending",value:as.records.filter(r=>r.visitStatus==="Pending").length,color:"#fbbf24"},{label:"Checked Out",value:as.records.filter(r=>r.visitStatus==="Checked Out").length,color:"#f87171"},{label:"Req. Eval",value:as.records.filter(r=>r.reqEval==="Y").length,color:"#22d3ee"}],urgency:as.records.filter(r=>r.visitStatus==="Checked Out").length>0?"high":as.total>0?"medium":"clear"},
+    {id:"weeklyVisits",icon:"📅",label:"Weekly Summary",desc:"All visits from the current week — completed, late, and incomplete.",stats:[{label:"Late",value:wv.summary?.late||0,color:"#f87171"},{label:"Paused",value:wv.summary?.paused||0,color:"#60a5fa"},{label:"Incomplete",value:wv.summary?.incomplete||0,color:"#fbbf24"}],urgency:(wv.summary?.late||0)>0?"high":(wv.summary?.incomplete||0)>0?"medium":"clear"},
+    {id:"schedulingRequests",icon:"📨",label:"Scheduling Requests",desc:"New visit requests and reschedules awaiting clinician assignment.",stats:[{label:"Unscheduled",value:sr.records.filter(r=>r.requestStatus==="Unscheduled").length,color:"#fbbf24"},{label:"Open Shifts",value:sr.records.filter(r=>(r.openShifts||0)>0).length,color:"#60a5fa"},{label:"Overdue",value:sr.records.filter(r=>{const d=new Date((r.shiftDate||"")+"T00:00:00"),t=new Date();t.setHours(0,0,0,0);const sun=new Date(t);sun.setDate(t.getDate()-t.getDay());return d<sun;}).length,color:"#f87171"}],urgency:sr.records.filter(r=>r.requestStatus==="Unscheduled").length>0?"high":sr.total>0?"medium":"clear"},
     {id:"clientSchedule",icon:"🔁",label:"Client Schedule",desc:"Missed, declined, and rescheduled visits needing outreach or rebooking.",stats:[{label:"Follow-up req.",value:cs.summary?.followUpPending||0,color:"#a78bfa"},{label:"Missed",value:cs.summary?.missed||0,color:"#f87171"},{label:"Declined",value:cs.summary?.declined||0,color:"#fbbf24"}],urgency:(cs.summary?.followUpPending||0)>0?"high":"clear"},
   ];
-  const urgColor={high:"#f87171",medium:"#fbbf24",clear:"#34d399"};
+  const urgColor={high:"#dc2626",medium:"#d97706",clear:"#34d399"};
+
+  // Attention groups
+  const attGroups = buildAttGroups();
+  const totalAlerts = attGroups.reduce((s,g)=>s+g.rows.length,0);
 
   return `
   <div style="flex:1;display:flex;flex-direction:column;overflow-y:auto;background:${BG};">
 
-    ${totalAlerts>0?`
-    <div class="urgency-banner">
-      <span style="font-size:11px;color:#fca5a5;font-weight:700;flex:1;display:flex;align-items:center;gap:6px;">
-        <span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;flex-shrink:0;animation:pulse 2s infinite;"></span>
-        ${totalAlerts} item${totalAlerts>1?"s":""} need attention today
-      </span>
-      <button id="view-summary-btn" style="font-size:10px;font-weight:600;color:#f87171;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);border-radius:5px;padding:2px 8px;cursor:pointer;white-space:nowrap;">View summary ↗</button>
-    </div>`:""}
-
+    <!-- Greeting -->
     <div style="padding:28px 28px 24px;background:linear-gradient(160deg,rgba(99,102,241,.08) 0%,rgba(139,92,246,.04) 50%,transparent 100%);border-bottom:1px solid ${BRD};flex-shrink:0;">
       <div style="font-size:11px;color:${MUT};letter-spacing:.5px;margin-bottom:10px;display:flex;align-items:center;gap:6px;">
         <span>${dateStr}</span><span style="opacity:.3">·</span><span>${timeStr}</span>
@@ -703,26 +1142,39 @@ function renderDashboard() {
       </div>
     </div>
 
+    <!-- Attention section -->
     ${attGroups.length>0?`
-    <div class="att-box">
-      <p style="margin:0 0 10px;font-size:12px;color:${MUT};line-height:1.5;"><span style="color:#f87171;font-weight:700;">A few things need your attention</span> — here's what stands out today:</p>
-      <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:7px;">
-        ${visible.map((g,i)=>`
-        <li style="display:flex;align-items:center;gap:10px;">
-          <span style="width:5px;height:5px;border-radius:50%;background:${g.color};flex-shrink:0;display:block;"></span>
-          <span style="font-size:12px;color:${TXT};line-height:1.4;flex:1;">
-            ${esc(g.label)} — <button class="nav-report-btn" data-dataset="${g.nav.dataset}" data-filterkey="${g.nav.filterKey||''}" data-filterval="${g.nav.filterVal||''}" data-tilefilter="${g.nav.tileFilter||''}" style="background:none;border:none;padding:0;cursor:pointer;font-size:12px;color:${ACC};font-family:inherit;font-weight:600;text-decoration:underline;text-decoration-color:rgba(99,102,241,.4);text-underline-offset:3px;">view in report →</button>
-          </span>
+    <div style="margin:16px 24px 0;border:1px solid rgba(248,113,113,.18);border-radius:12px;background:rgba(248,113,113,.03);overflow:hidden;">
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid rgba(248,113,113,.12);">
+        <span style="width:7px;height:7px;border-radius:50%;background:#f87171;display:inline-block;flex-shrink:0;animation:pulse 2s infinite;"></span>
+        <span style="font-size:11.5px;font-weight:700;color:#fca5a5;flex:1;">
+          ${totalAlerts} item${totalAlerts>1?"s":""} need${totalAlerts===1?"s":""} your attention
+        </span>
+      </div>
+      <ul style="margin:0;padding:10px 14px 12px;list-style:none;display:flex;flex-direction:column;gap:6px;">
+        ${attGroups.map(g=>`
+        <li style="display:flex;align-items:center;gap:9px;animation:rowIn .18s ease both;">
+          <span style="width:5px;height:5px;border-radius:50%;background:${g.color};flex-shrink:0;"></span>
+          <span style="font-size:12px;color:${TXT};flex:1;line-height:1.4;">${esc(g.label)}</span>
+          <span style="font-size:10px;font-weight:700;color:${g.color};background:${g.color}18;border-radius:8px;padding:1px 7px;flex-shrink:0;">${g.rows.length}</span>
+          <button class="nav-report-btn"
+            data-dataset="${g.nav.dataset}"
+            data-filterkey="${g.nav.filterKey||""}"
+            data-filterval="${g.nav.filterVal||""}"
+            data-tilefilter="${g.nav.tileFilter||""}"
+            style="font-size:10px;font-weight:600;color:${ACC};background:${ACCBG};border:1px solid ${ACCBR};border-radius:6px;padding:2px 9px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;">
+            View →
+          </button>
         </li>`).join("")}
-        ${overflow>0?`
-        <li style="display:flex;align-items:center;gap:10px;padding-top:2px;">
-          <span style="width:5px;height:5px;flex-shrink:0;display:block;"></span>
-          <button id="overflow-btn" data-groups='${JSON.stringify(hiddenGroups)}' style="background:none;border:none;padding:0;cursor:pointer;font-size:12px;color:${MUT};font-family:inherit;font-weight:600;text-decoration:underline;text-decoration-color:rgba(100,116,139,.3);text-underline-offset:3px;">+${overflow} more item${overflow>1?"s":""} →</button>
-        </li>`:""}
       </ul>
-    </div>`:""}
+    </div>`:
+    `<div style="margin:16px 24px 0;border:1px solid rgba(52,211,153,.15);border-radius:12px;background:rgba(52,211,153,.03);padding:12px 16px;display:flex;align-items:center;gap:9px;">
+      <span style="font-size:14px;">✅</span>
+      <span style="font-size:12px;color:#34d399;font-weight:600;">Everything looks good — no urgent actions outstanding.</span>
+    </div>`}
 
-    <div style="padding:20px 28px 28px;">
+    <!-- Reports -->
+    <div style="padding:20px 24px 28px;">
       <div style="font-size:10px;color:${MUT};text-transform:uppercase;letter-spacing:.9px;font-weight:700;margin-bottom:14px;">Reports</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         ${reportLinks.map(rpt=>`
@@ -749,30 +1201,30 @@ function renderDashboard() {
 // ─── Summary tile config (label, colour, row predicate) ──────────────────────
 const TILE_META = {
   // agentSummary
-  pending:        { label:"Pending",        color:"#fbbf24", pred: r => r.status==="Pending" },
-  high:           { label:"High Priority",  color:"#f87171", pred: r => r.priority==="High" },
-  medium:         { label:"Medium Priority",color:"#fb923c", pred: r => r.priority==="Medium" },
-  low:            { label:"Low Priority",   color:"#34d399", pred: r => r.priority==="Low" },
-  noContact:      { label:"No Contact",     color:"#22d3ee", pred: r => Number(r.attempts)===0 },
-  multiAttempt:   { label:"2+ Attempts",    color:"#a78bfa", pred: r => Number(r.attempts)>=2 },
+  pending:        { label:"Pending",        color:"#d97706", pred: r => r.visitStatus==="Pending" },
+  checkedOut:     { label:"Checked Out",    color:"#dc2626", pred: r => r.visitStatus==="Checked Out" },
+  reqEval:        { label:"Req. Eval",      color:"#22d3ee", pred: r => r.reqEval==="Y" },
+  inactive:       { label:"Inactive",       color:"#d97706", pred: r => r.active==="N" },
+  medicare:       { label:"Medicare",       color:"#60a5fa", pred: r => r.payorType==="Medicare" },
+  medicaid:       { label:"Medicaid",       color:"#6366f1", pred: r => r.payorType==="Medicaid" },
   // weeklyVisits
-  late:           { label:"Late",           color:"#f87171", pred: r => r.status==="Late" },
-  incomplete:     { label:"Incomplete",     color:"#fb923c", pred: r => r.status==="Incomplete" },
-  completed:      { label:"Completed",      color:"#34d399", pred: r => r.status==="Completed" },
+  late:           { label:"Late",           color:"#dc2626", pred: r => r.visitStatus==="Late" },
+  paused:         { label:"Paused",         color:"#60a5fa", pred: r => r.visitStatus==="Paused" },
+  incomplete:     { label:"Incomplete",     color:"#d97706", pred: r => r.visitStatus==="Incomplete" },
+  almostComplete: { label:"Almost Complete",color:"#34d399", pred: r => r.visitStatus==="Almost Complete" },
   // schedulingRequests
-  unassigned:     { label:"Unassigned",     color:"#fbbf24", pred: r => r.status==="Unassigned" },
-  assigned:       { label:"Assigned",       color:"#34d399", pred: r => r.status==="Assigned" },
-  newVisit:       { label:"New Visits",     color:"#60a5fa", pred: r => r.requestType==="New Visit" },
-  reschedules:    { label:"Reschedules",    color:"#818cf8", pred: r => r.requestType==="Reschedule" },
-  mediumReq:      { label:"Medium Priority",color:"#fb923c", pred: r => r.priority==="Medium" },
-  lowReq:         { label:"Low Priority",   color:"#34d399", pred: r => r.priority==="Low" },
+  unscheduled:    { label:"Unscheduled",    color:"#f59e0b", pred: r => r.requestStatus==="Unscheduled"||r.visitStatus==="Unscheduled" },
+  openShifts:     { label:"Open Shifts",    color:"#f59e0b", pred: r => (r.openShifts||0)>0 },
+  srToday:        { label:"Due Today",      color:"#06b6d4", pred: r => { const d=new Date((r.shiftDate||"")+"T00:00:00"),t=new Date(); t.setHours(0,0,0,0); return d.getTime()===t.getTime(); }},
+  srThisWeek:     { label:"This Week",      color:"#8b5cf6", pred: r => { const d=new Date((r.shiftDate||"")+"T00:00:00"),t=new Date(); t.setHours(0,0,0,0); const sun=new Date(t); sun.setDate(t.getDate()-t.getDay()); return d>=sun && d<t; }},
+  srOverdue:      { label:"Overdue",        color:"#ef4444", pred: r => { const d=new Date((r.shiftDate||"")+"T00:00:00"),t=new Date(); t.setHours(0,0,0,0); const sun=new Date(t); sun.setDate(t.getDate()-t.getDay()); return d<sun; }},
   // clientSchedule
-  missed:         { label:"Missed",         color:"#f87171", pred: r => r.status==="Missed" },
-  declined:       { label:"Declined",       color:"#a78bfa", pred: r => r.status==="Declined" },
-  rescheduled:    { label:"Rescheduled",    color:"#60a5fa", pred: r => r.status==="Rescheduled" },
-  reassigned:     { label:"Reassigned",     color:"#22d3ee", pred: r => r.status==="Reassigned" },
-  followUpPending:{ label:"Follow-Up Req",  color:"#c084fc", pred: r => r.followUpRequired===true },
-  noRebook:       { label:"No Rebook",        color:"#f87171", pred: r => r.status==="Missed"&&r.followUpRequired&&!r.rebookedDate },
+  csMissed:       { label:"Missed",         color:"#dc2626", pred: r => r.visitStatus==="Missed" },
+  csDeclined:     { label:"Declined",       color:"#a78bfa", pred: r => r.visitStatus==="Declined" },
+  csRescheduled:  { label:"Rescheduled",    color:"#60a5fa", pred: r => r.visitStatus==="Rescheduled" },
+  csReassigned:   { label:"Reassigned",     color:"#22d3ee", pred: r => r.visitStatus==="Reassigned" },
+  followUpPending:{ label:"Follow-Up Req",  color:"#dc2626", pred: r => r.followUpRequired===true },
+  noRebook:       { label:"No Rebook",      color:"#dc2626", pred: r => r.visitStatus==="Missed"&&r.followUpRequired&&!r.rebookedDate },
 };
 
 
@@ -813,6 +1265,104 @@ function renderColPanel() {
   </div>`;
 }
 
+
+// ─── Row Action Logic ─────────────────────────────────────────────────────────
+function getRowActions(ds, row) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const visitDt = row.visitDate ? new Date(row.visitDate + "T00:00:00") : null;
+  const now = new Date();
+  const isAfternoon = now.getHours() >= 12;
+  // Medicare week: Sunday–Saturday. Find start of current Medicare week (Sunday)
+  const dayOfWeek = today.getDay(); // 0=Sun
+  const medicareWeekStart = new Date(today); medicareWeekStart.setDate(today.getDate() - dayOfWeek);
+  const prevMedicareWeekStart = new Date(medicareWeekStart); prevMedicareWeekStart.setDate(medicareWeekStart.getDate() - 7);
+
+  const btn = (label, color="#6366f1", outline=false, nonClickable=false) => ({label, color, outline, nonClickable});
+
+  if (ds === "agentSummary") {
+    if (row.visitStatus === "Pending")      return [btn("Follow Up","#d97706")];
+    if (row.visitStatus === "Checked Out")  return [btn("Follow Up","#d97706")];
+    return [];
+  }
+
+  if (ds === "weeklyVisits") {
+    const isPast = visitDt && visitDt < today;
+    if (!isPast) return [];
+    if (row.visitStatus === "Late")         return [btn("Mark Missed","#dc2626")];
+    if (row.visitStatus === "Incomplete") {
+      return isAfternoon
+        ? [btn("Follow Up with Agent","#d97706")]
+        : [btn("Resolve Before Afternoon","#64748b",false,true)];
+    }
+    if (row.visitStatus === "Almost Complete") return [btn("Create HCHB Ticket","#6366f1")];
+    if (row.visitStatus === "Paused")           return [btn("Follow Up with Agent","#d97706")];
+    return [];
+  }
+
+  if (ds === "schedulingRequests") {
+    const srDt = row.shiftDate ? new Date(row.shiftDate + "T00:00:00")
+               : row.visitDate ? new Date(row.visitDate + "T00:00:00")
+               : null;
+    if (!srDt) return [];
+    if (srDt >= today) return [btn("Assign to Clinician","#06b6d4")];
+    if (srDt >= medicareWeekStart) return [btn("Reschedule in Week","#f59e0b")];
+    return [btn("Mark as Missed","#ef4444"), btn("Write New Order","#f97316",true)];
+  }
+
+  if (ds === "clientSchedule") {
+    if (["Missed","Declined","Rescheduled","Reassigned"].includes(row.visitStatus||row.statusName))
+      return [btn("Schedule in Console","#6366f1")];
+    return [];
+  }
+
+  return [];
+}
+
+function renderActionBtns(ds, row, compact=false) {
+  const actions = getRowActions(ds, row);
+  if (!actions.length) return "";
+
+  const ICONS = {
+    "Follow Up":               `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1.18h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 9a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>`,
+    "Mark Missed":             `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    "Resolve Before Afternoon":`<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
+    "Follow Up with Agent":           `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+    "Create HCHB Ticket":      `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>`,
+    "Assign to Clinician":     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>`,
+    "Reschedule in Week":      `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+    "Mark as Missed":          `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`,
+    "Write New Order":         `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 00-2 2v16a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`,
+    "Schedule in Console":     `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`,
+    "Follow Up with Agent":    `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+  };
+  const LOCK = `<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="opacity:.5;"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>`;
+
+  const fs = compact ? "10px" : "10.5px";
+  const py = compact ? "3px" : "4px";
+  const px = compact ? "9px" : "11px";
+
+  return `<div style="display:flex;flex-wrap:wrap;gap:5px;">${actions.map(a => {
+    const icon = ICONS[a.label] || "";
+    if (a.nonClickable) {
+      // Muted info pill — not a button
+      return `<span style="display:inline-flex;align-items:center;gap:5px;padding:${py} ${px};font-size:${fs};font-weight:600;border-radius:20px;border:1.5px dashed rgba(100,116,139,.5);background:rgba(100,116,139,.12);color:#94a3b8;white-space:nowrap;letter-spacing:.01em;">${LOCK}<span style="font-style:italic;">${a.label}</span></span>`;
+    }
+    // Solid / outline clickable pill
+    const isOutline = a.outline;
+    const pillBg   = isOutline ? a.color + "22" : a.color;
+    const pillBrd  = isOutline ? "1.5px solid " + a.color : "none";
+    const pillTxt  = isOutline ? a.color : "#fff";
+    const pillShad = isOutline ? "none" : "0 0 0 1px " + a.color + "44, 0 2px 8px " + a.color + "40";
+    return `<button
+      onclick="alert('Opening: ${a.label.replace(/'/g,"\\'")}\\
+${row.visitNumber||row.clientName||""}')"
+      style="display:inline-flex;align-items:center;gap:5px;padding:${py} ${px};font-size:${fs};font-weight:700;border-radius:20px;border:${pillBrd};background:${pillBg};color:${pillTxt};cursor:pointer;font-family:inherit;white-space:nowrap;box-shadow:${pillShad};letter-spacing:.01em;transition:filter .15s,transform .12s;"
+      onmouseenter="this.style.filter='brightness(1.15)';this.style.transform='translateY(-1px)';"
+      onmouseleave="this.style.filter='';this.style.transform='';"
+    >${icon}${a.label}</button>`;
+  }).join("")}</div>`;
+}
+
 function renderReportView() {
   const cfg=RC[state.activeDs];
   if (!cfg) return "";
@@ -839,18 +1389,8 @@ function renderReportView() {
     ? rows.filter(TILE_META[state.tileFilter].pred)
     : rows;
 
-  const totalAlerts=_store.agentSummary.length+_store.weeklyVisits.filter(r=>r.status!=="Completed").length+_store.schedulingRequests.filter(r=>r.status==="Unassigned").length+_store.clientSchedule.filter(r=>r.followUpRequired).length;
-
   return `
   <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;position:relative;">
-    ${totalAlerts>0?`
-    <div class="urgency-banner">
-      <span style="font-size:11px;color:#fca5a5;font-weight:700;flex:1;display:flex;align-items:center;gap:6px;">
-        <span style="width:6px;height:6px;border-radius:50%;background:#f87171;display:inline-block;animation:pulse 2s infinite;"></span>
-        ${totalAlerts} items need attention today
-      </span>
-      <button id="view-summary-btn" style="font-size:10px;font-weight:600;color:#f87171;background:rgba(248,113,113,.12);border:1px solid rgba(248,113,113,.25);border-radius:5px;padding:2px 8px;cursor:pointer;white-space:nowrap;">View summary ↗</button>
-    </div>`:""}
 
     <div style="display:flex;align-items:stretch;border-bottom:1px solid ${BRD};background:${SURF};flex-shrink:0;">
       <button id="back-dashboard" style="display:flex;align-items:center;gap:6px;padding:0 14px;border:none;border-right:1px solid ${BRD};background:none;cursor:pointer;color:${MUT};font-size:11px;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap;" onmouseenter="this.style.color='${ACC}';this.style.background='${ACCBG}';" onmouseleave="this.style.color='${MUT}';this.style.background='none';">
@@ -899,15 +1439,17 @@ function renderReportView() {
       </div>`;
     })()}
     <div style="flex:1;overflow-y:auto;overflow-x:auto;">
-      ${(()=>{const activeCols=getActiveCols();return `<table>
+      ${(()=>{const activeCols=getActiveCols();const hasActions=tileRows.some(r=>getRowActions(state.activeDs,r).length>0);return `<table>
         <thead><tr>
           ${activeCols.map(c=>`<th class="sort-th" data-col="${c}" style="color:${state.sortCol===c?ACC:MUT};">${clbl(c)}${state.sortCol===c?`<span style="margin-left:3px;">${state.sortDir==="asc"?"↑":"↓"}</span>`:""}</th>`).join("")}
+          ${hasActions?`<th style="color:${MUT};white-space:nowrap;min-width:160px;">Actions</th>`:""}
         </tr></thead>
         <tbody>
-          ${tileRows.length===0?`<tr><td colspan="${activeCols.length+1}" style="padding:32px;text-align:center;color:${MUT};">No records match</td></tr>`:""}
-          ${tileRows.map(row=>`<tr>
+          ${tileRows.length===0?`<tr><td colspan="${activeCols.length+2}" style="padding:32px;text-align:center;color:${MUT};">No records match</td></tr>`:""}
+          ${tileRows.map(row=>{const ab=renderActionBtns(state.activeDs,row);return `<tr>
             ${activeCols.map(c=>`<td>${cell(c,row[c])}</td>`).join("")}
-          </tr>`).join("")}
+            ${hasActions?`<td style="padding:7px 10px 7px 4px;vertical-align:middle;">${ab}</td>`:""}
+          </tr>`;}).join("")}
         </tbody>
       </table>`;})()}
     </div>
@@ -915,29 +1457,53 @@ function renderReportView() {
   </div>`;
 }
 
-// ─── Summary Modal ────────────────────────────────────────────────────────────
+// ─── Summary Modal ───────────────────────────────────────────────────────────
 function renderSummaryModal() {
-  const groups=state.summaryGroups||[];
-  const total=groups.reduce((s,g)=>s+g.rows.length,0);
+  const groups = state.summaryGroups || [];
+  const total  = groups.reduce((s,g)=>s+g.rows.length, 0);
   return `
   <div id="summary-modal-backdrop" class="modal-backdrop">
-    <div class="summary-modal-box">
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:22px 28px;border-bottom:1px solid ${BRD};flex-shrink:0;">
+    <div class="summary-modal-box" style="max-width:580px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 22px 14px;border-bottom:1px solid ${BRD};flex-shrink:0;">
         <div>
-          <div style="font-size:16px;font-weight:700;color:${TXT};letter-spacing:-.3px;">Items needing attention</div>
-          <div style="font-size:12px;color:${MUT};margin-top:4px;">${total} item${total>1?"s":""} across ${groups.length} categor${groups.length>1?"ies":"y"}</div>
+          <div style="font-size:15px;font-weight:700;color:${TXT};letter-spacing:-.2px;">Action Items</div>
+          <div style="font-size:11px;color:${MUT};margin-top:3px;">${total} item${total!==1?"s":""} across ${groups.length} group${groups.length!==1?"s":""}</div>
         </div>
-        <button id="close-summary-modal" style="background:none;border:none;cursor:pointer;color:${MUT};font-size:22px;line-height:1;padding:4px 8px;font-family:inherit;">×</button>
+        <button id="close-summary-modal" style="background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;cursor:pointer;color:${MUT};font-size:16px;line-height:1;padding:5px 9px;font-family:inherit;transition:background .15s;" onmouseenter="this.style.background='rgba(255,255,255,.1)';" onmouseleave="this.style.background='rgba(255,255,255,.06)';">✕</button>
       </div>
-      <div style="padding:20px 28px 26px;overflow-y:auto;">
-        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:0;">
-          ${groups.map((g,i)=>`
-          <li style="display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:${i<groups.length-1?"1px solid rgba(255,255,255,.05)":"none"};">
-            <span style="width:6px;height:6px;border-radius:50%;background:${g.color};flex-shrink:0;display:block;"></span>
-            <span style="font-size:13px;color:${TXT};line-height:1.5;flex:1;">${esc(g.label)}</span>
-            <button class="summary-nav-btn" data-dataset="${g.nav.dataset}" data-filterkey="${g.nav.filterKey||''}" data-filterval="${g.nav.filterVal||''}" data-tilefilter="${g.nav.tileFilter||''}" style="background:${ACCBG};border:1px solid ${ACCBR};border-radius:7px;padding:5px 14px;cursor:pointer;font-size:11px;color:${ACC};font-family:inherit;font-weight:700;flex-shrink:0;white-space:nowrap;">View in report →</button>
-          </li>`).join("")}
-        </ul>
+      <div style="overflow-y:auto;padding:6px 0;">
+        ${groups.map((g,i)=>{
+          const c = g.color;
+          return `
+          <div style="padding:13px 22px;border-bottom:${i<groups.length-1?"1px solid rgba(255,255,255,.04)":"none"};animation:fadeSlideUp .18s ease both;animation-delay:${i*0.04}s;">
+            <div style="display:flex;align-items:flex-start;gap:11px;">
+              <div style="width:3px;align-self:stretch;border-radius:2px;background:${c};flex-shrink:0;min-height:18px;"></div>
+              <div style="flex:1;min-width:0;">
+
+                <!-- Title row: label + count badge + Take me to report -->
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                  <span style="font-size:12.5px;font-weight:700;color:${TXT};line-height:1.35;flex:1;min-width:0;">${esc(g.label)}</span>
+                  <span style="font-size:10px;font-weight:700;color:${c};background:${c}1a;border-radius:10px;padding:2px 8px;flex-shrink:0;white-space:nowrap;">${g.rows.length}</span>
+                  <button class="summary-nav-btn"
+                    data-dataset="${g.nav.dataset}"
+                    data-filterkey="${g.nav.filterKey||''}"
+                    data-filterval="${g.nav.filterVal||''}"
+                    data-tilefilter="${g.nav.tileFilter||''}"
+                    style="display:inline-flex;align-items:center;gap:4px;padding:3px 10px;font-size:10px;font-weight:600;border-radius:20px;border:1.5px solid ${c}55;background:${c}12;color:${c};cursor:pointer;font-family:inherit;flex-shrink:0;white-space:nowrap;transition:background .15s,border-color .15s;"
+                    onmouseenter="this.style.background='${c}28';this.style.borderColor='${c}99';"
+                    onmouseleave="this.style.background='${c}12';this.style.borderColor='${c}55';">
+                    <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                    Take me to report
+                  </button>
+                </div>
+
+                <!-- Description only -->
+                <p style="font-size:11px;color:#64748b;margin:0;line-height:1.55;">${g.description||""}</p>
+
+              </div>
+            </div>
+          </div>`;
+        }).join("")}
       </div>
     </div>
   </div>`;
@@ -1040,7 +1606,22 @@ function bindAll() {
     btn.addEventListener("click",()=>{
       const key=btn.dataset.msgid+"-"+btn.dataset.si;
       state.sectionOpenState[key]=!state.sectionOpenState[key];
-      renderApp();
+      renderChatOnly();
+    });
+  });
+
+  // Per-message tile filter buttons (in chat inline reports)
+  document.querySelectorAll(".msg-tile-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const id=btn.dataset.msgid, k=btn.dataset.key;
+      state.msgTileFilter[id] = state.msgTileFilter[id]===k ? null : k;
+      renderChatOnly();
+    });
+  });
+  document.querySelectorAll(".msg-tile-clear").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      state.msgTileFilter[btn.dataset.msgid]=null;
+      renderChatOnly();
     });
   });
 
@@ -1066,19 +1647,11 @@ function bindAll() {
       state.summaryGroups=null;
       state.filters=fk?{[fk]:fv}:{};
       state.tileFilter=tf||null;
-      renderApp();
+      renderRightPaneOnly();
     });
   });
 
-  // Overflow button
-  document.getElementById("overflow-btn")?.addEventListener("click",btn=>{
-    try{state.summaryGroups=JSON.parse(document.getElementById("overflow-btn").dataset.groups);renderApp();}catch(e){}
-  });
 
-  // View summary button (banner)
-  document.getElementById("view-summary-btn")?.addEventListener("click",()=>{
-    state.summaryGroups=buildAttGroups(); renderApp();
-  });
 
   // Summary modal close
   document.getElementById("close-summary-modal")?.addEventListener("click",()=>{ state.summaryGroups=null; renderApp(); });
@@ -1097,44 +1670,44 @@ function bindAll() {
       state.sortCol=null;
       state.filters=fk?{[fk]:fv}:{};
       state.tileFilter=tf||null;
-      renderApp();
+      renderRightPaneOnly();
     });
   });
 
   // Back to dashboard
-  document.getElementById("back-dashboard")?.addEventListener("click",()=>{ state.activeDs="dashboard"; state.filters={}; state.search=""; renderApp(); });
+  document.getElementById("back-dashboard")?.addEventListener("click",()=>{ state.activeDs="dashboard"; state.filters={}; state.search=""; renderRightPaneOnly(); });
 
   // Report filters
   document.querySelectorAll(".report-filter").forEach(sel=>{
-    sel.addEventListener("change",()=>{ state.filters[sel.dataset.key]=sel.value; state.sortCol=null; renderApp(); });
+    sel.addEventListener("change",()=>{ state.filters[sel.dataset.key]=sel.value; state.sortCol=null; renderRightPaneOnly(); });
   });
 
   // Search
-  document.getElementById("report-search")?.addEventListener("input",e=>{ state.search=e.target.value; renderApp(); });
-  document.getElementById("clear-filters")?.addEventListener("click",()=>{ state.filters={}; state.search=""; state.sortCol=null; state.tileFilter=null; renderApp(); });
+  document.getElementById("report-search")?.addEventListener("input",e=>{ state.search=e.target.value; renderRightPaneOnly(); });
+  document.getElementById("clear-filters")?.addEventListener("click",()=>{ state.filters={}; state.search=""; state.sortCol=null; state.tileFilter=null; renderRightPaneOnly(); });
 
   // Tile filter buttons
   document.querySelectorAll(".tile-btn").forEach(btn=>{
     btn.addEventListener("click",()=>{
       state.tileFilter = state.tileFilter===btn.dataset.key ? null : btn.dataset.key;
-      renderApp();
+      renderRightPaneOnly();
     });
   });
-  document.getElementById("tile-clear")?.addEventListener("click",()=>{ state.tileFilter=null; renderApp(); });
+  document.getElementById("tile-clear")?.addEventListener("click",()=>{ state.tileFilter=null; renderRightPaneOnly(); });
 
   // ── Column panel ───────────────────────────────────────────────────────────
   document.getElementById("col-panel-btn")?.addEventListener("click",()=>{
-    state.colPanelOpen=!state.colPanelOpen; renderApp();
+    state.colPanelOpen=!state.colPanelOpen; renderRightPaneOnly();
   });
 
   document.getElementById("col-panel-close")?.addEventListener("click",()=>{
-    state.colPanelOpen=false; renderApp();
+    state.colPanelOpen=false; renderRightPaneOnly();
   });
 
   document.getElementById("col-reset")?.addEventListener("click",()=>{
     const ds=state.activeDs;
-    state.colConfig[ds]={cols:[...RC[ds].cols], hidden:new Set()};
-    renderApp();
+    state.colConfig[ds]=null; getColCfg(ds);
+    renderRightPaneOnly();
   });
 
   // Toggle column visibility
@@ -1146,7 +1719,7 @@ function bindAll() {
       const cfg=getColCfg(ds);
       if (cfg.hidden.has(col)) cfg.hidden.delete(col);
       else cfg.hidden.add(col);
-      renderApp();
+      renderRightPaneOnly();
     });
   });
 
@@ -1183,7 +1756,7 @@ function bindAll() {
       cols.splice(dropIdx,0,moved);
       cfg.cols=cols;
       dragSrcIdx=null;
-      renderApp();
+      renderRightPaneOnly();
     });
   });
 
@@ -1192,7 +1765,7 @@ function bindAll() {
     th.addEventListener("click",()=>{
       if(state.sortCol===th.dataset.col) state.sortDir=state.sortDir==="asc"?"desc":"asc";
       else{state.sortCol=th.dataset.col;state.sortDir="asc";}
-      renderApp();
+      renderRightPaneOnly();
     });
   });
 
@@ -1200,10 +1773,10 @@ function bindAll() {
 
 
   document.querySelectorAll(".action-mode-btn").forEach(btn=>{
-    btn.addEventListener("click",()=>{ state.actionMode=btn.dataset.mode; renderApp(); });
+    btn.addEventListener("click",()=>{ state.actionMode=btn.dataset.mode; renderRightPaneOnly(); });
   });
 
-  document.getElementById("action-back-btn")?.addEventListener("click",()=>{ state.actionMode=null; renderApp(); });
+  document.getElementById("action-back-btn")?.addEventListener("click",()=>{ state.actionMode=null; renderRightPaneOnly(); });
 
   document.getElementById("action-commit-btn")?.addEventListener("click",()=>{
     const mode=state.actionMode;
@@ -1227,8 +1800,18 @@ function bindAll() {
     const result=serverCall(mode,args);
     state.modal=null; state.actionMode=null;
     addMsg({role:"assistant",intent:mode.replace(/_/g," "),type:"action-result",result,mode});
-    renderApp();
-    scrollThread();
+    // Update right pane without resetting chat scroll
+    renderRightPaneOnly();
+    // Append new message to chat thread and scroll to it
+    const ct=document.getElementById("chat-thread");
+    if (ct) {
+      ct.innerHTML=renderThread();
+      bindAll();
+      scrollThread();
+    } else {
+      renderApp();
+      scrollThread();
+    }
   });
 }
 
